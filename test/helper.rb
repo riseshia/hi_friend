@@ -4,4 +4,4 @@ if ENV["COVERAGE"]
 end
 
 require "test/unit"
-require_relative "../lib/typeprof"
+require_relative "../lib/hi_friend"

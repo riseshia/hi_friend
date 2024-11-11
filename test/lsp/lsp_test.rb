@@ -1,6 +1,6 @@
 require_relative "../helper"
 
-module TypeProf::LSP
+module HiFriend::LSP
   class Server
     remove_method(:target_path?)
     def target_path?(_path)
@@ -31,8 +31,8 @@ module TypeProf::LSP
     def setup
       @dummy_io = DummyIO.new
       @th = Thread.new do
-        core = TypeProf::Core::Service.new
-        serv = TypeProf::LSP::Server.new(core, @dummy_io, @dummy_io)
+        core = HiFriend::Core::Service.new
+        serv = HiFriend::LSP::Server.new(core, @dummy_io, @dummy_io)
         serv.run
       end
       @id = 0
@@ -42,7 +42,7 @@ module TypeProf::LSP
       @folder = "file://" + File.expand_path(File.join(__dir__, "fixtures", fixture)) + "/"
       id = request("initialize", workspaceFolders: [{ uri: @folder }])
       expect_response(id) do |recv|
-        assert_equal({ name: "typeprof", version: TypeProf::VERSION }, recv[:serverInfo])
+        assert_equal({ name: "typeprof", version: HiFriend::VERSION }, recv[:serverInfo])
       end
       notify("initialized")
     end
@@ -194,7 +194,7 @@ foo(1, 2)
               end: { line: 4, character: 3 },
             },
             severity: 1,
-            source: "TypeProf",
+            source: "HiFriend",
           }
         ], json[:diagnostics])
       end

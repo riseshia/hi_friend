@@ -4,8 +4,8 @@ include TypeProf::Core
 def main(core)
   t = Time.now
   core.genv.run_count = 0
-  Dir.glob("lib/typeprof/**/*.rb", sort: true) do |path|
-    next if path.start_with?("lib/typeprof/lsp")
+  Dir.glob("lib/hi_friend/**/*.rb", sort: true) do |path|
+    next if path.start_with?("lib/hi_friend/lsp")
     puts path
     core.update_rb_file(path, File.read(path))
   end

@@ -16,10 +16,10 @@ class ScenarioCompiler
 
   def header
     <<~END
-      require #{ File.join(__dir__, "../lib/typeprof").dump }
+      require #{ File.join(__dir__, "../lib/hi_friend").dump }
       require #{ File.join(__dir__, "helper").dump }
       class ScenarioTest < Test::Unit::TestCase
-        core = TypeProf::Core::Service.new
+        core = HiFriend::Core::Service.new
         _ = core # stop "unused" warning
     END
   end
@@ -36,7 +36,7 @@ class ScenarioCompiler
     out = %(eval(<<'TYPEPROF_SCENARIO_END', nil, #{ scenario.dump }, 1)\n)
     out << %(test(#{ scenario.dump }) do )
     unless @fast
-      out << "core = TypeProf::Core::Service.new;"
+      out << "core = HiFriend::Core::Service.new;"
     end
     close_str = ""
     need_comment_removal = false
@@ -124,7 +124,7 @@ assert_equal(%q\0DATA\0.rstrip, output)
 
   def handle_hover
     <<-END
-output = core.hover(#{ @file.dump }, TypeProf::CodePosition.new(#{ @pos.join(",") }))
+output = core.hover(#{ @file.dump }, HiFriend::CodePosition.new(#{ @pos.join(",") }))
 assert_equal(%q\0DATA\0.strip, output.strip)
     END
   end
@@ -141,35 +141,35 @@ assert_equal(%q\0DATA\0.rstrip, output)
   def handle_completion
     <<-END
 output = []
-core.completion(#{ @file.dump }, ".", TypeProf::CodePosition.new(#{ @pos.join(",") })) {|_mid, hint| output << hint }
+core.completion(#{ @file.dump }, ".", HiFriend::CodePosition.new(#{ @pos.join(",") })) {|_mid, hint| output << hint }
 assert_equal(exp = %q\0DATA\0.rstrip, output[0..exp.count(\"\\n\")].join(\"\\n\"))
     END
   end
 
   def handle_definition
     <<-END
-output = core.definitions(#{ @file.dump }, TypeProf::CodePosition.new(#{ @pos.join(",") }))
+output = core.definitions(#{ @file.dump }, HiFriend::CodePosition.new(#{ @pos.join(",") }))
 assert_equal(exp = %q\0DATA\0.rstrip, output.map {|file, cr| file + ":" + cr.to_s }.join(\"\\n\"))
     END
   end
 
   def handle_type_definition
     <<-END
-output = core.type_definitions(#{ @file.dump }, TypeProf::CodePosition.new(#{ @pos.join(",") }))
+output = core.type_definitions(#{ @file.dump }, HiFriend::CodePosition.new(#{ @pos.join(",") }))
 assert_equal(exp = %q\0DATA\0.rstrip, output.map {|file, cr| file + ":" + cr.to_s }.join(\"\\n\"))
     END
   end
 
   def handle_references
     <<-END
-output = core.references(#{ @file.dump }, TypeProf::CodePosition.new(#{ @pos.join(",") }))
+output = core.references(#{ @file.dump }, HiFriend::CodePosition.new(#{ @pos.join(",") }))
 assert_equal(exp = %q\0DATA\0.rstrip, output.map {|file, cr| file + ":" + cr.to_s }.join(\"\\n\"))
     END
   end
 
   def handle_rename
     <<-END
-output = core.rename(#{ @file.dump }, TypeProf::CodePosition.new(#{ @pos.join(",") }))
+output = core.rename(#{ @file.dump }, HiFriend::CodePosition.new(#{ @pos.join(",") }))
 assert_equal(exp = %q\0DATA\0.rstrip, output.map {|file, cr| file + ":" + cr.to_s }.join(\"\\n\"))
     END
   end
