@@ -29,3 +29,6 @@ jobs:
 
     - name: Run specs
       run: bundle exec rake spec
+
+    - name: Run the dog bench
+      run: bundle exec ruby tool/dog_bench.rb
