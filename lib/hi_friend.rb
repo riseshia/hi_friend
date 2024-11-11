@@ -2,7 +2,7 @@
 
 require_relative "hi_friend/version"
 
-module HiFriend
-  class Error < StandardError; end
-  # Your code goes here...
-end
+require_relative "hi_friend/code_range"
+require_relative "hi_friend/diagnostic"
+require_relative "hi_friend/core"
+require_relative "hi_friend/lsp"
