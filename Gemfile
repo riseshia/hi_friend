@@ -2,9 +2,20 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in hi_friend.gemspec
 gemspec
 
-gem "rake", "~> 13.0"
+gem "prism", ">= 1.0.0"
 
-gem "rspec", "~> 3.0"
+group :development do
+  gem "rake"
+
+  gem "rspec"
+  gem "test-unit"
+
+  gem "stackprof", platforms: :mri
+
+  gem "simplecov"
+  gem "simplecov-html"
+
+  gem "coverage-helpers"
+end
