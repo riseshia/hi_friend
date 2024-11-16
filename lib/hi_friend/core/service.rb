@@ -5,8 +5,12 @@ module HiFriend::Core
     end
 
     def add_workspace(rb_folder)
-      Dir.glob(File.expand_path(rb_folder + "/**/*.rb")) do |path|
-        update_rb_file(path, nil)
+      prefixs = ["/app", "/lib"] # XXX: to be deleted?
+      prefixs.each do |prefix|
+        Dir.glob(File.expand_path(rb_folder + prefix + "/**/*.rb")) do |path|
+          HiFriend::Logger.info("add file #{path}")
+          update_rb_file(path, nil)
+        end
       end
     end
 
