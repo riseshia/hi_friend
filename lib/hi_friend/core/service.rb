@@ -1,7 +1,7 @@
 module HiFriend::Core
   class Service
     def initialize
-      # do something
+      # xxx
     end
 
     def add_workspace(rb_folder)
@@ -15,7 +15,15 @@ module HiFriend::Core
     end
 
     def update_rb_file(path, code)
-      # XXX
+      parse_result = Prism.parse_file(path)
+      visitor = Visitor.new(
+        const_registry: HiFriend::Core.const_registry,
+        method_registry: HiFriend::Core.method_registry,
+        type_var_registry: HiFriend::Core.type_variable_registry,
+        file_path: path,
+      )
+      # pp parse_result.value
+      parse_result.value.accept(visitor)
     end
 
     def diagnostics(path, &blk)
