@@ -186,83 +186,83 @@ module HiFriend::LSP
 
   # textDocument/declaration request
 
-  class Message::TextDocument::Definition < Message
-    METHOD = "textDocument/definition" # request
-    def run
-      @params => {
-        textDocument: { uri: },
-        position: pos,
-      }
-      text = @server.open_texts[uri]
-      unless text
-        respond(nil)
-        return
-      end
-      defs = @server.core.definitions(text.path, HiFriend::CodePosition.from_lsp(pos))
-      if defs.empty?
-        respond(nil)
-      else
-        respond(defs.map do |path, code_range|
-          {
-            uri: "file://" + path,
-            range: code_range.to_lsp,
-          }
-        end)
-      end
-    end
-  end
+  # class Message::TextDocument::Definition < Message
+  #   METHOD = "textDocument/definition" # request
+  #   def run
+  #     @params => {
+  #       textDocument: { uri: },
+  #       position: pos,
+  #     }
+  #     text = @server.open_texts[uri]
+  #     unless text
+  #       respond(nil)
+  #       return
+  #     end
+  #     defs = @server.core.definitions(text.path, HiFriend::CodePosition.from_lsp(pos))
+  #     if defs.empty?
+  #       respond(nil)
+  #     else
+  #       respond(defs.map do |path, code_range|
+  #         {
+  #           uri: "file://" + path,
+  #           range: code_range.to_lsp,
+  #         }
+  #       end)
+  #     end
+  #   end
+  # end
 
-  class Message::TextDocument::TypeDefinition < Message
-    METHOD = "textDocument/typeDefinition" # request
-    def run
-      @params => {
-        textDocument: { uri: },
-        position: pos,
-      }
-      text = @server.open_texts[uri]
-      unless text
-        respond(nil)
-        return
-      end
-      defs = @server.core.type_definitions(text.path, HiFriend::CodePosition.from_lsp(pos))
-      if defs.empty?
-        respond(nil)
-      else
-        respond(defs.map do |path, code_range|
-          {
-            uri: "file://" + path,
-            range: code_range.to_lsp,
-          }
-        end)
-      end
-    end
-  end
+  # class Message::TextDocument::TypeDefinition < Message
+  #   METHOD = "textDocument/typeDefinition" # request
+  #   def run
+  #     @params => {
+  #       textDocument: { uri: },
+  #       position: pos,
+  #     }
+  #     text = @server.open_texts[uri]
+  #     unless text
+  #       respond(nil)
+  #       return
+  #     end
+  #     defs = @server.core.type_definitions(text.path, HiFriend::CodePosition.from_lsp(pos))
+  #     if defs.empty?
+  #       respond(nil)
+  #     else
+  #       respond(defs.map do |path, code_range|
+  #         {
+  #           uri: "file://" + path,
+  #           range: code_range.to_lsp,
+  #         }
+  #       end)
+  #     end
+  #   end
+  # end
 
-  class Message::TextDocument::References < Message
-    METHOD = "textDocument/references" # request
-    def run
-      @params => {
-        textDocument: { uri: },
-        position: pos,
-      }
-      text = @server.open_texts[uri]
-      unless text
-        respond(nil)
-        return
-      end
-      callsites = @server.core.references(text.path, HiFriend::CodePosition.from_lsp(pos))
-      if callsites
-        respond(callsites.map do |path, code_range|
-          {
-            uri: "file://" + path,
-            range: code_range.to_lsp,
-          }
-        end)
-      else
-        respond(nil)
-      end
-    end
-  end
+  # class Message::TextDocument::References < Message
+  #   METHOD = "textDocument/references" # request
+  #   def run
+  #     @params => {
+  #       textDocument: { uri: },
+  #       position: pos,
+  #     }
+  #     text = @server.open_texts[uri]
+  #     unless text
+  #       respond(nil)
+  #       return
+  #     end
+  #     callsites = @server.core.references(text.path, HiFriend::CodePosition.from_lsp(pos))
+  #     if callsites
+  #       respond(callsites.map do |path, code_range|
+  #         {
+  #           uri: "file://" + path,
+  #           range: code_range.to_lsp,
+  #         }
+  #       end)
+  #     else
+  #       respond(nil)
+  #     end
+  #   end
+  # end
 
   class Message::TextDocument::Hover < Message
     METHOD = "textDocument/hover" # request
@@ -285,30 +285,30 @@ module HiFriend::LSP
     end
   end
 
-  class Message::TextDocument::CodeLens < Message
-    METHOD = "textDocument/codeLens"
-    def run
-      @params => { textDocument: { uri: } }
-      text = @server.open_texts[uri]
-      if !text || !@server.signature_enabled
-        respond(nil)
-        return
-      end
-      ret = []
-      @server.core.code_lens(text.path) do |code_range, title|
-        pos = code_range.first
-        ret << {
-          range: HiFriend::CodeRange.new(pos, pos.right).to_lsp,
-          command: {
-            title: "#: " + title,
-            command: "hi_friend.createPrototypeRBS",
-            arguments: [uri, code_range.first.lineno, code_range.first.column, title],
-          },
-        }
-      end
-      respond(ret)
-    end
-  end
+  # class Message::TextDocument::CodeLens < Message
+  #   METHOD = "textDocument/codeLens"
+  #   def run
+  #     @params => { textDocument: { uri: } }
+  #     text = @server.open_texts[uri]
+  #     if !text || !@server.signature_enabled
+  #       respond(nil)
+  #       return
+  #     end
+  #     ret = []
+  #     @server.core.code_lens(text.path) do |code_range, title|
+  #       pos = code_range.first
+  #       ret << {
+  #         range: HiFriend::CodeRange.new(pos, pos.right).to_lsp,
+  #         command: {
+  #           title: "#: " + title,
+  #           command: "hi_friend.createPrototypeRBS",
+  #           arguments: [uri, code_range.first.lineno, code_range.first.column, title],
+  #         },
+  #       }
+  #     end
+  #     respond(ret)
+  #   end
+  # end
 
   # textDocument/documentSymbol request
 
@@ -316,76 +316,76 @@ module HiFriend::LSP
   # workspace/diagnostic request
   #   workspace/diagnostic/refresh request
 
-  class Message::TextDocument::Completion < Message
-    METHOD = "textDocument/completion" # request
-    def run
-      @params => {
-        textDocument: { uri: },
-        position: pos,
-      }
-      #trigger_kind = @params.key?(:context) ? @params[:context][:triggerKind] : 1 # Invoked
-      text = @server.open_texts[uri]
-      unless text
-        respond(nil)
-        return
-      end
-      items = []
-      sort = "aaaa"
-      text.modify_for_completion(text, pos) do |string, trigger, pos|
-        @server.core.update_rb_file(text.path, string)
-        pos = HiFriend::CodePosition.from_lsp(pos)
-        @server.core.completion(text.path, trigger, pos) do |mid, hint|
-          items << {
-            label: mid,
-            kind: 2, # Method
-            sortText: sort,
-            detail: hint,
-          }
-          sort = sort.succ
-        end
-      end
-      respond(
-        isIncomplete: false,
-        items: items,
-      )
-      @server.core.update_rb_file(text.path, text.string)
-    end
-  end
+  # class Message::TextDocument::Completion < Message
+  #   METHOD = "textDocument/completion" # request
+  #   def run
+  #     @params => {
+  #       textDocument: { uri: },
+  #       position: pos,
+  #     }
+  #     #trigger_kind = @params.key?(:context) ? @params[:context][:triggerKind] : 1 # Invoked
+  #     text = @server.open_texts[uri]
+  #     unless text
+  #       respond(nil)
+  #       return
+  #     end
+  #     items = []
+  #     sort = "aaaa"
+  #     text.modify_for_completion(text, pos) do |string, trigger, pos|
+  #       @server.core.update_rb_file(text.path, string)
+  #       pos = HiFriend::CodePosition.from_lsp(pos)
+  #       @server.core.completion(text.path, trigger, pos) do |mid, hint|
+  #         items << {
+  #           label: mid,
+  #           kind: 2, # Method
+  #           sortText: sort,
+  #           detail: hint,
+  #         }
+  #         sort = sort.succ
+  #       end
+  #     end
+  #     respond(
+  #       isIncomplete: false,
+  #       items: items,
+  #     )
+  #     @server.core.update_rb_file(text.path, text.string)
+  #   end
+  # end
 
   # textDocument/signatureHelp request
 
   # textDocument/prepareRename request
 
-  class Message::TextDocument::Rename < Message
-    METHOD = "textDocument/rename" # request
-    def run
-      @params => {
-        textDocument: { uri: },
-        position: pos,
-        newName:,
-      }
-      text = @server.open_texts[uri]
-      unless text
-        respond(nil)
-        return
-      end
-      renames = @server.core.rename(text.path, HiFriend::CodePosition.from_lsp(pos))
-      if renames
-        changes = {}
-        renames.each do |path, cr|
-          (changes["file://" + path] ||= []) << {
-            range: cr.to_lsp,
-            newText: newName,
-          }
-        end
-        respond({
-          changes:,
-        })
-      else
-        respond(nil)
-      end
-    end
-  end
+  # class Message::TextDocument::Rename < Message
+  #   METHOD = "textDocument/rename" # request
+  #   def run
+  #     @params => {
+  #       textDocument: { uri: },
+  #       position: pos,
+  #       newName:,
+  #     }
+  #     text = @server.open_texts[uri]
+  #     unless text
+  #       respond(nil)
+  #       return
+  #     end
+  #     renames = @server.core.rename(text.path, HiFriend::CodePosition.from_lsp(pos))
+  #     if renames
+  #       changes = {}
+  #       renames.each do |path, cr|
+  #         (changes["file://" + path] ||= []) << {
+  #           range: cr.to_lsp,
+  #           newText: newName,
+  #         }
+  #       end
+  #       respond({
+  #         changes:,
+  #       })
+  #     else
+  #       respond(nil)
+  #     end
+  #   end
+  # end
 
   module Message::Workspace
   end
@@ -407,21 +407,21 @@ module HiFriend::LSP
         @server.signature_enabled = false
         @server.send_request("workspace/codeLens/refresh")
         respond(nil)
-      when "hi_friend.createPrototypeRBS"
-        uri, row, col, str = @params[:arguments]
-        @server.send_request(
-          "workspace/applyEdit",
-          edit: {
-            changes: {
-              uri => [{
-                range: HiFriend::CodeRange[row, col, row, col].to_lsp,
-                newText: "#: #{ str }\n" + " " * col,
-              }],
-            },
-          },
-        ) do |res, err|
-        end
-        respond(nil)
+      # when "hi_friend.createPrototypeRBS"
+      #   uri, row, col, str = @params[:arguments]
+      #   @server.send_request(
+      #     "workspace/applyEdit",
+      #     edit: {
+      #       changes: {
+      #         uri => [{
+      #           range: HiFriend::CodeRange[row, col, row, col].to_lsp,
+      #           newText: "#: #{ str }\n" + " " * col,
+      #         }],
+      #       },
+      #     },
+      #   ) do |res, err|
+      #   end
+      #   respond(nil)
       end
     end
   end
