@@ -4,9 +4,7 @@ require_relative "../lib/hi_friend"
 
 case ARGV[0]
 when "--version"
-  # puts "hi-friend #{HiFriend::VERSION}"
-  # XXX: change this when release own vscode extension
-  puts "typeprof 0.30.0"
+  puts "hi-friend #{HiFriend::VERSION}"
 when "--lsp"
   mode = ARGV[1]&.to_sym || :socket
 
