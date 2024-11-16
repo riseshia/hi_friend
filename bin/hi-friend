@@ -22,6 +22,10 @@ when "--lsp"
     puts $!.detailed_message(highlight: false)
     raise
   end
+when "--test"
+  path = File.expand_path("./a.rb")
+  core = HiFriend::Core::Service.new
+  core.update_rb_file(path, nil)
 else
   p ARGV
 end

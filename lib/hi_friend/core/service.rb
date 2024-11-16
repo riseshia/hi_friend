@@ -59,9 +59,3 @@ module HiFriend::Core
     end
   end
 end
-
-if $0 == __FILE__
-  core = HiFriend::Core::Service.new
-  core.add_workspaces(["foo"].to_a)
-  core.update_rb_file("foo", "foo")
-end
