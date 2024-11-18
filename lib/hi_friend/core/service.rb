@@ -15,7 +15,13 @@ module HiFriend::Core
     end
 
     def update_rb_file(path, code)
-      parse_result = Prism.parse_file(path)
+      parse_result =
+        if code
+          Prism.parse(code)
+        else
+          Prism.parse_file(path)
+        end
+
       visitor = Visitor.new(
         const_registry: HiFriend::Core.const_registry,
         method_registry: HiFriend::Core.method_registry,
