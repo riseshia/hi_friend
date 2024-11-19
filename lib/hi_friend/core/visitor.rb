@@ -100,6 +100,15 @@ module HiFriend::Core
       super
     end
 
+    def visit_constant_read_node(node)
+      const_tv = find_or_create_tv(node)
+      @type_var_registry.add(const_tv)
+
+      super
+
+      @last_evaluated_tv = const_tv
+    end
+
     def visit_local_variable_read_node(node)
       lvar_node = node
       lvar_tv = find_or_create_tv(lvar_node)

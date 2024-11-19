@@ -166,6 +166,22 @@ module HiFriend::Core
           expect(false0.dependents).to eq([if_cond])
         end
       end
+
+      context "with const return" do
+        let(:code) do
+          <<~CODE
+            def hoge
+              C
+            end
+          CODE
+        end
+
+        it "registers all" do
+          c = type_var_registry.all.first
+
+          expect(c.name).to eq("C")
+        end
+      end
     end
   end
 end
