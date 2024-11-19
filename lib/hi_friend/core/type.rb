@@ -97,7 +97,7 @@ module HiFriend::Core
       end
 
       def to_human_s
-        const_name
+        @const_name
       end
     end
 
@@ -108,5 +108,6 @@ module HiFriend::Core
     def true = (@true ||= True.new)
     def false = (@false ||= False.new)
     def integer = (@integer ||= Integer.new)
+    def const(name) = Const.new(name)
   end
 end

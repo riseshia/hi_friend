@@ -103,6 +103,7 @@ module HiFriend::Core
     def visit_constant_read_node(node)
       const_tv = find_or_create_tv(node)
       @type_var_registry.add(const_tv)
+      const_tv.correct_type(Type.const(const_tv.name))
 
       super
 
