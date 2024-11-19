@@ -108,6 +108,7 @@ module HiFriend::Core
       lvar_def_ref = find_latest_lvar_tv(lvar_tv.name)
       if lvar_def_ref
         lvar_tv.add_dependency(lvar_def_ref)
+        lvar_def_ref.add_dependent(lvar_tv)
       else
         raise "undefined local variable: #{lvar_node.name}. It should be defined somewhere before."
       end
@@ -167,34 +168,18 @@ module HiFriend::Core
     def visit_call_node(node)
       call_tv = find_or_create_tv(node)
 
-      depend_tvs = []
       if node.receiver
         receiver_tv = find_or_create_tv(node.receiver)
         call_tv.add_receiver(receiver_tv)
-        depend_tvs.push(receiver_tv)
       end
 
       node.arguments&.arguments&.each do |arg|
         arg_tv = find_or_create_tv(arg)
         call_tv.add_arg(arg_tv)
-        depend_tvs.push(arg_tv)
       end
 
       qualified_const_name = build_qualified_const_name([])
       call_tv.add_scope(qualified_const_name)
-
-      depend_tvs.each do |tv|
-        if tv.is_a?(TypeVariable::LvarRead)
-          lvar_ref = find_latest_lvar_tv(tv.name)
-
-          if lvar_ref
-            lvar_ref.add_dependent(tv)
-            tv.add_dependency(lvar_ref)
-          end
-        else
-          next
-        end
-      end
 
       super
 

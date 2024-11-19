@@ -111,7 +111,7 @@ module HiFriend::Core
             Type.any
           end
         else
-          method_obj = ZatsuLsp.method_registry.find(receiver_type.to_human_s, @name, visibility: :public)
+          method_obj = HiFriend::Core.method_registry.find(receiver_type.to_human_s, @name, visibility: :public)
           method_obj.inference_return_type
         end
       end
