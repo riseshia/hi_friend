@@ -1,7 +1,7 @@
 module HiFriend::Core
   class Service
     def initialize
-      # xxx
+      @code_ast_per_file = {}
     end
 
     def add_workspace(rb_folder)
@@ -22,6 +22,11 @@ module HiFriend::Core
           Prism.parse_file(path)
         end
 
+      if @code_ast_per_file.key?(path)
+        remove_garbage(path)
+      end
+      @code_ast_per_file[path] = parse_result.value
+
       visitor = Visitor.new(
         const_registry: HiFriend::Core.const_registry,
         method_registry: HiFriend::Core.method_registry,
@@ -30,6 +35,10 @@ module HiFriend::Core
       )
       # pp parse_result.value
       parse_result.value.accept(visitor)
+    end
+
+    def remove_garbage(path)
+      # XXX
     end
 
     def diagnostics(path, &blk)
@@ -53,7 +62,10 @@ module HiFriend::Core
     end
 
     def hover(path, pos)
-      # XXX
+      code_ast = @code_ast_per_file.fetch(path)
+      node = HiFriend::LocToNodeMapper.lookup(code_ast, pos)
+      tvar = HiFriend::Core.type_variable_registry.find(node.node_id)
+      tvar.inference.to_human_s
     end
 
     def code_lens(path)
