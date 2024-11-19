@@ -1,14 +1,12 @@
 module HiFriend
   class LocToNodeMapper
     class << self
-      # XXX use CodePosition
-      # row start from 1, column start from 0
-      def lookup(node, row:, column:)
+      def lookup(node, pos)
         target_node = node
 
         loop do
           next_node = target_node.compact_child_nodes.find do |child|
-            in_range?(child, row: row, column: column)
+            in_range?(child, pos)
           end
 
           break if next_node.nil?
@@ -19,12 +17,15 @@ module HiFriend
         target_node
       end
 
-      private def in_range?(node, row:, column:)
+      private def in_range?(node, pos)
         loc = node.location
+        lineno = pos.lineno
+        column = pos.column
 
-        return false if loc.start_line > row || row > loc.end_line
-        return false if loc.start_line == row && column < loc.start_column
-        return false if loc.end_line == row && column > loc.end_column
+
+        return false if loc.start_line > lineno || lineno > loc.end_line
+        return false if loc.start_line == lineno && column < loc.start_column
+        return false if loc.end_line == lineno && column > loc.end_column
 
         true
       end

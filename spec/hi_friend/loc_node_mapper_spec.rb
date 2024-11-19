@@ -26,37 +26,44 @@ module HiFriend
       let(:node) { Prism.parse(code).value }
 
       it "return module" do
-        result = described_class.lookup(node, row: 1, column: 1)
+        pos = HiFriend::CodePosition.new(1, 1)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:module_node)
       end
 
       it "return App" do
-        result = described_class.lookup(node, row: 1, column: 7)
+        pos = HiFriend::CodePosition.new(1, 7)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:constant_read_node)
       end
 
       it "return class" do
-        result = described_class.lookup(node, row: 2, column: 3)
+        pos = HiFriend::CodePosition.new(2, 3)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:class_node)
       end
 
       it "return def initialize" do
-        result = described_class.lookup(node, row: 3, column: 4)
+        pos = HiFriend::CodePosition.new(3, 4)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:def_node)
       end
 
       it "return arg title of initialize" do
-        result = described_class.lookup(node, row: 3, column: 19)
+        pos = HiFriend::CodePosition.new(3, 19)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:required_parameter_node)
       end
 
       it "return ivar title" do
-        result = described_class.lookup(node, row: 9, column: 6)
+        pos = HiFriend::CodePosition.new(9, 6)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:instance_variable_read_node)
       end
 
       it "return call" do
-        result = described_class.lookup(node, row: 13, column: 19)
+        pos = HiFriend::CodePosition.new(13, 19)
+        result = described_class.lookup(node, pos)
         expect(result.type).to eq(:call_node)
       end
     end
