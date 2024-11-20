@@ -205,6 +205,15 @@ module HiFriend::Core
       @last_evaluated_tv = value_tv
     end
 
+    def visit_symbol_node(node)
+      tv = find_or_create_tv(node)
+      tv.correct_type(Type.symbol(tv.name))
+
+      super
+
+      @last_evaluated_tv = tv
+    end
+
     def visit_true_node(node)
       value_tv = find_or_create_tv(node)
       value_tv.correct_type(Type.true)
@@ -350,6 +359,12 @@ module HiFriend::Core
           TypeVariable::Static.new(
             path: @file_path,
             name: node.name.to_s,
+            node: node,
+          )
+        when Prism::SymbolNode
+          TypeVariable::Static.new(
+            path: @file_path,
+            name: node.value.to_s,
             node: node,
           )
         when Prism::TrueNode, Prism::FalseNode, Prism::NilNode

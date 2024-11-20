@@ -182,6 +182,22 @@ module HiFriend::Core
           expect(c.name).to eq("C")
         end
       end
+
+      context "with symbol return" do
+        let(:code) do
+          <<~CODE
+            def hoge
+              :hoge
+            end
+          CODE
+        end
+
+        it "registers all" do
+          c = type_var_registry.all.first
+
+          expect(c.inference.to_human_s).to eq(":hoge")
+        end
+      end
     end
   end
 end

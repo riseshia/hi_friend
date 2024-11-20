@@ -89,6 +89,18 @@ module HiFriend::Core
       end
     end
 
+    class Symbol < Base
+      def initialize(name)
+        super()
+
+        @name = name
+      end
+
+      def to_human_s
+        ":#{@name}"
+      end
+    end
+
     class Const < Base
       def initialize(const_name)
         super()
@@ -109,5 +121,6 @@ module HiFriend::Core
     def false = (@false ||= False.new)
     def integer = (@integer ||= Integer.new)
     def const(name) = Const.new(name)
+    def symbol(name) = Symbol.new(name)
   end
 end
