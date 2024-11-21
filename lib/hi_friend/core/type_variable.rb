@@ -65,6 +65,16 @@ module HiFriend::Core
       end
     end
 
+    class IvarWrite < Base
+      def receiver(const)
+        @const = const
+      end
+
+      def inference
+        @dependencies[0].inference
+      end
+    end
+
     class IvarRead < Base
       def receiver(const)
         @const = const

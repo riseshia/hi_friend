@@ -217,6 +217,48 @@ module HiFriend::Core
           expect(c.inference.to_human_s).to eq("nil")
         end
       end
+
+      context "with ivar write return" do
+        let(:code) do
+          <<~CODE
+            class C
+              def foo
+                @foo = 1
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          foo, one = type_var_registry.all.last(2)
+
+          expect(foo.name).to eq("@foo")
+          expect(foo.inference.to_human_s).to eq("Integer")
+        end
+      end
+
+      context "with ivar read/write" do
+        let(:code) do
+          <<~CODE
+            class C
+              def foo_init
+                @foo = 1
+              end
+
+              def foo
+                @foo
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          foo0, one, foo1 = type_var_registry.all.last(3)
+
+          expect(foo1.name).to eq("@foo")
+          expect(foo1.inference.to_human_s).to eq("Integer")
+        end
+      end
     end
   end
 end
