@@ -146,6 +146,20 @@ module HiFriend::Core
       @last_evaluated_tv = lvar_tv
     end
 
+    def visit_instance_variable_read_node(node)
+      ivar_read_tv = find_or_create_tv(node)
+      @type_var_registry.add(ivar_read_tv)
+
+      current_const_name = build_qualified_const_name([])
+      const = @const_registry.find(current_const_name)
+      const.add_ivar_read_tv(ivar_read_tv)
+      ivar_read_tv.receiver(const)
+
+      super
+
+      @last_evaluated_tv = ivar_read_tv
+    end
+
     def visit_if_node(node)
       if_cond_tv = find_or_create_tv(node)
       predicate_tv = find_or_create_tv(node.predicate)
@@ -327,6 +341,12 @@ module HiFriend::Core
           )
         when Prism::LocalVariableWriteNode
           TypeVariable::LvarWrite.new(
+            path: @file_path,
+            name: node.name.to_s,
+            node: node,
+          )
+        when Prism::InstanceVariableReadNode
+          TypeVariable::IvarRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,

@@ -198,6 +198,25 @@ module HiFriend::Core
           expect(c.inference.to_human_s).to eq(":hoge")
         end
       end
+
+      context "with ivar return" do
+        let(:code) do
+          <<~CODE
+            class C
+              def foo
+                @foo
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          c = type_var_registry.all.last
+
+          expect(c.name).to eq("@foo")
+          expect(c.inference.to_human_s).to eq("nil")
+        end
+      end
     end
   end
 end

@@ -65,6 +65,16 @@ module HiFriend::Core
       end
     end
 
+    class IvarRead < Base
+      def receiver(const)
+        @const = const
+      end
+
+      def inference
+        @const.ivar_type_inference(@name)
+      end
+    end
+
     class Static < Base
       def correct_type(type)
         @candidates[0] = type
