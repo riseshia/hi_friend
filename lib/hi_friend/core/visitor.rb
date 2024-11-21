@@ -102,7 +102,6 @@ module HiFriend::Core
 
     def visit_constant_read_node(node)
       const_tv = find_or_create_tv(node)
-      @type_var_registry.add(const_tv)
       const_tv.correct_type(Type.const(const_tv.name))
 
       super
@@ -113,7 +112,6 @@ module HiFriend::Core
     def visit_local_variable_read_node(node)
       lvar_node = node
       lvar_tv = find_or_create_tv(lvar_node)
-      @type_var_registry.add(lvar_tv)
 
       lvar_def_ref = find_latest_lvar_tv(lvar_tv.name)
       if lvar_def_ref
@@ -138,8 +136,6 @@ module HiFriend::Core
       lvar_tv.add_dependency(value_tv)
       value_tv.add_dependent(lvar_tv)
 
-      @type_var_registry.add(lvar_tv)
-
       super
 
       @lvars.push(lvar_tv)
@@ -148,7 +144,6 @@ module HiFriend::Core
 
     def visit_instance_variable_read_node(node)
       ivar_read_tv = find_or_create_tv(node)
-      @type_var_registry.add(ivar_read_tv)
 
       current_const_name = build_qualified_const_name([])
       const = @const_registry.find(current_const_name)
