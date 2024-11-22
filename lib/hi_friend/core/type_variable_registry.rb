@@ -12,6 +12,10 @@ module HiFriend::Core
       @registry.delete(node_id)
     end
 
+    def remove_by_path(path)
+      @registry.delete_if { |_, var| var.path == path }
+    end
+
     def find(node_id)
       @registry[node_id]
     end

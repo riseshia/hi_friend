@@ -21,6 +21,10 @@ module HiFriend::Core
       @registry.delete(id)
     end
 
+    def remove_by_path(path)
+      @registry.delete_if { |_, method| method.path == path }
+    end
+
     def find(const_name, method_name, visibility:, singleton: false)
       id = build_id(const_name, method_name, singleton: singleton)
       @registry[id]

@@ -23,7 +23,7 @@ module HiFriend::Core
         end
 
       if @code_ast_per_file.key?(path)
-        remove_garbage(path)
+        remove_old_version(path)
       end
       @code_ast_per_file[path] = parse_result.value
 
@@ -37,8 +37,10 @@ module HiFriend::Core
       parse_result.value.accept(visitor)
     end
 
-    def remove_garbage(path)
-      # XXX
+    def remove_old_version(path)
+      HiFriend::Core.const_registry.remove_by_path(path)
+      HiFriend::Core.method_registry.remove_by_path(path)
+      HiFriend::Core.type_variable_registry.remove_by_path(path)
     end
 
     def diagnostics(path, &blk)
