@@ -4,6 +4,10 @@ module HiFriend::Core
       def to_human_s
         raise NotImplementedError
       end
+
+      def ==(other)
+        self.class == other.class && self.to_human_s == other.to_human_s
+      end
     end
 
     class Any < Base
@@ -54,7 +58,7 @@ module HiFriend::Core
           types.each do |type|
             if type.is_a?(Union)
               element_types.concat(type.element_types)
-            else
+            elsif !element_types.include?(type)
               element_types << type
             end
           end
@@ -65,13 +69,13 @@ module HiFriend::Core
     end
 
     class Array < Base
-      def initialize(element_types)
-        super
-        @element_types = element_types
+      def initialize(element_type)
+        super()
+        @element_type = element_type
       end
 
       def to_human_s
-        "[#{@element_types.map(&:to_human_s).join(' | ')}]"
+        "[#{@element_type.to_human_s}]"
       end
     end
 
@@ -122,5 +126,6 @@ module HiFriend::Core
     def integer = (@integer ||= Integer.new)
     def const(name) = Const.new(name)
     def symbol(name) = Symbol.new(name)
+    def array(el_type) = Array.new(el_type)
   end
 end

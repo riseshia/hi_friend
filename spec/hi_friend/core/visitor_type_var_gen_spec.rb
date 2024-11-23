@@ -259,6 +259,21 @@ module HiFriend::Core
           expect(foo1.inference.to_human_s).to eq("Integer")
         end
       end
+
+      context "with lvar with int array" do
+        let(:code) do
+          <<~CODE
+            arr = [1, 2]
+          CODE
+        end
+
+        it "registers all" do
+          arr_var, arr, one, two = type_var_registry.all
+
+          expect(arr.name).to eq("Prism::ArrayNode")
+          expect(arr.inference.to_human_s).to eq("[Integer]")
+        end
+      end
     end
   end
 end

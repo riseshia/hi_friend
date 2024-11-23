@@ -85,6 +85,14 @@ module HiFriend::Core
       end
     end
 
+    class Array < Base
+      def inference
+        el_types = @dependencies.map(&:inference)
+        el_type = Type::Union.build(el_types)
+        Type.array(el_type)
+      end
+    end
+
     class Static < Base
       def correct_type(type)
         @candidates[0] = type

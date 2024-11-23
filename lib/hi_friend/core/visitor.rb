@@ -224,6 +224,19 @@ module HiFriend::Core
       @last_evaluated_tv = call_tv
     end
 
+    def visit_array_node(node)
+      arr_tv = find_or_create_tv(node)
+
+      node.elements.each do |element_node|
+        element_tv = find_or_create_tv(element_node)
+        arr_tv.add_dependency(element_tv)
+      end
+
+      super
+
+      @last_evaluated_tv = arr_tv
+    end
+
     def visit_integer_node(node)
       value_tv = find_or_create_tv(node)
       value_tv.correct_type(Type.integer)
@@ -379,6 +392,12 @@ module HiFriend::Core
           )
         when Prism::IfNode
           TypeVariable::If.new(
+            path: @file_path,
+            name: node.class.name,
+            node: node,
+          )
+        when Prism::ArrayNode
+          TypeVariable::Array.new(
             path: @file_path,
             name: node.class.name,
             node: node,
