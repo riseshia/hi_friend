@@ -1,8 +1,9 @@
 module HiFriend::Core
   module TypeVariable
     class Base
-      attr_reader :name, :node, :path, :stable,
+      attr_reader :node, :path, :stable,
                   :candidates, :dependencies, :dependents
+      attr_accessor :name
 
       def initialize(path:, name:, node:)
         @path = path

@@ -183,6 +183,38 @@ module HiFriend::Core
         end
       end
 
+      context "with absolute const path return" do
+        let(:code) do
+          <<~CODE
+            def hoge
+              ::C
+            end
+          CODE
+        end
+
+        it "registers all" do
+          c = type_var_registry.all.first
+
+          expect(c.name).to eq("C")
+        end
+      end
+
+      context "with const path return" do
+        let(:code) do
+          <<~CODE
+            def hoge
+              C::D
+            end
+          CODE
+        end
+
+        it "registers all" do
+          c = type_var_registry.all.first
+
+          expect(c.name).to eq("C::D")
+        end
+      end
+
       context "with symbol return" do
         let(:code) do
           <<~CODE

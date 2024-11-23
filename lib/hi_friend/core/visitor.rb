@@ -109,6 +109,34 @@ module HiFriend::Core
       @last_evaluated_tv = const_tv
     end
 
+    def visit_constant_path_node(node)
+      const_names = []
+      idx = node
+      loop do
+        const_names.unshift(idx.name)
+        if idx.is_a?(Prism::ConstantPathNode) && idx.parent
+          idx = idx.parent
+        else
+          break
+        end
+      end
+
+      const_name =
+        if node.parent
+          build_qualified_const_name(const_names)
+        else
+          const_names.join("::")
+        end
+
+      const_tv = find_or_create_tv(node)
+      const_tv.name = const_name
+      const_tv.correct_type(Type.const(const_name))
+
+      # Skip visit children to ignore it's sub constant read node
+
+      @last_evaluated_tv = const_tv
+    end
+
     def visit_local_variable_read_node(node)
       lvar_node = node
       lvar_tv = find_or_create_tv(lvar_node)
@@ -415,6 +443,12 @@ module HiFriend::Core
             node: node,
           )
         when Prism::ConstantReadNode
+          TypeVariable::Static.new(
+            path: @file_path,
+            name: node.name.to_s,
+            node: node,
+          )
+        when Prism::ConstantPathNode
           TypeVariable::Static.new(
             path: @file_path,
             name: node.name.to_s,
