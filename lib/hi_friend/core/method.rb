@@ -11,7 +11,7 @@ module HiFriend::Core
       @arg_types = {}
       @return_type = nil
 
-      @arg_tvs = []
+      @arg_tvs = {}
       @return_tvs = []
       @call_location_tvs = []
     end
@@ -26,8 +26,7 @@ module HiFriend::Core
       if @arg_types.key?(name)
         @arg_types[name]
       else
-        # Try some guess with @call_location_tvs
-        Type.any
+        Type::Union.build(@arg_tvs[name].dependencies.map(&:inference))
       end
     end
 
@@ -49,7 +48,7 @@ module HiFriend::Core
     end
 
     def add_arg_tv(arg_tv)
-      @arg_tvs << arg_tv
+      @arg_tvs[arg_tv.name] = arg_tv
       arg_tv.add_method_obj(self)
     end
 

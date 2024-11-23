@@ -81,6 +81,18 @@ module HiFriend::Core
       @lvars.push(tv)
     end
 
+    def visit_optional_parameter_node(node)
+      tv = find_or_create_tv(node)
+      @current_method_obj.add_arg_tv(tv)
+
+      value_tv = find_or_create_tv(node.value)
+      tv.add_dependency(value_tv)
+
+      super
+
+      @lvars.push(tv)
+    end
+
     def visit_return_node(node)
       if node.arguments.nil?
         # means return nil, so mimic it
@@ -383,6 +395,12 @@ module HiFriend::Core
       tv =
         case node
         when Prism::RequiredParameterNode
+          TypeVariable::Arg.new(
+            path: @file_path,
+            name: node.name.to_s,
+            node: node,
+          )
+        when Prism::OptionalParameterNode
           TypeVariable::Arg.new(
             path: @file_path,
             name: node.name.to_s,

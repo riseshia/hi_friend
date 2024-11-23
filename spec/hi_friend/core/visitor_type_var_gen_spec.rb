@@ -306,6 +306,22 @@ module HiFriend::Core
           expect(arr.inference.to_human_s).to eq("[Integer]")
         end
       end
+
+      context "with params with default value" do
+        let(:code) do
+          <<~CODE
+            def foo(a, b = 1)
+              a + b
+            end
+          CODE
+        end
+
+        it "registers all" do
+          a0, b0, one, plus, a1, a2 = type_var_registry.all
+
+          expect(b0.inference.to_human_s).to eq("Integer")
+        end
+      end
     end
   end
 end
