@@ -71,6 +71,7 @@ module HiFriend::Core
             described_class.new(path: "path", name: "a", node: nil).tap do |tv|
               method_obj = Method.new(path: "path", receiver_type: Type::Const.new("Object"), node: nil)
               tv.add_method_obj(method_obj)
+              method_obj.add_arg_tv(tv)
             end
           end
 

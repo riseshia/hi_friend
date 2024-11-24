@@ -25,8 +25,11 @@ module HiFriend::Core
     def inference_arg_type(name)
       if @arg_types.key?(name)
         @arg_types[name]
-      else
+      elsif @arg_tvs[name].dependencies.size > 0
+        # has default value
         Type::Union.build(@arg_tvs[name].dependencies.map(&:inference))
+      else
+        Type.any
       end
     end
 

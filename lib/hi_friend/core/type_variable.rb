@@ -50,6 +50,7 @@ module HiFriend::Core
       end
 
       def inference
+        # delegate to method_obj
         @method_obj.inference_arg_type(@name)
       end
     end
