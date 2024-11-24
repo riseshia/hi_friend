@@ -1,7 +1,7 @@
 module HiFriend
   class LocToNodeMapper
     class << self
-      def lookup(node, pos)
+      def lookup(node, text, pos)
         target_node = node
 
         loop do
@@ -14,7 +14,20 @@ module HiFriend
           target_node = next_node
         end
 
-        target_node
+        case target_node
+        when Prism::DefNode, Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode
+          whitespace?(text, pos) ? nil : target_node
+        else
+          target_node
+        end
+
+      end
+
+      WHITESPACE_REGEXP = /\s/
+      private def whitespace?(text, pos)
+        line = text.lines[pos.lineno - 1]
+        return false if line.nil?
+        WHITESPACE_REGEXP.match?(line[pos.column])
       end
 
       private def in_range?(node, pos)
