@@ -54,11 +54,17 @@ module HiFriend::Core
 
       class << self
         def build(types)
-          element_types = []
-          types.each do |type|
+          flatten_types = types.flat_map do |type|
             if type.is_a?(Union)
-              element_types.concat(type.element_types)
-            elsif !element_types.include?(type)
+              type.element_types
+            else
+              [type]
+            end
+          end
+
+          element_types = []
+          flatten_types.each do |type|
+            if !element_types.include?(type)
               element_types << type
             end
           end
@@ -127,5 +133,28 @@ module HiFriend::Core
     def const(name) = Const.new(name)
     def symbol(name) = Symbol.new(name)
     def array(el_type) = Array.new(el_type)
+
+    def union(given_types)
+      flatten_types = given_types.flat_map do |type|
+        if type.is_a?(Union)
+          type.element_types
+        else
+          [type]
+        end
+      end
+
+      uniq_types = []
+      flatten_types.each do |type|
+        if !uniq_types.include?(type)
+          uniq_types << type
+        end
+      end
+
+      if uniq_types.size == 1
+        uniq_types.first
+      else
+        Union.new(uniq_types)
+      end
+    end
   end
 end
