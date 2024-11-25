@@ -354,6 +354,51 @@ module HiFriend::Core
           expect(b0.inference.to_human_s).to eq("Integer")
         end
       end
+
+      context "with multi write node with same node on right side" do
+        let(:code) do
+          <<~CODE
+            def foo
+              a, b = 1, 2
+            end
+          CODE
+        end
+
+        it "registers all" do
+          a0, b0, array, one, two = type_var_registry.all
+
+          expect(a0.dependencies).to eq([one])
+          expect(b0.dependencies).to eq([two])
+          expect(a0.inference.to_human_s).to eq("Integer")
+          expect(b0.inference.to_human_s).to eq("Integer")
+          expect(array.inference.to_human_s).to eq("[Integer]")
+        end
+      end
+
+      context "with multi write node with one node on right side" do
+        let(:code) do
+          <<~CODE
+            def foo
+              arr = [1, 2]
+              a, b = arr
+            end
+          CODE
+        end
+
+        it "registers all" do
+          skip "we need sized array for this"
+          arr0, fixed_arr, one, two, a0, b0, arr1 = type_var_registry.all
+
+          expect(a0.dependencies).to eq([arr1])
+          expect(b0.dependencies).to eq([arr1])
+          expect(arr1.dependencies).to eq([fixed_arr])
+          expect(arr1.dependents).to eq([a0, b0])
+          expect(fixed_arr.dependencies).to eq([one, two])
+          expect(fixed_arr.dependents).to eq([arr1])
+          expect(one.dependents).to eq([fixed_arr])
+          expect(two.dependents).to eq([fixed_arr])
+        end
+      end
     end
   end
 end

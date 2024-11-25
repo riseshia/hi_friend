@@ -235,6 +235,37 @@ module HiFriend::Core
       @last_evaluated_tv = ivar_write_tv
     end
 
+    def visit_multi_write_node(node)
+      left_tvs = node.lefts.map do |left_node|
+        find_or_create_tv(left_node)
+      end
+
+      value_node = node.value
+      value_tv = find_or_create_tv(value_node)
+
+      if value_node.is_a?(Prism::ArrayNode)
+        element_tvs = value_node.elements.map do |element_node|
+          find_or_create_tv(element_node)
+        end
+
+        if left_tvs.size == element_tvs.size
+          left_tvs.zip(element_tvs).each do |left_tv, element_tv|
+            left_tv.add_dependency(element_tv)
+            element_tv.add_dependent(left_tv)
+          end
+        else
+          # XXX todo
+        end
+      end
+
+      super
+
+      left_tvs.each do |left_tv|
+        @lvars.push(left_tv)
+      end
+      @last_evaluated_tv = value_tv
+    end
+
     def visit_if_node(node)
       if_cond_tv = find_or_create_tv(node)
       predicate_tv = find_or_create_tv(node.predicate)
@@ -445,7 +476,7 @@ module HiFriend::Core
             name: node.name.to_s,
             node: node,
           )
-        when Prism::LocalVariableWriteNode
+        when Prism::LocalVariableWriteNode, Prism::LocalVariableTargetNode
           TypeVariable::LvarWrite.new(
             path: @file_path,
             name: node.name.to_s,
