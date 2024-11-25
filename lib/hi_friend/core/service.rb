@@ -63,9 +63,9 @@ module HiFriend::Core
       # XXX
     end
 
-    def hover(path, pos)
-      code_ast = @code_ast_per_file.fetch(path)
-      node = HiFriend::LocToNodeMapper.lookup(code_ast, pos)
+    def hover(text, pos)
+      code_ast = @code_ast_per_file.fetch(text.path)
+      node = HiFriend::LocToNodeMapper.lookup(code_ast, text, pos)
       tvar = HiFriend::Core.type_variable_registry.find(node.node_id)
       tvar.inference.to_human_s
     end

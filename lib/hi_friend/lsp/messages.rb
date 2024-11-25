@@ -276,7 +276,7 @@ module HiFriend::LSP
         respond(nil)
         return
       end
-      str = @server.core.hover(text.path, HiFriend::CodePosition.from_lsp(pos))
+      str = @server.core.hover(text, HiFriend::CodePosition.from_lsp(pos))
       if str
         respond(contents: { language: "ruby", value: str })
       else

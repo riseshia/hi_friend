@@ -121,7 +121,8 @@ class ScenarioCompiler
 
   def handle_hover
     <<-END
-output = core.hover(#{ @file.dump }, HiFriend::CodePosition.new(#{ @pos.join(",") }))
+text = HiFriend::LSP::Text.new(#{ @file.dump }, file_body, "somever")
+output = core.hover(text, HiFriend::CodePosition.new(#{ @pos.join(",") }))
 assert_equal(%q\0DATA\0.strip, output.strip)
     END
   end
