@@ -1,8 +1,7 @@
 class ScenarioCompiler
-  def initialize(scenarios, output_declarations: false, check_diff: true, fast: true)
+  def initialize(scenarios, output_declarations: false, fast: true)
     @scenarios = scenarios
     @output_declarations = output_declarations
-    @check_diff = check_diff
     @fast = fast
   end
 
@@ -87,9 +86,7 @@ class ScenarioCompiler
 
   def handle_update
     <<-END
-#{ @check_diff ? 2 : 1 }.times {|i|
-  core.update_rb_file(#{ @file.dump }, %q\0DATA\0)
-};
+  core.update_rb_file(#{ @file.dump }, file_body=%q\0DATA\0)
     END
   end
 
