@@ -27,7 +27,7 @@ module HiFriend::Core
         @arg_types[name]
       elsif @arg_tvs[name].dependencies.size > 0
         # has default value
-        Type::Union.build(@arg_tvs[name].dependencies.map(&:inference))
+        Type.union(@arg_tvs[name].dependencies.map(&:inference))
       else
         Type.any
       end

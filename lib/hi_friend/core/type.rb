@@ -51,27 +51,6 @@ module HiFriend::Core
       def to_human_s
         @element_types.map(&:to_human_s).join(' | ')
       end
-
-      class << self
-        def build(types)
-          flatten_types = types.flat_map do |type|
-            if type.is_a?(Union)
-              type.element_types
-            else
-              [type]
-            end
-          end
-
-          element_types = []
-          flatten_types.each do |type|
-            if !element_types.include?(type)
-              element_types << type
-            end
-          end
-
-          new(element_types)
-        end
-      end
     end
 
     class Array < Base

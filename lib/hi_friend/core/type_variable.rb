@@ -90,7 +90,7 @@ module HiFriend::Core
     class Array < Base
       def inference
         el_types = @dependencies.map(&:inference)
-        el_type = Type::Union.build(el_types)
+        el_type = Type.union(el_types)
         Type.array(el_type)
       end
     end
@@ -166,7 +166,7 @@ module HiFriend::Core
           types.push(Type.nil)
         end
 
-        Type::Union.build(types)
+        Type.union(types)
       end
     end
   end
