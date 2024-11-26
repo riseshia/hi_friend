@@ -57,13 +57,13 @@ module HiFriend::Core
 
     class LvarWrite < Base
       def inference(constraints = {})
-        @dependencies[0].inference
+        @dependencies[0].inference(constraints)
       end
     end
 
     class LvarRead < Base
       def inference(constraints = {})
-        @dependencies[0].inference
+        @dependencies[0].inference(constraints)
       end
     end
 
@@ -73,7 +73,7 @@ module HiFriend::Core
       end
 
       def inference(constraints = {})
-        @dependencies[0].inference
+        @dependencies[0].inference(constraints)
       end
     end
 
@@ -89,7 +89,7 @@ module HiFriend::Core
 
     class Array < Base
       def inference(constraints = {})
-        el_types = @dependencies.map(&:inference)
+        el_types = @dependencies.map { _1.inference(constraints) }
         el_type = Type.union(el_types)
         Type.array(el_type)
       end
@@ -161,7 +161,7 @@ module HiFriend::Core
       end
 
       def inference(constraints = {})
-        types = @dependencies.map(&:inference)
+        types = @dependencies.map { _1.inference(constraints) }
         if types.size == 1 # if cond without else
           types.push(Type.nil)
         end
