@@ -13,12 +13,10 @@ module HiFriend::Core
         @candidates = []
         @dependencies = []
         @dependents = []
-        @leaf = false
         # @stable = false
       end
 
-      def leaf? = @leaf
-      def leaf! = (@leaf = true)
+      def leaf? = @dependents.empty?
 
       def id
         @id ||= @node.node_id
