@@ -32,7 +32,7 @@ module HiFriend::Core
         @dependents << type_var
       end
 
-      def inference
+      def inference(constraints = {})
         raise NotImplementedError
       end
     end
@@ -49,20 +49,20 @@ module HiFriend::Core
         @method_obj = method_obj
       end
 
-      def inference
+      def inference(constraints = {})
         # delegate to method_obj
         @method_obj.inference_arg_type(@name)
       end
     end
 
     class LvarWrite < Base
-      def inference
+      def inference(constraints = {})
         @dependencies[0].inference
       end
     end
 
     class LvarRead < Base
-      def inference
+      def inference(constraints = {})
         @dependencies[0].inference
       end
     end
@@ -72,7 +72,7 @@ module HiFriend::Core
         @const = const
       end
 
-      def inference
+      def inference(constraints = {})
         @dependencies[0].inference
       end
     end
@@ -82,13 +82,13 @@ module HiFriend::Core
         @const = const
       end
 
-      def inference
+      def inference(constraints = {})
         @const.ivar_type_inference(@name)
       end
     end
 
     class Array < Base
-      def inference
+      def inference(constraints = {})
         el_types = @dependencies.map(&:inference)
         el_type = Type.union(el_types)
         Type.array(el_type)
@@ -100,7 +100,7 @@ module HiFriend::Core
         @candidates[0] = type
       end
 
-      def inference
+      def inference(constraints = {})
         @candidates.first
       end
     end
@@ -130,7 +130,7 @@ module HiFriend::Core
         @scope = const_name
       end
 
-      def inference
+      def inference(constraints = {})
         receiver_type = @receiver_tv.inference
 
         if receiver_type.is_a?(Type::Any)
@@ -160,7 +160,7 @@ module HiFriend::Core
         predicate.add_dependent(self)
       end
 
-      def inference
+      def inference(constraints = {})
         types = @dependencies.map(&:inference)
         if types.size == 1 # if cond without else
           types.push(Type.nil)
