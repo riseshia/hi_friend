@@ -35,6 +35,18 @@ module HiFriend::Core
       def inference(constraints = {})
         raise NotImplementedError
       end
+
+      def guess_const_by_received_methods(method_names)
+        candidates = method_names.map do |method_name|
+          HiFriend::Core.method_registry.guess_method(method_name)
+        end
+        candidates.compact!.uniq!
+
+        return nil if candidates.size != 1
+
+        method = candidates.first
+        method.receiver_type
+      end
     end
 
     class Arg < Base
@@ -63,7 +75,17 @@ module HiFriend::Core
 
     class LvarRead < Base
       def inference(constraints = {})
-        @dependencies[0].inference(constraints)
+        guessed_type = Type.any
+        if constraints[:received_methods]
+          guessed_type = guess_const_by_received_methods(constraints[:received_methods])
+        end
+
+        accurate_type = @dependencies[0].inference(constraints)
+        if accurate_type.is_a?(Type::Any)
+          guessed_type
+        else
+          accurate_type
+        end
       end
     end
 
@@ -83,7 +105,17 @@ module HiFriend::Core
       end
 
       def inference(constraints = {})
-        @const.ivar_type_inference(@name)
+        guessed_type = Type.any
+        if constraints[:received_methods]
+          guessed_type = guess_const_by_received_methods(constraints[:received_methods])
+        end
+
+        accurate_type = @const.ivar_type_inference(@name, constraints)
+        if accurate_type.is_a?(Type::Any)
+          guessed_type
+        else
+          accurate_type
+        end
       end
     end
 
@@ -131,15 +163,12 @@ module HiFriend::Core
       end
 
       def inference(constraints = {})
-        receiver_type = @receiver_tv.inference
+        method_name = @name
+
+        receiver_type = @receiver_tv.inference({ received_methods: [method_name] })
 
         if receiver_type.is_a?(Type::Any)
-          method_obj = MethodRegistry.guess_method(node.name)
-          if method_obj
-            method_obj.return_type
-          else
-            Type.any
-          end
+          Type.any
         else
           method_obj = HiFriend::Core.method_registry.find(receiver_type.to_human_s, @name, visibility: :public)
           method_obj.inference_return_type
