@@ -1,45 +1,53 @@
 module HiFriend::Core
   class MethodRegistry
     def initialize
-      @registry = {}
+      @method_by_id = {}
+      @methods_by_path = Hash.new { |h, k| h[k] = [] }
     end
 
     def add(const_name, node, path, singleton:)
       id = build_id(const_name, node.name, singleton: singleton)
 
-      @registry[id] = Method.new(
-        path: path,
+      @method_by_id[id] ||= Method.new(
+        id: id,
         node: node,
         receiver_type: Type::Const.new(const_name),
       )
-    end
+      method = @method_by_id[id]
+      method.add_path(path)
 
-    def remove(const_name, method_name)
-      singleton = node.receiver&.is_a?(Prism::SelfNode)
-      id = build_id(const_name, method_name, singleton: singleton)
+      @methods_by_path[path] << method
 
-      @registry.delete(id)
+      method
     end
 
     def remove_by_path(path)
-      @registry.delete_if { |_, method| method.path == path }
+      methods = @methods_by_path.delete(path)
+      return if methods.nil?
+
+      methods.each do |method|
+        method.remove_path(path)
+        @method_by_id.delete(method.id) if method.dangling?
+      end
     end
 
     def find(const_name, method_name, visibility:, singleton: false)
       id = build_id(const_name, method_name, singleton: singleton)
-      @registry[id]
+      @method_by_id[id]
     end
 
+    # test purpose
     def all_keys
-      @registry.keys
+      @method_by_id.keys
     end
 
     def clear
-      @registry.clear
+      @method_by_id.clear
+      @methods_by_path.clear
     end
 
     def guess_method(name)
-      candidates = @registry.values.select { |v| v.name == name }
+      candidates = @method_by_id.values.select { |v| v.name == name }
 
       if candidates.size == 1
         candidates.values.first

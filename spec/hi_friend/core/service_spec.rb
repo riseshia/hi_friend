@@ -153,6 +153,63 @@ module HiFriend::Core
             expect(const_registry.find("A::Bar")).to be_nil
           end
         end
+
+        context "class open on files" do
+          let(:file_a) do
+            <<~CODE
+              class Foo
+                def method_from_a
+                  1
+                end
+              end
+            CODE
+          end
+
+          let(:file_b) do
+            <<~CODE
+              class Foo
+                def method_from_b
+                  1
+                end
+              end
+            CODE
+          end
+
+          let(:file_a_new) do
+            <<~CODE
+              class Bar
+              end
+            CODE
+          end
+
+          let(:file_b_new) do
+            <<~CODE
+              class Bar
+              end
+            CODE
+          end
+
+          it "const_registry has consistency" do
+            service.update_rb_file("a.rb", file_a)
+            service.update_rb_file("b.rb", file_b)
+
+            expect(const_registry.find("Foo")).not_to be_nil
+            expect(method_registry.find("Foo", "method_from_a", visibility: :public)).not_to be_nil
+            expect(method_registry.find("Foo", "method_from_b", visibility: :public)).not_to be_nil
+
+            service.update_rb_file("b.rb", file_b_new)
+            expect(const_registry.find("Foo")).not_to be_nil
+            expect(method_registry.find("Foo", "method_from_a", visibility: :public)).not_to be_nil
+            expect(method_registry.find("Foo", "method_from_b", visibility: :public)).to be_nil
+            expect(const_registry.find("Bar")).not_to be_nil
+
+            service.update_rb_file("a.rb", file_a_new)
+            expect(const_registry.find("Foo")).to be_nil
+            expect(method_registry.find("Foo", "method_from_a", visibility: :public)).to be_nil
+            expect(method_registry.find("Foo", "method_from_b", visibility: :public)).to be_nil
+            expect(const_registry.find("Bar")).not_to be_nil
+          end
+        end
       end
     end
   end

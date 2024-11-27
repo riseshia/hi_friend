@@ -16,6 +16,8 @@ module HiFriend::Core
 
     def remove_by_path(path)
       consts = @consts_by_path.delete(path)
+      return if consts.nil?
+
       consts.each do |const|
         const.remove_path(path)
         @const_by_name.delete(const.name) if const.dangling?

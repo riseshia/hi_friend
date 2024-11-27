@@ -1,10 +1,11 @@
 module HiFriend::Core
   class Method
-    attr_reader :path, :node, :receiver_type,
+    attr_reader :id, :paths, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
 
-    def initialize(path:, receiver_type:, node:)
-      @path = path
+    def initialize(id:, receiver_type:, node:)
+      @id = id
+      @paths = []
       @node = node
       @receiver_type = receiver_type
 
@@ -20,6 +21,18 @@ module HiFriend::Core
 
     def name
       @node.name
+    end
+
+    def add_path(path)
+      @paths << path
+    end
+
+    def remove_path(given_path)
+      @paths.delete_if { |path| path == given_path }
+    end
+
+    def dangling?
+      @paths.empty?
     end
 
     def inference_arg_type(name)
