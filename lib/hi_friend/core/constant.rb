@@ -1,12 +1,25 @@
 module HiFriend::Core
   class Constant
-    attr_reader :path, :node
+    attr_reader :name, :paths, :node
 
-    def initialize(path, prism_node)
-      @path = path
+    def initialize(name, prism_node)
+      @name = name
       @node = prism_node
+      @paths = []
       @ivar_read_tvs = Hash.new { |h, k| h[k] = [] }
       @ivar_write_tvs = {}
+    end
+
+    def add_path(path)
+      @paths << path
+    end
+
+    def remove_path(given_path)
+      @paths.delete_if { |path| path == given_path }
+    end
+
+    def dangling?
+      @paths.empty?
     end
 
     def add_ivar_read_tv(ivar_read_tv)

@@ -100,6 +100,59 @@ module HiFriend::Core
             expect(two.name).to eq("2")
           end
         end
+
+        context "module open on files" do
+          let(:file_a) do
+            <<~CODE
+              module A
+                class Foo; end
+              end
+            CODE
+          end
+
+          let(:file_b) do
+            <<~CODE
+              module A
+                class Bar; end
+              end
+            CODE
+          end
+
+          let(:file_a_new) do
+            <<~CODE
+              class Foo
+              end
+            CODE
+          end
+
+          let(:file_b_new) do
+            <<~CODE
+              class Bar
+              end
+            CODE
+          end
+
+          it "const_registry has consistency" do
+            service.update_rb_file("a.rb", file_a)
+            service.update_rb_file("b.rb", file_b)
+
+            expect(const_registry.find("A")).not_to be_nil
+            expect(const_registry.find("A::Foo")).not_to be_nil
+            expect(const_registry.find("A::Bar")).not_to be_nil
+
+            service.update_rb_file("b.rb", file_b_new)
+            expect(const_registry.find("A")).not_to be_nil
+            expect(const_registry.find("Bar")).not_to be_nil
+            expect(const_registry.find("A::Foo")).not_to be_nil
+            expect(const_registry.find("A::Bar")).to be_nil
+
+            service.update_rb_file("a.rb", file_a_new)
+            expect(const_registry.find("A")).to be_nil
+            expect(const_registry.find("Foo")).not_to be_nil
+            expect(const_registry.find("A::Foo")).to be_nil
+            expect(const_registry.find("A::Bar")).to be_nil
+          end
+        end
       end
     end
   end

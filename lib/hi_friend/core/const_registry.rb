@@ -1,31 +1,39 @@
 module HiFriend::Core
   class ConstRegistry
     def initialize
-      @registry = {}
+      @const_by_name = {}
+      @consts_by_path = Hash.new { |h, k| h[k] = [] }
     end
 
     def add(const_name, node, path)
-      @registry[const_name] = Constant.new(path, node)
-    end
+      @const_by_name[const_name] ||= Constant.new(const_name, node)
 
-    def remove(const_name)
-      @registry.delete(const_name)
+      const = @const_by_name[const_name]
+      const.add_path(path)
+
+      @consts_by_path[path] << const
     end
 
     def remove_by_path(path)
-      @registry.delete_if { |_, const| const.path == path }
+      consts = @consts_by_path.delete(path)
+      consts.each do |const|
+        const.remove_path(path)
+        @const_by_name.delete(const.name) if const.dangling?
+      end
     end
 
     def find(const_name)
-      @registry[const_name]
+      @const_by_name[const_name]
     end
 
+    # test purpose
     def all_keys
-      @registry.keys
+      @const_by_name.keys
     end
 
     def clear
-      @registry.clear
+      @const_by_name.clear
+      @consts_by_path.clear
     end
   end
 end
