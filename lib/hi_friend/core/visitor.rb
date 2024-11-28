@@ -63,8 +63,11 @@ module HiFriend::Core
       singleton = node.receiver.is_a?(Prism::SelfNode) || @in_singleton
 
       method_obj = @method_registry.add(
-        qualified_const_name, node, @file_path,
-        singleton: singleton
+        receiver_name: qualified_const_name,
+        name: node.name,
+        node: node,
+        path: @file_path,
+        singleton: singleton,
       )
 
       in_method(node.name, method_obj) do

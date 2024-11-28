@@ -95,8 +95,11 @@ module HiFriend::Core
               node = double(Prism::CallNode, name: :+)
 
               HiFriend::Core.method_registry.add(
-                "Integer", node, "path",
-                singleton: false
+                receiver_name: "Integer",
+                name: "+",
+                node: node,
+                path: "path",
+                singleton: false,
               )
               method_obj = HiFriend::Core.method_registry.find("Integer", "+", visibility: :public, singleton: false)
               method_obj.add_arg_type("a", Type.integer)

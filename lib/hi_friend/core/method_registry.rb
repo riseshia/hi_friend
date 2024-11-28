@@ -5,13 +5,19 @@ module HiFriend::Core
       @methods_by_path = Hash.new { |h, k| h[k] = [] }
     end
 
-    def add(const_name, node, path, singleton:)
-      id = build_id(const_name, node.name, singleton: singleton)
+    def add(
+      receiver_name:,
+      name:,
+      node:,
+      path:,
+      singleton:
+    )
+      id = build_id(receiver_name, node.name, singleton: singleton)
 
       @method_by_id[id] ||= Method.new(
         id: id,
         node: node,
-        receiver_type: Type::Const.new(const_name),
+        receiver_type: Type::Const.new(receiver_name),
       )
       method = @method_by_id[id]
       method.add_path(path)
