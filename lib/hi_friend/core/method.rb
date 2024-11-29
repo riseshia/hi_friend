@@ -50,7 +50,7 @@ module HiFriend::Core
       if @return_type
         @return_type
       else
-        # Try some guess with @return_tvs
+        # XXX: Try some guess with @return_tvs
         Type.any
       end
     end

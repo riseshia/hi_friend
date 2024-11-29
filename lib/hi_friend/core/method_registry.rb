@@ -12,7 +12,7 @@ module HiFriend::Core
       path:,
       singleton:
     )
-      id = build_id(receiver_name, node.name, singleton: singleton)
+      id = build_id(receiver_name, name, singleton: singleton)
 
       @method_by_id[id] ||= Method.new(
         id: id,

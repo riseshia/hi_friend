@@ -299,24 +299,50 @@ module HiFriend::Core
     end
 
     def visit_call_node(node)
-      call_tv = find_or_create_tv(node)
+      case node.name
+      when :attr_reader
+        # def {name} = @name
+        qualified_const_name = build_qualified_const_name([])
+        const = @const_registry.find(qualified_const_name)
+        node.arguments&.arguments&.each do |arg_node|
+          name = "@" + arg_node.unescaped
 
-      if node.receiver
-        receiver_tv = find_or_create_tv(node.receiver)
-        call_tv.add_receiver(receiver_tv)
+          ivar_read_tv = TypeVariable::IvarRead.new(
+            path: @file_path,
+            name: name,
+            node: arg_node,
+          )
+          @type_var_registry.add(ivar_read_tv)
+
+          method_obj = @method_registry.add(
+            receiver_name: qualified_const_name,
+            name: name,
+            node: arg_node,
+            path: @file_path,
+            singleton: @in_singleton
+          )
+          method_obj.add_return_tv(ivar_read_tv)
+        end
+      else
+        call_tv = find_or_create_tv(node)
+
+        if node.receiver
+          receiver_tv = find_or_create_tv(node.receiver)
+          call_tv.add_receiver(receiver_tv)
+        end
+
+        node.arguments&.arguments&.each do |arg|
+          arg_tv = find_or_create_tv(arg)
+          call_tv.add_arg(arg_tv)
+        end
+
+        qualified_const_name = build_qualified_const_name([])
+        call_tv.add_scope(qualified_const_name)
+
+        super
+
+        @last_evaluated_tv = call_tv
       end
-
-      node.arguments&.arguments&.each do |arg|
-        arg_tv = find_or_create_tv(arg)
-        call_tv.add_arg(arg_tv)
-      end
-
-      qualified_const_name = build_qualified_const_name([])
-      call_tv.add_scope(qualified_const_name)
-
-      super
-
-      @last_evaluated_tv = call_tv
     end
 
     def visit_array_node(node)

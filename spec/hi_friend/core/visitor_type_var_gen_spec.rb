@@ -231,6 +231,23 @@ module HiFriend::Core
         end
       end
 
+      context "with attr_reader" do
+        let(:code) do
+          <<~CODE
+            class C
+              attr_reader :foo, "bar"
+            end
+          CODE
+        end
+
+        it "registers all" do
+          c, foo, bar = type_var_registry.all
+
+          expect(foo.name).to eq("@foo")
+          expect(bar.name).to eq("@bar")
+        end
+      end
+
       context "with ivar return" do
         let(:code) do
           <<~CODE
