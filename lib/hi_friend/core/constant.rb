@@ -33,5 +33,9 @@ module HiFriend::Core
     def ivar_type_infer(ivar_name, constraints)
       @ivar_write_tvs[ivar_name]&.infer(constraints) || Type.nil
     end
+
+    def hover
+      raise NotImplementedError
+    end
   end
 end

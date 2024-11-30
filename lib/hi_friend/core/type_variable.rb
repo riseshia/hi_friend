@@ -35,6 +35,10 @@ module HiFriend::Core
         raise NotImplementedError
       end
 
+      def hover
+        @inferred_type.to_human_s
+      end
+
       def guess_const_by_received_methods(method_names)
         candidates = method_names.map do |method_name|
           HiFriend::Core.method_registry.guess_method(method_name)

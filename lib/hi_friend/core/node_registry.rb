@@ -5,7 +5,7 @@ module HiFriend::Core
     end
 
     def add(path, obj)
-      @objs_by_path[path][obj.node.id] = obj
+      @objs_by_path[path][obj.node.node_id] = obj
     end
 
     def remove(path, node_id)

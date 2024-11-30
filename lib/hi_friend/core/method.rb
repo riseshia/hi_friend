@@ -75,5 +75,10 @@ module HiFriend::Core
     def add_call_location_tv(call_tv)
       @call_location_tvs << call_tv
     end
+
+    def hover
+      # XXX: more information
+      name
+    end
   end
 end

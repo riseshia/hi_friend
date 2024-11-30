@@ -72,6 +72,7 @@ module HiFriend::Core
         path: @file_path,
         singleton: singleton,
       )
+      @node_registry.add(@file_path, method_obj)
 
       in_method(node.name, method_obj) do
         super
@@ -129,6 +130,7 @@ module HiFriend::Core
           node: node,
         )
         @type_var_registry.add(tv)
+        @node_registry.add(@file_path, tv)
       else
         node.arguments.arguments.each do |arg|
           arg_tv = find_or_create_tv(arg)
@@ -316,6 +318,7 @@ module HiFriend::Core
             node: arg_node,
           )
           @type_var_registry.add(ivar_read_tv)
+          @node_registry.add(@file_path, ivar_read_tv)
 
           method_obj = @method_registry.add(
             receiver_name: qualified_const_name,
@@ -585,6 +588,7 @@ module HiFriend::Core
         end
 
       @type_var_registry.add(tv)
+      @node_registry.add(@file_path, tv)
 
       tv
     end

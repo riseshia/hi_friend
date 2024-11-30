@@ -42,6 +42,7 @@ module HiFriend::Core
       HiFriend::Core.const_registry.remove_by_path(path)
       HiFriend::Core.method_registry.remove_by_path(path)
       HiFriend::Core.type_variable_registry.remove_by_path(path)
+      HiFriend::Core.node_registry.remove_by_path(path)
     end
 
     def diagnostics(path, &blk)
@@ -67,8 +68,8 @@ module HiFriend::Core
     def hover(text, pos)
       code_ast = @code_ast_per_file.fetch(text.path)
       node = HiFriend::LocToNodeMapper.lookup(code_ast, text, pos)
-      tvar = HiFriend::Core.type_variable_registry.find(node.node_id)
-      tvar.infer.to_human_s
+      tvar = HiFriend::Core.node_registry.find(node.node_id)
+      tvar.hover
     end
 
     def code_lens(path)
