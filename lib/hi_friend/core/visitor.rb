@@ -6,6 +6,7 @@ module HiFriend::Core
       const_registry:,
       method_registry:,
       type_var_registry:,
+      node_registry:,
       file_path:
     )
       super()
@@ -13,6 +14,8 @@ module HiFriend::Core
       @const_registry = const_registry
       @method_registry = method_registry
       @type_var_registry = type_var_registry
+      @node_registry = node_registry
+
       @file_path = file_path
       @current_scope = []
       @lvars = []

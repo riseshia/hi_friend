@@ -5,11 +5,13 @@ module HiFriend::Core
     let(:const_registry) { ConstRegistry.new }
     let(:method_registry) { MethodRegistry.new }
     let(:type_var_registry) { TypeVariableRegistry.new }
+    let(:node_registry) { NodeRegistry.new }
     let(:visitor) do
       Visitor.new(
         const_registry: const_registry,
         method_registry: method_registry,
         type_var_registry: type_var_registry,
+        node_registry: node_registry,
         file_path: "sample/sample.rb",
       )
     end

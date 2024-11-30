@@ -31,6 +31,7 @@ module HiFriend::Core
         const_registry: HiFriend::Core.const_registry,
         method_registry: HiFriend::Core.method_registry,
         type_var_registry: HiFriend::Core.type_variable_registry,
+        node_registry: HiFriend::Core.node_registry,
         file_path: path,
       )
       # pp parse_result.value
