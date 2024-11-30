@@ -2,7 +2,8 @@ module HiFriend::Core
   module TypeVariable
     class Base
       attr_reader :node, :path, :stable,
-                  :candidates, :dependencies, :dependents
+                  :candidates, :dependencies, :dependents,
+                  :inferred_type
       attr_accessor :name
 
       def initialize(path:, name:, node:)
@@ -13,7 +14,7 @@ module HiFriend::Core
         @candidates = []
         @dependencies = []
         @dependents = []
-        # @stable = false
+        @inferred_type = Type.any
       end
 
       def leaf? = @dependents.empty?
@@ -30,7 +31,7 @@ module HiFriend::Core
         @dependents << type_var
       end
 
-      def inference(constraints = {})
+      def infer(constraints = {})
         raise NotImplementedError
       end
 
@@ -59,31 +60,32 @@ module HiFriend::Core
         @method_obj = method_obj
       end
 
-      def inference(constraints = {})
+      def infer(constraints = {})
         # delegate to method_obj
-        @method_obj.inference_arg_type(@name)
+        @inferred_type = @method_obj.infer_arg_type(@name)
       end
     end
 
     class LvarWrite < Base
-      def inference(constraints = {})
-        @dependencies[0].inference(constraints)
+      def infer(constraints = {})
+        @inferred_type = @dependencies[0].infer(constraints)
       end
     end
 
     class LvarRead < Base
-      def inference(constraints = {})
+      def infer(constraints = {})
         guessed_type = Type.any
         if constraints[:received_methods]
           guessed_type = guess_const_by_received_methods(constraints[:received_methods])
         end
 
-        accurate_type = @dependencies[0].inference(constraints)
-        if accurate_type.is_a?(Type::Any)
-          guessed_type
-        else
-          accurate_type
-        end
+        accurate_type = @dependencies[0].infer(constraints)
+        @inferred_type =
+          if accurate_type.is_a?(Type::Any)
+            guessed_type
+          else
+            accurate_type
+          end
       end
     end
 
@@ -92,8 +94,8 @@ module HiFriend::Core
         @const = const
       end
 
-      def inference(constraints = {})
-        @dependencies[0].inference(constraints)
+      def infer(constraints = {})
+        @inferred_type = @dependencies[0].infer(constraints)
       end
     end
 
@@ -102,26 +104,27 @@ module HiFriend::Core
         @const = const
       end
 
-      def inference(constraints = {})
+      def infer(constraints = {})
         guessed_type = Type.any
         if constraints[:received_methods]
           guessed_type = guess_const_by_received_methods(constraints[:received_methods])
         end
 
-        accurate_type = @const.ivar_type_inference(@name, constraints)
-        if accurate_type.is_a?(Type::Any)
-          guessed_type
-        else
-          accurate_type
-        end
+        accurate_type = @const.ivar_type_infer(@name, constraints)
+        @inferred_type =
+          if accurate_type.is_a?(Type::Any)
+            guessed_type
+          else
+            accurate_type
+          end
       end
     end
 
     class Array < Base
-      def inference(constraints = {})
-        el_types = @dependencies.map { _1.inference(constraints) }
+      def infer(constraints = {})
+        el_types = @dependencies.map { _1.infer(constraints) }
         el_type = Type.union(el_types)
-        Type.array(el_type)
+        @inferred_type = Type.array(el_type)
       end
     end
 
@@ -130,8 +133,8 @@ module HiFriend::Core
         @candidates[0] = type
       end
 
-      def inference(constraints = {})
-        @candidates.first
+      def infer(constraints = {})
+        @inferred_type = @candidates.first
       end
     end
 
@@ -160,17 +163,18 @@ module HiFriend::Core
         @scope = const_name
       end
 
-      def inference(constraints = {})
+      def infer(constraints = {})
         method_name = @name
 
-        receiver_type = @receiver_tv.inference({ received_methods: [method_name] })
+        receiver_type = @receiver_tv.infer({ received_methods: [method_name] })
 
-        if receiver_type.is_a?(Type::Any)
-          Type.any
-        else
-          method_obj = HiFriend::Core.method_registry.find(receiver_type.to_human_s, @name, visibility: :public)
-          method_obj.inference_return_type
-        end
+        @inferred_type =
+          if receiver_type.is_a?(Type::Any)
+            Type.any
+          else
+            method_obj = HiFriend::Core.method_registry.find(receiver_type.to_human_s, @name, visibility: :public)
+            method_obj.infer_return_type
+          end
       end
     end
 
@@ -187,13 +191,13 @@ module HiFriend::Core
         predicate.add_dependent(self)
       end
 
-      def inference(constraints = {})
-        types = @dependencies.map { _1.inference(constraints) }
+      def infer(constraints = {})
+        types = @dependencies.map { _1.infer(constraints) }
         if types.size == 1 # if cond without else
           types.push(Type.nil)
         end
 
-        Type.union(types)
+        @inferred_type = Type.union(types)
       end
     end
   end

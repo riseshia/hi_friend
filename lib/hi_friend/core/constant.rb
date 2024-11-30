@@ -30,8 +30,8 @@ module HiFriend::Core
       @ivar_write_tvs[ivar_write_tv.name] = ivar_write_tv
     end
 
-    def ivar_type_inference(ivar_name, constraints)
-      @ivar_write_tvs[ivar_name]&.inference(constraints) || Type.nil
+    def ivar_type_infer(ivar_name, constraints)
+      @ivar_write_tvs[ivar_name]&.infer(constraints) || Type.nil
     end
   end
 end

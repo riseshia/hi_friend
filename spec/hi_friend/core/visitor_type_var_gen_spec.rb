@@ -133,8 +133,8 @@ module HiFriend::Core
           expect(a1.dependents).to eq([gt])
           expect(one.dependents).to eq([gt])
           expect(true0.dependents).to eq([if_cond])
-          expect(true0.inference.to_human_s).to eq("true")
-          expect(false0.inference.to_human_s).to eq("false")
+          expect(true0.infer.to_human_s).to eq("true")
+          expect(false0.infer.to_human_s).to eq("false")
 
           method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([true0, false0])
@@ -227,7 +227,7 @@ module HiFriend::Core
         it "registers all" do
           c = type_var_registry.all.first
 
-          expect(c.inference.to_human_s).to eq(":hoge")
+          expect(c.infer.to_human_s).to eq(":hoge")
         end
       end
 
@@ -263,7 +263,7 @@ module HiFriend::Core
           c = type_var_registry.all.last
 
           expect(c.name).to eq("@foo")
-          expect(c.inference.to_human_s).to eq("nil")
+          expect(c.infer.to_human_s).to eq("nil")
         end
       end
 
@@ -282,7 +282,7 @@ module HiFriend::Core
           foo, one = type_var_registry.all.last(2)
 
           expect(foo.name).to eq("@foo")
-          expect(foo.inference.to_human_s).to eq("Integer")
+          expect(foo.infer.to_human_s).to eq("Integer")
         end
       end
 
@@ -305,7 +305,7 @@ module HiFriend::Core
           foo0, one, foo1 = type_var_registry.all.last(3)
 
           expect(foo1.name).to eq("@foo")
-          expect(foo1.inference.to_human_s).to eq("Integer")
+          expect(foo1.infer.to_human_s).to eq("Integer")
         end
       end
 
@@ -320,7 +320,7 @@ module HiFriend::Core
           arr_var, arr, one, two = type_var_registry.all
 
           expect(arr.name).to eq("Prism::ArrayNode")
-          expect(arr.inference.to_human_s).to eq("[Integer]")
+          expect(arr.infer.to_human_s).to eq("[Integer]")
         end
       end
 
@@ -336,7 +336,7 @@ module HiFriend::Core
         it "registers all" do
           a0, b0, one, plus, a1, a2 = type_var_registry.all
 
-          expect(b0.inference.to_human_s).to eq("Integer")
+          expect(b0.infer.to_human_s).to eq("Integer")
         end
       end
 
@@ -352,7 +352,7 @@ module HiFriend::Core
         it "registers all" do
           a0, b0, plus, a1, a2 = type_var_registry.all
 
-          expect(b0.inference.to_human_s).to eq("any")
+          expect(b0.infer.to_human_s).to eq("any")
         end
       end
 
@@ -368,7 +368,7 @@ module HiFriend::Core
         it "registers all" do
           a0, b0, one, plus, a1, a2 = type_var_registry.all
 
-          expect(b0.inference.to_human_s).to eq("Integer")
+          expect(b0.infer.to_human_s).to eq("Integer")
         end
       end
 
@@ -386,9 +386,9 @@ module HiFriend::Core
 
           expect(a0.dependencies).to eq([one])
           expect(b0.dependencies).to eq([two])
-          expect(a0.inference.to_human_s).to eq("Integer")
-          expect(b0.inference.to_human_s).to eq("Integer")
-          expect(array.inference.to_human_s).to eq("[Integer]")
+          expect(a0.infer.to_human_s).to eq("Integer")
+          expect(b0.infer.to_human_s).to eq("Integer")
+          expect(array.infer.to_human_s).to eq("[Integer]")
         end
       end
 

@@ -67,7 +67,7 @@ module HiFriend::Core
       code_ast = @code_ast_per_file.fetch(text.path)
       node = HiFriend::LocToNodeMapper.lookup(code_ast, text, pos)
       tvar = HiFriend::Core.type_variable_registry.find(node.node_id)
-      tvar.inference.to_human_s
+      tvar.infer.to_human_s
     end
 
     def code_lens(path)

@@ -22,7 +22,7 @@ module HiFriend::Core
       end
 
       describe Static do
-        describe "#inference" do
+        describe "#infer" do
           let(:tv) do
             described_class.new(path: "path", name: "Prism::TrueNode", node: nil).tap do |tv|
               tv.correct_type(Type.true)
@@ -30,13 +30,13 @@ module HiFriend::Core
           end
 
           it "return only one type" do
-            expect(tv.inference.to_human_s).to eq("true")
+            expect(tv.infer.to_human_s).to eq("true")
           end
         end
       end
 
       describe LvarWrite do
-        describe "#inference" do
+        describe "#infer" do
           let(:tv) do
             described_class.new(path: "path", name: "a", node: nil).tap do |tv|
               tv.add_dependency(true_tv)
@@ -44,13 +44,13 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.inference.to_human_s).to eq("true")
+            expect(tv.infer.to_human_s).to eq("true")
           end
         end
       end
 
       describe LvarRead do
-        describe "#inference" do
+        describe "#infer" do
           let(:tv) do
             described_class.new(path: "path", name: "a", node: nil).tap do |tv|
               lvar_write_tv = LvarWrite.new(path: "path", name: "a", node: nil)
@@ -60,13 +60,13 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.inference.to_human_s).to eq("true")
+            expect(tv.infer.to_human_s).to eq("true")
           end
         end
       end
 
       describe Arg do
-        describe "#inference" do
+        describe "#infer" do
           let(:tv) do
             described_class.new(path: "path", name: "a", node: nil).tap do |tv|
               method_obj = Method.new(id: "method_id", receiver_type: Type::Const.new("Object"), node: nil)
@@ -76,13 +76,13 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.inference.to_human_s).to eq("any")
+            expect(tv.infer.to_human_s).to eq("any")
           end
         end
       end
 
       describe Call do
-        describe "#inference" do
+        describe "#infer" do
           # 1 + 2
           let(:tv) do
             described_class.new(path: "path", name: "+", node: nil).tap do |tv|
@@ -112,13 +112,13 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.inference.to_human_s).to eq("Integer")
+            expect(tv.infer.to_human_s).to eq("Integer")
           end
         end
       end
 
       describe If do
-        describe "#inference" do
+        describe "#infer" do
           # if true
           #   true
           # else
@@ -135,7 +135,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.inference.to_human_s).to eq("true | false")
+            expect(tv.infer.to_human_s).to eq("true | false")
           end
         end
       end
