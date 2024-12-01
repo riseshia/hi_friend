@@ -10,11 +10,12 @@ module HiFriend::Core
       name:,
       node:,
       path:,
-      singleton:
+      singleton:,
+      type: :method
     )
       id = build_id(receiver_name, name, singleton: singleton)
 
-      @method_by_id[id] ||= Method.new(
+      @method_by_id[id] ||= method_class(type).new(
         id: id,
         node: node,
         receiver_type: Type::Const.new(receiver_name),
@@ -25,6 +26,16 @@ module HiFriend::Core
       @methods_by_path[path] << method
 
       method
+    end
+
+    private def method_class(type)
+      case type
+      when :method then Method
+      when :attr_reader then AttrReader
+      when :attr_writer then AttrWriter
+      else
+        raise "Unknown method type: #{type}"
+      end
     end
 
     def remove_by_path(path)

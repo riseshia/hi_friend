@@ -81,4 +81,48 @@ module HiFriend::Core
       name
     end
   end
+
+  class AttrReader < Method
+    def name
+      @node.unescaped
+    end
+
+    def infer_arg_type(_)
+      raise "AttrReader does not have arguments"
+    end
+
+    def add_arg_type(_, _)
+      raise "AttrReader does not have arguments"
+    end
+
+    def add_return_type(type)
+      @return_type = type
+    end
+
+    def receiver_obj(const)
+      @receiver_obj = const
+    end
+ 
+    def infer_return_type
+      ivar_name = "@#{name}"
+      @receiver_obj.ivar_type_infer(ivar_name, {})
+    end
+
+    def add_arg_tv(arg_tv)
+      raise "AttrReader does not have arguments"
+    end
+
+    def add_return_tv(return_tv)
+      raise "AttrReader can't be added return tv"
+    end
+
+    def add_call_location_tv(call_tv)
+      @call_location_tvs << call_tv
+    end
+
+    def hover
+      # XXX: more information
+      name
+    end
+  end
 end

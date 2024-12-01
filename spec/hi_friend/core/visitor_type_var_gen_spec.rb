@@ -243,10 +243,13 @@ module HiFriend::Core
         end
 
         it "registers all" do
-          c, foo, bar = type_var_registry.all
+          foo = method_registry.find("C", "foo", visibility: :public, singleton: false)
+          bar = method_registry.find("C", "bar", visibility: :public, singleton: false)
 
-          expect(foo.name).to eq("@foo")
-          expect(bar.name).to eq("@bar")
+          expect(foo.name).to eq("foo")
+          expect(foo.infer_return_type.to_human_s).to eq("nil")
+          expect(bar.name).to eq("bar")
+          expect(bar.infer_return_type.to_human_s).to eq("nil")
         end
       end
 

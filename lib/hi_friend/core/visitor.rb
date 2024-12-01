@@ -310,24 +310,15 @@ module HiFriend::Core
         qualified_const_name = build_qualified_const_name([])
         const = @const_registry.find(qualified_const_name)
         node.arguments&.arguments&.each do |arg_node|
-          name = "@" + arg_node.unescaped
-
-          ivar_read_tv = TypeVariable::IvarRead.new(
-            path: @file_path,
-            name: name,
-            node: arg_node,
-          )
-          @type_var_registry.add(ivar_read_tv)
-          @node_registry.add(@file_path, ivar_read_tv)
-
           method_obj = @method_registry.add(
             receiver_name: qualified_const_name,
-            name: name,
+            name: arg_node.unescaped,
             node: arg_node,
             path: @file_path,
-            singleton: @in_singleton
+            singleton: @in_singleton,
+            type: :attr_reader,
           )
-          method_obj.add_return_tv(ivar_read_tv)
+          method_obj.receiver_obj(const)
         end
       else
         call_tv = find_or_create_tv(node)
