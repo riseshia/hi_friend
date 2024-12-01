@@ -69,7 +69,7 @@ module HiFriend::Core
         describe "#infer" do
           let(:tv) do
             described_class.new(path: "path", name: "a", node: nil).tap do |tv|
-              method_obj = Method.new(id: "method_id", receiver_type: Type::Const.new("Object"), node: nil)
+              method_obj = Method.new(id: "method_id", name: "a", receiver_type: Type::Const.new("Object"), node: nil)
               tv.add_method_obj(method_obj)
               method_obj.add_arg_tv(tv)
             end

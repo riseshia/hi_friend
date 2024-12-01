@@ -1,10 +1,11 @@
 module HiFriend::Core
   class MethodBase
-    attr_reader :id, :paths, :node, :receiver_type,
+    attr_reader :id, :paths, :name, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
 
-    def initialize(id:, receiver_type:, node:)
+    def initialize(id:, name:, receiver_type:, node:)
       @id = id
+      @name = name
       @paths = []
       @node = node
       @receiver_type = receiver_type
@@ -19,9 +20,6 @@ module HiFriend::Core
 
     def node_id = (@node_id ||= @node.node_id)
 
-    def name
-      raise NotImplementedError
-    end
 
     def add_path(path)
       @paths << path
@@ -73,10 +71,6 @@ module HiFriend::Core
     attr_reader :id, :paths, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
 
-    def name
-      @node.name
-    end
-
     def infer_arg_type(name)
       if @arg_types.key?(name)
         @arg_types[name]
@@ -104,10 +98,6 @@ module HiFriend::Core
   end
 
   class AttrReader < MethodBase
-    def name
-      @node.unescaped
-    end
-
     def infer_arg_type(_)
       raise "AttrReader does not have arguments"
     end
@@ -136,6 +126,46 @@ module HiFriend::Core
     def hover
       # XXX: more information
       name
+    end
+  end
+
+  class AttrWriter < MethodBase
+    def infer_arg_type(_)
+      guess_ivar_type
+    end
+
+    def add_arg_type(_, _)
+      # XXX: TBW
+      raise "AttrWriter does not accept argument type"
+    end
+
+    def receiver_obj(const)
+      @receiver_obj = const
+    end
+
+    def infer_return_type
+      guess_ivar_type
+    end
+
+    def add_arg_tv(arg_tv)
+      raise "AttrWriter does not accept argument tv"
+    end
+
+    def add_return_tv(return_tv)
+      raise "AttrWriter does not accept return tv"
+    end
+
+    def hover
+      # XXX: more information
+      name
+    end
+
+    private def guess_ivar_type
+      if @call_location_tvs.empty?
+        Type.nil
+      else
+        Type.union(@call_location_tvs.map(&:infer))
+      end
     end
   end
 end

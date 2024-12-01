@@ -17,6 +17,7 @@ module HiFriend::Core
 
       @method_by_id[id] ||= method_class(type).new(
         id: id,
+        name: name,
         node: node,
         receiver_type: Type::Const.new(receiver_name),
       )
