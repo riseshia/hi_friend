@@ -273,6 +273,32 @@ module HiFriend::Core
         end
       end
 
+      context "with attr_accessor" do
+        let(:code) do
+          <<~CODE
+            class C
+              attr_accessor :foo, "bar"
+            end
+          CODE
+        end
+
+        it "registers all" do
+          foo_read = method_registry.find("C", "foo", visibility: :public, singleton: false)
+          foo_write = method_registry.find("C", "foo=", visibility: :public, singleton: false)
+          bar_read = method_registry.find("C", "bar", visibility: :public, singleton: false)
+          bar_write = method_registry.find("C", "bar=", visibility: :public, singleton: false)
+
+          expect(foo_read.name).to eq("foo")
+          expect(foo_read.infer_return_type.to_human_s).to eq("nil")
+          expect(foo_write.name).to eq("foo=")
+          expect(foo_write.infer_return_type.to_human_s).to eq("nil")
+          expect(bar_read.name).to eq("bar")
+          expect(bar_read.infer_return_type.to_human_s).to eq("nil")
+          expect(bar_write.name).to eq("bar=")
+          expect(bar_write.infer_return_type.to_human_s).to eq("nil")
+        end
+      end
+
       context "with ivar return" do
         let(:code) do
           <<~CODE

@@ -321,10 +321,39 @@ module HiFriend::Core
           method_obj.receiver_obj(const)
         end
       when :attr_writer
-        # def {name} = @name
+        # def {name}=(name) = @name = name
         qualified_const_name = build_qualified_const_name([])
         const = @const_registry.find(qualified_const_name)
         node.arguments&.arguments&.each do |arg_node|
+          method_name = "#{arg_node.unescaped}="
+          method_obj = @method_registry.add(
+            receiver_name: qualified_const_name,
+            name: method_name,
+            node: arg_node,
+            path: @file_path,
+            singleton: @in_singleton,
+            type: :attr_writer,
+          )
+          method_obj.receiver_obj(const)
+        end
+      when :attr_accessor
+        # def {name} = @name
+        # def {name}=(name) = @name = name
+        qualified_const_name = build_qualified_const_name([])
+        const = @const_registry.find(qualified_const_name)
+        node.arguments&.arguments&.each do |arg_node|
+          # reader
+          method_obj = @method_registry.add(
+            receiver_name: qualified_const_name,
+            name: arg_node.unescaped,
+            node: arg_node,
+            path: @file_path,
+            singleton: @in_singleton,
+            type: :attr_writer,
+          )
+          method_obj.receiver_obj(const)
+
+          # writer
           method_name = "#{arg_node.unescaped}="
           method_obj = @method_registry.add(
             receiver_name: qualified_const_name,
