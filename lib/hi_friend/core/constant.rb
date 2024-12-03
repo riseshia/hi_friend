@@ -18,6 +18,11 @@ module HiFriend::Core
       @paths.delete_if { |path| path == given_path }
     end
 
+    def remove_ivar_ref_path(given_path)
+      @ivar_read_tvs.delete_if { |path| path == given_path }
+      @ivar_write_tvs.delete_if { |path| path == given_path }
+    end
+
     def dangling?
       @paths.empty?
     end

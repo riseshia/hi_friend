@@ -29,6 +29,10 @@ module HiFriend::Core
       @paths.delete_if { |path| path == given_path }
     end
 
+    def remove_caller_ref_path(given_path)
+      @call_location_tvs.delete_if { |path| path == given_path }
+    end
+
     def dangling?
       @paths.empty?
     end

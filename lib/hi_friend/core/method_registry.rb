@@ -41,11 +41,15 @@ module HiFriend::Core
 
     def remove_by_path(path)
       methods = @methods_by_path.delete(path)
-      return if methods.nil?
+      if methods
+        methods.each do |method|
+          method.remove_path(path)
+          @method_by_id.delete(method.id) if method.dangling?
+        end
+      end
 
-      methods.each do |method|
-        method.remove_path(path)
-        @method_by_id.delete(method.id) if method.dangling?
+      @method_by_id.values.each do |method|
+        method.remove_caller_ref_path(path)
       end
     end
 
