@@ -100,7 +100,6 @@ module HiFriend::LSP
           },
           executeCommandProvider: {
             commands: [
-              "hi_friend.createPrototypeRBS",
               "hi_friend.enableSignature",
               "hi_friend.disableSignature",
             ],
