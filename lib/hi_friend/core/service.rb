@@ -6,11 +6,17 @@ module HiFriend::Core
 
     def add_workspace(rb_folder)
       prefixs = ["/app", "/lib"] # XXX: to be deleted?
+      updated_file_paths = []
       prefixs.each do |prefix|
         Dir.glob(File.expand_path(rb_folder + prefix + "/**/*.rb")) do |path|
+          updated_file_paths << path
           HiFriend::Logger.info("add file #{path}")
           update_rb_file(path, nil)
         end
+      end
+      updated_file_paths.each do |path|
+        tvs = HiFriend::Core.type_variable_registry.find_by_path(path)
+        tvs.each(&:infer)
       end
     end
 
