@@ -11,16 +11,15 @@ module HiFriend::Core
         Dir.glob(File.expand_path(rb_folder + prefix + "/**/*.rb")) do |path|
           updated_file_paths << path
           HiFriend::Logger.info("add file #{path}")
-          update_rb_file(path, nil)
+          # delay update inference to do it at once after all files are added
+          update_rb_file(path, nil, update_inference: false)
         end
       end
-      updated_file_paths.each do |path|
-        tvs = HiFriend::Core.type_variable_registry.find_by_path(path)
-        tvs.each(&:infer)
-      end
+
+      update_inference(updated_file_paths)
     end
 
-    def update_rb_file(path, code)
+    def update_rb_file(path, code, update_inference: false)
       parse_result =
         if code
           Prism.parse(code)
@@ -42,9 +41,20 @@ module HiFriend::Core
       )
       # pp parse_result.value
       parse_result.value.accept(visitor)
+
+      if update_inference
+        update_inference([path])
+      end
     end
 
-    def remove_old_version(path)
+    private def update_inference(paths)
+      paths.each do |path|
+        tvs = HiFriend::Core.type_variable_registry.find_by_path(path)
+        tvs.each(&:infer)
+      end
+    end
+
+    private def remove_old_version(path)
       HiFriend::Core.const_registry.remove_by_path(path)
       HiFriend::Core.method_registry.remove_by_path(path)
       HiFriend::Core.type_variable_registry.remove_by_path(path)

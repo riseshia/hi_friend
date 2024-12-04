@@ -151,7 +151,7 @@ module HiFriend::LSP
 
       text = Text.new(path, text, version)
       @server.open_texts[uri] = text
-      @server.core.update_rb_file(text.path, text.string)
+      @server.core.update_rb_file(text.path, text.string, update_inference: true)
       @server.send_request("workspace/codeLens/refresh")
       publish_diagnostics(uri)
     end
