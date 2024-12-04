@@ -23,9 +23,13 @@ when "--lsp"
     raise
   end
 when "--test"
-  path = File.expand_path("./a.rb")
+  path = ARGV[1] || "./a.rb"
+  path = File.expand_path(path)
   core = HiFriend::Core::Service.new
-  core.update_rb_file(path, nil)
+  core.update_rb_file(path, nil, update_inference: true)
+when "--test-all"
+  core = HiFriend::Core::Service.new
+  core.add_workspace(".")
 else
   p ARGV
 end
