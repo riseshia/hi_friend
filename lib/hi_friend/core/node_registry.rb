@@ -5,11 +5,13 @@ module HiFriend::Core
     end
 
     def add(path, obj)
-      @objs_by_path[path][obj.node.node_id] = obj
+      id = build_id(path, obj.node.node_id)
+      @objs_by_path[path][id] = obj
     end
 
     def remove(path, node_id)
-      @objs_by_path[path].delete(node_id)
+      id = build_id(path, node_id)
+      @objs_by_path[path].delete(id)
     end
 
     def remove_by_path(path)
@@ -17,7 +19,8 @@ module HiFriend::Core
     end
 
     def find(path, node_id)
-      @objs_by_path[path][node_id]
+      id = build_id(path, node_id)
+      @objs_by_path[path][id]
     end
 
     # test purpose
@@ -27,6 +30,10 @@ module HiFriend::Core
 
     def clear
       @objs_by_path.clear
+    end
+
+    private def build_id(path, node_id)
+      "#{path}:#{node_id}"
     end
   end
 end

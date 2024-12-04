@@ -511,7 +511,7 @@ module HiFriend::Core
     end
 
     private def find_or_create_tv(node)
-      tv = @type_var_registry.find(node.node_id)
+      tv = @type_var_registry.find(@file_path, node.node_id)
       return tv if tv
 
       tv =

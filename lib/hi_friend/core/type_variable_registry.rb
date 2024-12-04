@@ -6,7 +6,8 @@ module HiFriend::Core
     end
 
     def add(var)
-      @tv_by_id[var.id] = var
+      id = build_id(var.path, var.id)
+      @tv_by_id[id] = var
       @tvs_by_path[var.path] << var
     end
 
@@ -15,13 +16,15 @@ module HiFriend::Core
 
       if tvs
         tvs.each do |tv|
-          @tv_by_id.delete(tv.id)
+          id = build_id(tv.path, tv.id)
+          @tv_by_id.delete(id)
         end
       end
     end
 
-    def find(node_id)
-      @tv_by_id[node_id]
+    def find(path, node_id)
+      id = build_id(path, node_id)
+      @tv_by_id[id]
     end
 
     def find_by_path(path)
@@ -39,6 +42,10 @@ module HiFriend::Core
 
     def clear
       @tv_by_id.clear
+    end
+
+    private def build_id(path, node_id)
+      "#{path}:#{node_id}"
     end
   end
 end
