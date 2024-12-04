@@ -45,6 +45,9 @@ module HiFriend::Core
       if update_inference
         update_inference([path])
       end
+    rescue RuntimeError => e
+      HiFriend::Logger.error("Failed to update file: #{path}")
+      HiFriend::Logger.error(e)
     end
 
     private def update_inference(paths)
