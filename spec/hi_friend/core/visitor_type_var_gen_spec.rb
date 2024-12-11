@@ -467,6 +467,44 @@ module HiFriend::Core
           expect(two.dependents).to eq([fixed_arr])
         end
       end
+
+      context "with break with no args" do
+        let(:code) do
+          <<~CODE
+            def foo
+              loop do
+                break if true
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          skip "we need to handle loop"
+          loop_call, if_cond, true0, break_node = type_var_registry.all
+
+          expect(loop_call.infer.to_human_s).to eq("nil")
+        end
+      end
+
+      context "with break with args" do
+        let(:code) do
+          <<~CODE
+            def foo
+              loop do
+                break 1, 2 if true
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          skip "we need to handle loop"
+          loop_call, if_cond, true0, break_node, one, two = type_var_registry.all
+
+          expect(loop_call.infer.to_human_s).to eq("1 | 2 | nil")
+        end
+      end
     end
   end
 end

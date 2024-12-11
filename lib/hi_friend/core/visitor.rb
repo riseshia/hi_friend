@@ -285,6 +285,17 @@ module HiFriend::Core
       @last_evaluated_tv = if_cond_tv
     end
 
+    def visit_break_node(node)
+      break_tv = find_or_create_tv(node)
+
+      node.arguments&.arguments&.each do |arg_node|
+        arg_tv = find_or_create_tv(arg_node)
+        break_tv.add_dependency(arg_tv)
+      end
+
+      @last_evaluated_tv = break_tv
+    end
+
     def visit_statements_node(node)
       @last_evaluated_tv_stack.push(@last_evaluated_tv)
       @last_evaluated_tv = nil
@@ -610,6 +621,12 @@ module HiFriend::Core
           TypeVariable::Static.new(
             path: @file_path,
             name: node.value.to_s,
+            node: node,
+          )
+        when Prism::BreakNode
+          TypeVariable::Break.new(
+            path: @file_path,
+            name: node.class.name,
             node: node,
           )
         when Prism::TrueNode, Prism::FalseNode, Prism::NilNode

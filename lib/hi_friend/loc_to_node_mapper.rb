@@ -20,7 +20,6 @@ module HiFriend
         else
           target_node
         end
-
       end
 
       WHITESPACE_REGEXP = /\s/

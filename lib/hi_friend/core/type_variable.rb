@@ -142,6 +142,18 @@ module HiFriend::Core
       end
     end
 
+    class Break < Base
+      def infer(constraints = {})
+        @inferred_type =
+          if @dependencies.empty?
+            Type.nil
+          else
+            el_types = @dependencies.map { _1.infer(constraints) }
+            Type.union(el_types)
+          end
+      end
+    end
+
     class Call < Base
       attr_reader :receiver_tv, :args, :scope
 
