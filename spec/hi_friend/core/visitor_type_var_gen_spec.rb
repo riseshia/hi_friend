@@ -468,6 +468,24 @@ module HiFriend::Core
         end
       end
 
+      context "with loop" do
+        let(:code) do
+          <<~CODE
+            def foo
+              loop do
+                1
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          loop_call, one = type_var_registry.all
+
+          expect(loop_call.infer.to_human_s).to eq("nil")
+        end
+      end
+
       context "with break with no args" do
         let(:code) do
           <<~CODE
