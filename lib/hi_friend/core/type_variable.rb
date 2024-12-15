@@ -182,15 +182,44 @@ module HiFriend::Core
       def infer(constraints = {})
         method_name = @name
 
-        receiver_type = @receiver_tv.infer({ received_methods: [method_name] })
+        method_visibility_scope = :public
+        receiver_type =
+          if @receiver_tv
+            @receiver_tv.infer({ received_methods: [method_name] })
+          else # receiver is self
+            method_visibility_scope = :private
+            const = HiFriend::Core.const_registry.find(@scope)
+
+            if const
+              Type.const(const.name)
+            else
+              # XXX: Someday this case should be removed.
+              #      It's a workaround for the case that builtin class.
+              Type.any
+            end
+          end
 
         @inferred_type =
           if receiver_type.is_a?(Type::Any)
             Type.any
-          else
-            method_obj = HiFriend::Core.method_registry.find(receiver_type.to_human_s, @name, visibility: :public)
+          elsif !receiver_type.is_a?(Type::Union)
+            method_obj = lookup_method(
+              const_registry: HiFriend::Core.const_registry,
+              method_registry: HiFriend::Core.method_registry,
+              const_name: receiver_type.to_human_s,
+              method_name: method_name,
+              visibility: method_visibility_scope,
+            )
             method_obj.infer_return_type
+          else
+            # XXX: Someday this case should be handled. such as A | B
+            Type.any
           end
+      end
+
+      private def lookup_method(const_registry:, method_registry:, const_name:, method_name:, visibility:)
+        # const_obj = const_registry.find(const_name)
+        method_registry.find(const_name, method_name, visibility: visibility)
       end
     end
 

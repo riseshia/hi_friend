@@ -390,7 +390,8 @@ module HiFriend::Core
         end
 
         qualified_const_name = build_qualified_const_name([])
-        call_tv.add_scope(qualified_const_name)
+        scope_const_name = qualified_const_name == "" ? "Object" : qualified_const_name
+        call_tv.add_scope(scope_const_name)
 
         super
 
