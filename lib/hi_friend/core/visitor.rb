@@ -381,12 +381,12 @@ module HiFriend::Core
 
         if node.receiver
           receiver_tv = find_or_create_tv(node.receiver)
-          call_tv.add_receiver(receiver_tv)
+          call_tv.add_receiver_tv(receiver_tv)
         end
 
         node.arguments&.arguments&.each do |arg|
           arg_tv = find_or_create_tv(arg)
-          call_tv.add_arg(arg_tv)
+          call_tv.add_arg_tv(arg_tv)
         end
 
         qualified_const_name = build_qualified_const_name([])

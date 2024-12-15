@@ -89,7 +89,7 @@ module HiFriend::Core
               one = integer_tv
               two = integer_tv
 
-              tv.add_receiver(one)
+              tv.add_receiver_tv(one)
               tv.add_dependency(two)
 
               node = double(Prism::CallNode, name: :+)

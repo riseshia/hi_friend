@@ -163,13 +163,13 @@ module HiFriend::Core
         @args = []
       end
 
-      def add_receiver(receiver_tv)
+      def add_receiver_tv(receiver_tv)
         @receiver_tv = receiver_tv
         @dependencies << receiver_tv
         receiver_tv.add_dependent(self)
       end
 
-      def add_arg(arg)
+      def add_arg_tv(arg)
         @args << arg
         @dependencies << arg
         arg.add_dependent(self)
