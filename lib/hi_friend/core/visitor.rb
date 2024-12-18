@@ -448,6 +448,15 @@ module HiFriend::Core
       @last_evaluated_tv = value_tv
     end
 
+    def visit_nil_node(node)
+      value_tv = find_or_create_tv(node)
+      value_tv.correct_type(Type.nil)
+
+      super
+
+      @last_evaluated_tv = value_tv
+    end
+
     private def extract_const_names(const_read_node_or_const_path_node)
       if const_read_node_or_const_path_node.is_a?(Prism::ConstantReadNode)
         [const_read_node_or_const_path_node.name]
