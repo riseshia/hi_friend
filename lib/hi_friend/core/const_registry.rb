@@ -33,6 +33,18 @@ module HiFriend::Core
       @const_by_name[const_name]
     end
 
+    def lookup(scope, const_name)
+      return find(const_name) if scope.empty?
+
+      tokens = scope.split("::")
+      tokens.size.downto(1) do |i|
+        prefix = tokens[0, i].join("::")
+        const = find("#{prefix}::#{const_name}")
+        return const if const
+      end
+      find(const_name)
+    end
+
     # test purpose
     def all_keys
       @const_by_name.keys
