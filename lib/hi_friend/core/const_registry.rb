@@ -5,8 +5,15 @@ module HiFriend::Core
       @consts_by_path = Hash.new { |h, k| h[k] = [] }
     end
 
-    def add(const_name, node, path)
-      @const_by_name[const_name] ||= Constant.new(const_name, node)
+    def add(const_name, node, path, type:)
+      @const_by_name[const_name] ||=
+        begin
+          if type == :var
+            ConstVariable.new(const_name, node)
+          else
+            ClassOrModule.new(const_name, node, type: type)
+          end
+        end
 
       const = @const_by_name[const_name]
       const.add_path(path)

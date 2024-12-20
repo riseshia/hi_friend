@@ -124,6 +124,23 @@ module HiFriend::Core
       end
     end
 
+    class ConstRead < Base
+      def set_const(const)
+        @candidates[0] = const
+      end
+
+      def infer(constraints = {})
+        const = @candidates.first
+
+        @inferred_type =
+          if const.is_a?(ClassOrModule)
+            Type.const(const.name)
+          else
+            const.infer(constraints)
+          end
+      end
+    end
+
     class Array < Base
       def infer(constraints = {})
         el_types = @dependencies.map { _1.infer(constraints) }

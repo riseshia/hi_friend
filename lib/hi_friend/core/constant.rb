@@ -1,13 +1,14 @@
 module HiFriend::Core
-  class Constant
-    attr_reader :name, :paths, :node
+  class ClassOrModule
+    attr_reader :name, :paths, :node, :type
 
-    def initialize(name, prism_node)
+    def initialize(name, prism_node, type:)
       @name = name
       @node = prism_node
       @paths = []
       @ivar_read_tvs = Hash.new { |h, k| h[k] = [] }
       @ivar_write_tvs = {}
+      @type = type
     end
 
     def add_path(path)
@@ -41,6 +42,44 @@ module HiFriend::Core
 
     def hover
       raise NotImplementedError
+    end
+  end
+
+  class ConstVariable
+    attr_reader :name, :paths, :node
+
+    def initialize(name, prism_node)
+      @name = name
+      @node = prism_node
+      @value_tv = nil
+      @paths = []
+    end
+
+    def add_path(path)
+      @paths << path
+    end
+
+    def remove_path(given_path)
+      @paths.delete_if { |path| path == given_path }
+    end
+
+    def dangling?
+      @paths.empty?
+    end
+
+    def hover
+      raise NotImplementedError
+    end
+
+    def set_value_tv(value_tv)
+      @value_tv = value_tv
+    end
+
+    def infer(constraints = {})
+      if @value_tv.nil?
+        raise "Value TV should be set before infer"
+      end
+      @value_tv.infer(constraints)
     end
   end
 end

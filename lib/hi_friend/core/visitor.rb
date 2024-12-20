@@ -29,7 +29,7 @@ module HiFriend::Core
     def visit_module_node(node)
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
-      @const_registry.add(qualified_const_name, node, @file_path)
+      @const_registry.add(qualified_const_name, node, @file_path, type: :module)
 
       in_scope(const_names) do
         super
@@ -39,7 +39,7 @@ module HiFriend::Core
     def visit_class_node(node)
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
-      @const_registry.add(qualified_const_name, node, @file_path)
+      @const_registry.add(qualified_const_name, node, @file_path, type: :class)
 
       in_scope(const_names) do
         super
@@ -50,15 +50,6 @@ module HiFriend::Core
       in_singleton do
         super
       end
-    end
-
-    def visit_constant_write_node(node)
-      # we need this some day
-      # const_names = extract_const_names(node.constant_path)
-      qualified_const_name = build_qualified_const_name([node.name])
-      @const_registry.add(qualified_const_name, node, @file_path)
-
-      super
     end
 
     def visit_def_node(node)
@@ -141,9 +132,28 @@ module HiFriend::Core
       super
     end
 
+    def visit_constant_write_node(node)
+      # we need this some day
+      qualified_const_name = build_qualified_const_name([node.name])
+      @const_registry.add(qualified_const_name, node, @file_path, type: :var)
+
+      super
+    end
+
     def visit_constant_read_node(node)
-      const_tv = find_or_create_tv(node)
-      const_tv.correct_type(Type.const(const_tv.name))
+      scope_name = build_qualified_const_name([])
+      const = @const_registry.lookup(scope_name, node.name.to_s)
+
+      if const.nil?
+        # XXX: Someday this case make diagnostic
+        raise "undefined constant: #{node.name} on scope #{scope_name}. It should be defined somewhere before."
+      end
+
+      # create tv without class/module def
+      if const.is_a?(ConstVariable) || const.node.constant_path != node
+        const_tv = find_or_create_tv(node)
+        const_tv.set_const(const)
+      end
 
       super
 
@@ -162,12 +172,7 @@ module HiFriend::Core
         end
       end
 
-      const_name =
-        if node.parent
-          build_qualified_const_name(const_names)
-        else
-          const_names.join("::")
-        end
+      const_name = const_names.join("::")
 
       const_tv = find_or_create_tv(node)
       const_tv.name = const_name
@@ -616,7 +621,7 @@ module HiFriend::Core
             node: node,
           )
         when Prism::ConstantReadNode
-          TypeVariable::Static.new(
+          TypeVariable::ConstRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,

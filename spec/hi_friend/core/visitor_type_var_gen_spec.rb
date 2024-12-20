@@ -169,22 +169,6 @@ module HiFriend::Core
         end
       end
 
-      context "with const return" do
-        let(:code) do
-          <<~CODE
-            def hoge
-              C
-            end
-          CODE
-        end
-
-        it "registers all" do
-          c = type_var_registry.all.first
-
-          expect(c.name).to eq("C")
-        end
-      end
-
       context "with absolute const path return" do
         let(:code) do
           <<~CODE
@@ -523,6 +507,44 @@ module HiFriend::Core
           loop_call, if_cond, true0, break_node, one, two = type_var_registry.all
 
           expect(loop_call.infer.to_human_s).to eq("1 | 2 | nil")
+        end
+      end
+
+      context "with const read" do
+        let(:code) do
+          <<~CODE
+            class C
+              def foo
+                C
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          ref_const = type_var_registry.all.first
+
+          expect(ref_const.infer.to_human_s).to eq("C")
+        end
+      end
+
+      context "with const path read" do
+        let(:code) do
+          <<~CODE
+            module A
+              class B
+                def foo
+                  A::B
+                end
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          ref_const = type_var_registry.all.first
+
+          expect(ref_const.infer.to_human_s).to eq("A::B")
         end
       end
     end
