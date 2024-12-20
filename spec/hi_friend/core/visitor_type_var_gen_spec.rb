@@ -172,9 +172,10 @@ module HiFriend::Core
       context "with absolute const path return" do
         let(:code) do
           <<~CODE
-            def hoge
-              ::C
+            module C
             end
+
+            def hoge = ::C
           CODE
         end
 
@@ -188,8 +189,12 @@ module HiFriend::Core
       context "with const path return" do
         let(:code) do
           <<~CODE
-            def hoge
-              C::D
+            module C
+              module D
+                def hoge
+                  C::D
+                end
+              end
             end
           CODE
         end
@@ -545,6 +550,34 @@ module HiFriend::Core
           ref_const = type_var_registry.all.first
 
           expect(ref_const.infer.to_human_s).to eq("A::B")
+        end
+      end
+
+      context "with absolute const path read" do
+        let(:code) do
+          <<~CODE
+            module A
+              module B
+                module A
+                  class B
+                    def foo = ::A
+                    def bar = A
+                    def baz = A::B
+                    def qux = ::A::B
+                  end
+                end
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          abs_const, rel_const0, rel_const1, rel_const2 = type_var_registry.all
+
+          expect(abs_const.infer.to_human_s).to eq("A")
+          expect(rel_const0.infer.to_human_s).to eq("A::B::A")
+          expect(rel_const1.infer.to_human_s).to eq("A::B::A::B")
+          expect(rel_const2.infer.to_human_s).to eq("A::B")
         end
       end
     end

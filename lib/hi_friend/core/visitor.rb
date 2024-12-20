@@ -171,12 +171,15 @@ module HiFriend::Core
           break
         end
       end
+      absolute_path = idx.is_a?(Prism::ConstantPathNode)
 
+      scope_name = absolute_path ? "" : build_qualified_const_name([])
       const_name = const_names.join("::")
+      const = @const_registry.lookup(scope_name, const_name)
 
       const_tv = find_or_create_tv(node)
-      const_tv.name = const_name
-      const_tv.correct_type(Type.const(const_name))
+      const_tv.name = const.name
+      const_tv.set_const(const)
 
       # Skip visit children to ignore it's sub constant read node
 
@@ -627,7 +630,7 @@ module HiFriend::Core
             node: node,
           )
         when Prism::ConstantPathNode
-          TypeVariable::Static.new(
+          TypeVariable::ConstRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
