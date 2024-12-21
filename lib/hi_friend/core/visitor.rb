@@ -420,6 +420,30 @@ module HiFriend::Core
       @last_evaluated_tv = arr_tv
     end
 
+    def visit_hash_node(node)
+      hash_tv = find_or_create_tv(node)
+
+      node.elements.each do |assoc|
+        key_tv = find_or_create_tv(assoc.key)
+        value_tv = find_or_create_tv(assoc.value)
+
+        hash_tv.add_kv(key_tv, value_tv)
+      end
+
+      super
+
+      @last_evaluated_tv = hash_tv
+    end
+
+    def visit_string_node(node)
+      value_tv = find_or_create_tv(node)
+      value_tv.correct_type(Type.string(node.unescaped))
+
+      super
+
+      @last_evaluated_tv = value_tv
+    end
+
     def visit_integer_node(node)
       value_tv = find_or_create_tv(node)
       value_tv.correct_type(Type.integer)
@@ -623,6 +647,12 @@ module HiFriend::Core
             name: node.class.name,
             node: node,
           )
+        when Prism::HashNode
+          TypeVariable::Hash.new(
+            path: @file_path,
+            name: node.class.name,
+            node: node,
+          )
         when Prism::ConstantReadNode
           TypeVariable::ConstRead.new(
             path: @file_path,
@@ -633,6 +663,12 @@ module HiFriend::Core
           TypeVariable::ConstRead.new(
             path: @file_path,
             name: node.name.to_s,
+            node: node,
+          )
+        when Prism::StringNode
+          TypeVariable::Static.new(
+            path: @file_path,
+            name: node.class.name,
             node: node,
           )
         when Prism::SymbolNode

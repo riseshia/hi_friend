@@ -580,6 +580,35 @@ module HiFriend::Core
           expect(rel_const2.infer.to_human_s).to eq("A::B")
         end
       end
+
+      context "with static hash" do
+        let(:code) do
+          <<~CODE
+            a = { foo: 1, "bar" => 2 }
+          CODE
+        end
+
+        it "registers all" do
+          a0, foo, one, bar, two = type_var_registry.all
+
+          expect(a0.infer.to_human_s).to eq('{ foo: Integer, "bar" => Integer }')
+        end
+      end
+
+      context "with hash which has variable as value" do
+        let(:code) do
+          <<~CODE
+            b = 1
+            a = { foo: b, "bar" => 2 }
+          CODE
+        end
+
+        it "registers all" do
+          b0, one, a0, foo, b1, bar, two = type_var_registry.all
+
+          expect(a0.infer.to_human_s).to eq('{ foo: Integer, "bar" => Integer }')
+        end
+      end
     end
   end
 end

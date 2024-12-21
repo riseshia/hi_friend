@@ -149,6 +149,27 @@ module HiFriend::Core
       end
     end
 
+    class Hash < Base
+      def initialize(path:, name:, node:)
+        super
+        @kvs = []
+      end
+
+      def infer(constraints = {})
+        kv_types = @kvs.map { |k, v| [k.infer(constraints), v.infer(constraints)] }
+
+        @inferred_type = Type.hash(kv_types)
+      end
+
+      def add_kv(k, v)
+        @kvs << [k, v]
+        @dependencies << k
+        @dependencies << v
+        k.add_dependent(self)
+        v.add_dependent(self)
+      end
+    end
+
     class Static < Base
       def correct_type(type)
         @candidates[0] = type
