@@ -177,6 +177,10 @@ module HiFriend::Core
       const_name = const_names.join("::")
       const = @const_registry.lookup(scope_name, const_name)
 
+      if const.nil?
+        const = @const_registry.add(scope_name, node, @file_path, type: :unknown)
+      end
+
       const_tv = find_or_create_tv(node)
       const_tv.name = const.name
       const_tv.set_const(const)

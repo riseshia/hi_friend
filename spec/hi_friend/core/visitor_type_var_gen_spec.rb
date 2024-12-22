@@ -581,6 +581,24 @@ module HiFriend::Core
         end
       end
 
+      context "with class which inherit unexist const" do
+        let(:code) do
+          <<~CODE
+            class C < A::B
+              def foo
+                1
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          one = type_var_registry.all.first
+
+          expect(one.infer.to_human_s).to eq("C")
+        end
+      end
+
       context "with static hash" do
         let(:code) do
           <<~CODE

@@ -19,6 +19,8 @@ module HiFriend::Core
       const.add_path(path)
 
       @consts_by_path[path] << const
+
+      const
     end
 
     def remove_by_path(path)
