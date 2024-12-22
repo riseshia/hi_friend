@@ -113,7 +113,7 @@ module HiFriend::Core
     def receiver_obj(const)
       @receiver_obj = const
     end
- 
+
     def infer_return_type
       ivar_name = "@#{name}"
       @receiver_obj.ivar_type_infer(ivar_name, {})
