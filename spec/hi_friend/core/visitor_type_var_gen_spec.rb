@@ -2,9 +2,9 @@
 
 module HiFriend::Core
   describe Visitor do
-    let(:const_registry) { ConstRegistry.new }
-    let(:method_registry) { MethodRegistry.new }
-    let(:type_var_registry) { TypeVariableRegistry.new }
+    let(:const_registry) { HiFriend::Core.const_registry }
+    let(:method_registry) { HiFriend::Core.method_registry }
+    let(:type_var_registry) { HiFriend::Core.type_variable_registry }
     let(:node_registry) { NodeRegistry.new }
     let(:visitor) do
       Visitor.new(
@@ -541,6 +541,26 @@ module HiFriend::Core
           b0, one, a0, foo, b1, bar, two = type_var_registry.all
 
           expect(a0.infer.to_human_s).to eq('{ foo: Integer, "bar" => Integer }')
+        end
+      end
+
+      context "with class method" do
+        let(:code) do
+          <<~CODE
+            class A
+              def self.hello = 1
+            end
+
+            a_class = A
+            b = a_class.hello
+          CODE
+        end
+
+        it "registers all" do
+          one, a_class0, const_a, b0, method_hello, a_class1 = type_var_registry.all
+
+          expect(a_class0.infer.to_human_s).to eq('singleton(A)')
+          expect(b0.infer.to_human_s).to eq("Integer")
         end
       end
     end

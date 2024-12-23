@@ -41,7 +41,7 @@ module HiFriend::Core
       raise NotImplementedError
     end
 
-    def infer_return_type
+    def infer_return_type(_constraints = {})
       raise NotImplementedError
     end
 
@@ -86,12 +86,12 @@ module HiFriend::Core
       end
     end
 
-    def infer_return_type
+    def infer_return_type(constraints = {})
       if @return_type
         @return_type
       else
-        # XXX: Try some guess with @return_tvs
-        Type.any
+        types = @return_tvs.map { |tv| tv.infer(constraints) }
+        Type.union(types)
       end
     end
 
@@ -114,7 +114,7 @@ module HiFriend::Core
       @receiver_obj = const
     end
 
-    def infer_return_type
+    def infer_return_type(constraints = {})
       ivar_name = "@#{name}"
       @receiver_obj.ivar_type_infer(ivar_name, {})
     end
@@ -147,7 +147,7 @@ module HiFriend::Core
       @receiver_obj = const
     end
 
-    def infer_return_type
+    def infer_return_type(constraints = {})
       guess_ivar_type
     end
 

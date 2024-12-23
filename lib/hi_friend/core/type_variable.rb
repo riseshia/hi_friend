@@ -244,20 +244,21 @@ module HiFriend::Core
             method_obj = lookup_method(
               const_registry: HiFriend::Core.const_registry,
               method_registry: HiFriend::Core.method_registry,
-              const_name: receiver_type.to_human_s,
+              const_name: receiver_type.name,
               method_name: method_name,
+              singleton: receiver_type.singleton?,
               visibility: method_visibility_scope,
             )
-            method_obj.infer_return_type
+            method_obj.infer_return_type(constraints)
           else
             # XXX: Someday this case should be handled. such as A | B
             Type.any
           end
       end
 
-      private def lookup_method(const_registry:, method_registry:, const_name:, method_name:, visibility:)
+      private def lookup_method(const_registry:, method_registry:, const_name:, method_name:, visibility:, singleton:)
         # const_obj = const_registry.find(const_name)
-        method_registry.find(const_name, method_name, visibility: visibility)
+        method_registry.find(const_name, method_name, visibility: visibility, singleton: singleton)
       end
     end
 

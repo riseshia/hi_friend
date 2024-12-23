@@ -136,6 +136,8 @@ module HiFriend::Core
         @singleton = singleton
       end
 
+      def name = @const_name
+
       def singleton? = @singleton
 
       def to_human_s
@@ -155,7 +157,7 @@ module HiFriend::Core
     def false = (@false ||= False.new)
     def integer = (@integer ||= Integer.new)
     def string(literal = nil) = String.new(literal)
-    def const(name, singleton) = Const.new(name, singleton: singleton)
+    def const(name, singleton:) = Const.new(name, singleton: singleton)
     def symbol(name) = Symbol.new(name)
     def array(el_type) = Array.new(el_type)
     def hash(kvs) = Hash.new(kvs)
