@@ -181,9 +181,11 @@ module HiFriend::Core
         const = @const_registry.add(scope_name, node, @file_path, type: :unknown)
       end
 
-      const_tv = find_or_create_tv(node)
-      const_tv.name = const.name
-      const_tv.set_const(const)
+      if const.is_a?(ConstVariable) || const.node.constant_path != node
+        const_tv = find_or_create_tv(node)
+        const_tv.name = const.name
+        const_tv.set_const(const)
+      end
 
       # Skip visit children to ignore it's sub constant read node
 

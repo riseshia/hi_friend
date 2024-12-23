@@ -599,6 +599,24 @@ module HiFriend::Core
         end
       end
 
+      context "with class with constant path" do
+        let(:code) do
+          <<~CODE
+            class A::B
+              def foo
+                1
+              end
+            end
+          CODE
+        end
+
+        it "registers all" do
+          one = type_var_registry.all.first
+
+          expect(one.infer.to_human_s).to eq("Integer")
+        end
+      end
+
       context "with static hash" do
         let(:code) do
           <<~CODE
