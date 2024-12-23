@@ -62,6 +62,7 @@ module HiFriend::Core
         node: node,
         path: @file_path,
         singleton: singleton,
+        visibility: :public, # XXX: pass current scope visibility
       )
       @node_registry.add(@file_path, method_obj)
 
@@ -342,6 +343,7 @@ module HiFriend::Core
             path: @file_path,
             singleton: @in_singleton,
             type: :attr_reader,
+            visibility: :public,
           )
           method_obj.receiver_obj(const)
         end
@@ -357,6 +359,7 @@ module HiFriend::Core
             node: arg_node,
             path: @file_path,
             singleton: @in_singleton,
+            visibility: :public,
             type: :attr_writer,
           )
           method_obj.receiver_obj(const)
@@ -374,6 +377,7 @@ module HiFriend::Core
             node: arg_node,
             path: @file_path,
             singleton: @in_singleton,
+            visibility: :public,
             type: :attr_writer,
           )
           method_obj.receiver_obj(const)
@@ -386,6 +390,7 @@ module HiFriend::Core
             node: arg_node,
             path: @file_path,
             singleton: @in_singleton,
+            visibility: :public,
             type: :attr_writer,
           )
           method_obj.receiver_obj(const)

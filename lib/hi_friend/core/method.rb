@@ -1,14 +1,15 @@
 module HiFriend::Core
   class MethodBase
-    attr_reader :id, :paths, :name, :node, :receiver_type,
+    attr_reader :id, :paths, :name, :node, :receiver_type, :visibility,
                 :arg_tvs, :return_tvs, :return_type
 
-    def initialize(id:, name:, receiver_type:, node:)
+    def initialize(id:, name:, receiver_type:, node:, visibility:)
       @id = id
       @name = name
       @paths = []
       @node = node
       @receiver_type = receiver_type
+      @visibility = visibility
 
       @arg_types = {}
       @return_type = nil
@@ -75,7 +76,7 @@ module HiFriend::Core
     attr_reader :id, :paths, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
 
-    def infer_arg_type(name)
+    def infer_arg_type(name, constraints = {})
       if @arg_types.key?(name)
         @arg_types[name]
       elsif @arg_tvs[name].dependencies.size > 0
@@ -116,7 +117,7 @@ module HiFriend::Core
 
     def infer_return_type(constraints = {})
       ivar_name = "@#{name}"
-      @receiver_obj.ivar_type_infer(ivar_name, {})
+      @receiver_obj.ivar_type_infer(ivar_name, constraints)
     end
 
     def add_arg_tv(arg_tv)

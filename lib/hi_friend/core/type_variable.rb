@@ -66,7 +66,7 @@ module HiFriend::Core
 
       def infer(constraints = {})
         # delegate to method_obj
-        @inferred_type = @method_obj.infer_arg_type(@name)
+        @inferred_type = @method_obj.infer_arg_type(@name, constraints)
       end
     end
 

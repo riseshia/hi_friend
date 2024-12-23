@@ -11,6 +11,7 @@ module HiFriend::Core
       node:,
       path:,
       singleton:,
+      visibility:,
       type: :method
     )
       id = build_id(receiver_name, name, singleton: singleton)
@@ -20,6 +21,7 @@ module HiFriend::Core
         name: name,
         node: node,
         receiver_type: Type.const(receiver_name, singleton: singleton),
+        visibility: visibility,
       )
       method = @method_by_id[id]
       method.add_path(path)
@@ -53,8 +55,17 @@ module HiFriend::Core
       end
     end
 
-    def find(const_name, method_name, visibility:, singleton: false)
+    def find(const_name, method_name, visibility: nil, singleton: false)
       id = build_id(const_name, method_name, singleton: singleton)
+
+      obj = @method_by_id[id]
+      return nil if obj.nil?
+      return nil if visibility && obj.visibility != visibility
+
+      obj
+    end
+
+    def find_by_id(id)
       @method_by_id[id]
     end
 
