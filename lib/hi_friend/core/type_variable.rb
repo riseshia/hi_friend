@@ -134,7 +134,7 @@ module HiFriend::Core
 
         @inferred_type =
           if const.is_a?(ClassOrModule)
-            Type.const(const.name)
+            Type.const(const.name, singleton: true)
           else
             const.infer(constraints)
           end
@@ -229,7 +229,7 @@ module HiFriend::Core
             const = HiFriend::Core.const_registry.find(@scope)
 
             if const
-              Type.const(const.name)
+              Type.const(const.name, singleton: false)
             else
               # XXX: Someday this case should be removed.
               #      It's a workaround for the case that builtin class.

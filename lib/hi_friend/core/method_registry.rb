@@ -19,7 +19,7 @@ module HiFriend::Core
         id: id,
         name: name,
         node: node,
-        receiver_type: Type::Const.new(receiver_name),
+        receiver_type: Type.const(receiver_name, singleton: singleton),
       )
       method = @method_by_id[id]
       method.add_path(path)

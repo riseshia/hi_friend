@@ -129,14 +129,21 @@ module HiFriend::Core
     end
 
     class Const < Base
-      def initialize(const_name)
+      def initialize(const_name, singleton: false)
         super()
 
         @const_name = const_name
+        @singleton = singleton
       end
 
+      def singleton? = @singleton
+
       def to_human_s
-        @const_name
+        if @singleton
+          "singleton(#{@const_name})"
+        else
+          @const_name
+        end
       end
     end
 
@@ -148,7 +155,7 @@ module HiFriend::Core
     def false = (@false ||= False.new)
     def integer = (@integer ||= Integer.new)
     def string(literal = nil) = String.new(literal)
-    def const(name) = Const.new(name)
+    def const(name, singleton) = Const.new(name, singleton: singleton)
     def symbol(name) = Symbol.new(name)
     def array(el_type) = Array.new(el_type)
     def hash(kvs) = Hash.new(kvs)
