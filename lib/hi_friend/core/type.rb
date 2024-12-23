@@ -10,6 +10,12 @@ module HiFriend::Core
       end
     end
 
+    class Void < Base
+      def to_human_s
+        "void"
+      end
+    end
+
     class Any < Base
       def to_human_s
         "any"
@@ -151,6 +157,7 @@ module HiFriend::Core
 
     module_function
 
+    def void = (@void ||= Void.new)
     def any = (@any ||= Any.new)
     def nil = (@nil ||= Nil.new)
     def true = (@true ||= True.new)
