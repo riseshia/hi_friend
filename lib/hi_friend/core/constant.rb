@@ -1,14 +1,14 @@
 module HiFriend::Core
   class ClassOrModule
-    attr_reader :name, :paths, :node, :type
+    attr_reader :name, :paths, :node, :kind
 
-    def initialize(name, prism_node, type:)
+    def initialize(name, prism_node, kind:)
       @name = name
       @node = prism_node
       @paths = []
       @ivar_read_tvs = Hash.new { |h, k| h[k] = [] }
       @ivar_write_tvs = {}
-      @type = type
+      @kind = kind
     end
 
     def add_path(path)
