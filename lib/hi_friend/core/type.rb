@@ -1,9 +1,15 @@
 module HiFriend::Core
   module Type
     class Base
+      def name
+        raise NotImplementedError
+      end
+
       def to_human_s
         raise NotImplementedError
       end
+
+      def singleton? = false
 
       def ==(other)
         self.class == other.class && self.to_human_s == other.to_human_s
@@ -11,39 +17,33 @@ module HiFriend::Core
     end
 
     class Void < Base
-      def to_human_s
-        "void"
-      end
+      def name = "void"
+      def to_human_s = "void"
     end
 
     class Any < Base
-      def to_human_s
-        "any"
-      end
+      def name = "any"
+      def to_human_s = "any"
     end
 
     class Nil < Base
-      def to_human_s
-        "nil"
-      end
+      def name = "nil"
+      def to_human_s = "nil"
     end
 
     class True < Base
-      def to_human_s
-        "true"
-      end
+      def name = "true"
+      def to_human_s = "true"
     end
 
     class False < Base
-      def to_human_s
-        "false"
-      end
+      def name = "false"
+      def to_human_s = "false"
     end
 
     class Integer < Base
-      def to_human_s
-        "Integer"
-      end
+      def name = "Integer"
+      def to_human_s = "Integer"
     end
 
     class String < Base
@@ -55,6 +55,8 @@ module HiFriend::Core
 
       def literal? = !!@literal
 
+      def name = "String"
+
       def to_human_s
         if @literal
           "\"#{@literal}\""
@@ -65,13 +67,13 @@ module HiFriend::Core
     end
 
     class Symbol < Base
-      attr_reader :name
-
       def initialize(name)
         super()
 
         @name = name
       end
+
+      def name = "Symbol"
 
       def to_human_s
         ":#{@name}"
@@ -86,6 +88,8 @@ module HiFriend::Core
         @element_types = element_types
       end
 
+      def name = @element_types.map(&:name).join(' | ')
+
       def to_human_s
         @element_types.map(&:to_human_s).join(' | ')
       end
@@ -97,6 +101,8 @@ module HiFriend::Core
         @element_type = element_type
       end
 
+      def name = "[#{@element_type.name}]"
+
       def to_human_s
         "[#{@element_type.to_human_s}]"
       end
@@ -106,6 +112,16 @@ module HiFriend::Core
       def initialize(kvs)
         super()
         @kvs = kvs
+      end
+
+      def name
+        keys = @kvs.map(&:first)
+        values = @kvs.map(&:last)
+
+        key = Type.union(keys)
+        value = Type.union(values)
+
+        "{ #{key.name} => #{value.name} }"
       end
 
       def to_human_s
