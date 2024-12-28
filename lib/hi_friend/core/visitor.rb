@@ -200,7 +200,6 @@ module HiFriend::Core
       lvar_def_ref = find_latest_lvar_tv(lvar_tv.name)
       if lvar_def_ref
         lvar_tv.add_dependency(lvar_def_ref)
-        lvar_def_ref.add_dependent(lvar_tv)
       else
         raise "undefined local variable: #{lvar_node.name}. It should be defined somewhere before."
       end
@@ -218,7 +217,6 @@ module HiFriend::Core
       value_tv = find_or_create_tv(value_node)
 
       lvar_tv.add_dependency(value_tv)
-      value_tv.add_dependent(lvar_tv)
 
       super
 
@@ -246,7 +244,6 @@ module HiFriend::Core
       value_tv = find_or_create_tv(value_node)
 
       ivar_write_tv.add_dependency(value_tv)
-      value_tv.add_dependent(ivar_write_tv)
 
       current_const_name = build_qualified_const_name([])
       const = @const_registry.find(current_const_name)
@@ -274,7 +271,6 @@ module HiFriend::Core
         if left_tvs.size == element_tvs.size
           left_tvs.zip(element_tvs).each do |left_tv, element_tv|
             left_tv.add_dependency(element_tv)
-            element_tv.add_dependent(left_tv)
           end
         else
           # XXX todo
@@ -319,7 +315,6 @@ module HiFriend::Core
 
       if in_if_cond?
         @current_if_cond_tv.add_dependency(@last_evaluated_tv)
-        @last_evaluated_tv.add_dependent(@current_if_cond_tv)
       else
         if in_method?
           @return_tvs.push(@last_evaluated_tv)

@@ -25,9 +25,10 @@ module HiFriend::Core
 
       def add_dependency(type_var)
         @dependencies << type_var
+        type_var.add_dependent(self)
       end
 
-      def add_dependent(type_var)
+      protected def add_dependent(type_var)
         @dependents << type_var
       end
 
