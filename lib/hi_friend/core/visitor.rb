@@ -455,6 +455,32 @@ module HiFriend::Core
       @last_evaluated_tv = value_tv
     end
 
+    def visit_interpoled_string_node(node)
+      value_tv = find_or_create_tv(node)
+
+      node.parts.each do |part_node|
+        part_tv = find_or_create_tv(part_node)
+        value_tv.add_dependency(part_tv)
+      end
+
+      super
+
+      @last_evaluated_tv = value_tv
+    end
+
+    def visit_embedded_statements_node(node)
+      value_tv = find_or_create_tv(node)
+
+      node.statements.body.each do |body_node|
+        body_tv = find_or_create_tv(body_node)
+        value_tv.add_dependency(body_tv)
+      end
+
+      super
+
+      @last_evaluated_tv = value_tv
+    end
+
     def visit_integer_node(node)
       value_tv = find_or_create_tv(node)
       value_tv.correct_type(Type.integer)
@@ -678,6 +704,18 @@ module HiFriend::Core
           )
         when Prism::StringNode
           TypeVariable::Static.new(
+            path: @file_path,
+            name: node.class.name,
+            node: node,
+          )
+        when Prism::InterpolatedStringNode
+          TypeVariable::InterpolatedString.new(
+            path: @file_path,
+            name: node.class.name,
+            node: node,
+          )
+        when Prism::EmbeddedStatementsNode
+          TypeVariable::EmbeddedStatements.new(
             path: @file_path,
             name: node.class.name,
             node: node,

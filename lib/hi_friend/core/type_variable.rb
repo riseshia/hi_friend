@@ -170,6 +170,23 @@ module HiFriend::Core
       end
     end
 
+    class InterpolatedString < Base
+      def infer(constraints = {})
+        @dependencies.each { _1.infer(constraints) }
+
+        # Return always string not to breake further inference
+        @inferred_type = Type.string
+      end
+    end
+
+    class EmbeddedStatements < Base
+      def infer(constraints = {})
+        @dependencies.each { _1.infer(constraints) }
+
+        @inferred_type = @dependencies.last.inferred_type
+      end
+    end
+
     class Static < Base
       def correct_type(type)
         @candidates[0] = type

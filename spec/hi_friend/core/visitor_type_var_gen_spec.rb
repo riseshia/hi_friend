@@ -563,6 +563,24 @@ module HiFriend::Core
           expect(b0.infer.to_human_s).to eq("Integer")
         end
       end
+
+      context "with string interpolation" do
+        let(:code) do
+          <<~CODE
+            a = "foo"
+            b = "bar\#{a}"
+          CODE
+        end
+
+        it "registers all" do
+          a0, foo, b0, itpl_str, bar, embedded, a1 = type_var_registry.all
+
+          expect(a0.infer.to_human_s).to eq('"foo"')
+          expect(b0.infer.to_human_s).to eq("String")
+          expect(embedded.infer.to_human_s).to eq('"foo"')
+          expect(itpl_str.infer.to_human_s).to eq("String")
+        end
+      end
     end
   end
 end
