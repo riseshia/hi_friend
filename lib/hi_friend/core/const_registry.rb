@@ -8,7 +8,7 @@ module HiFriend::Core
     def add(const_name, node, path, kind:)
       @const_by_name[const_name] ||=
         begin
-          if type == :var
+          if kind == :var
             ConstVariable.new(const_name, node)
           else
             ClassOrModule.new(const_name, node, kind: kind)
