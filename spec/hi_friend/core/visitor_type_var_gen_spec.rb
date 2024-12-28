@@ -17,6 +17,10 @@ module HiFriend::Core
     end
 
     before(:each) do
+      const_registry.clear
+      method_registry.clear
+      type_var_registry.clear
+      node_registry.clear
       parse_result = Prism.parse(code)
       parse_result.value.accept(visitor)
     end
