@@ -67,16 +67,16 @@ module HiFriend::Core
     end
 
     class Symbol < Base
-      def initialize(name)
+      def initialize(val)
         super()
 
-        @name = name
+        @val = val
       end
 
       def name = "Symbol"
 
       def to_human_s
-        ":#{@name}"
+        ":#{@val}"
       end
     end
 
@@ -128,7 +128,7 @@ module HiFriend::Core
         if fixed?
           kv_hs = @kvs.map do |k, v|
             if k.is_a?(Symbol)
-              "#{k.name}: #{v.to_human_s}"
+              "#{k.to_human_s.sub(':', '')}: #{v.to_human_s}"
             else
               "#{k.to_human_s} => #{v.to_human_s}"
             end
