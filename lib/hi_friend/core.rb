@@ -4,6 +4,7 @@ require_relative "core/constant"
 require_relative "core/method"
 require_relative "core/type"
 require_relative "core/type_variable"
+require_relative "core/global_env"
 
 require_relative "core/const_registry"
 require_relative "core/method_registry"

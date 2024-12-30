@@ -2,9 +2,12 @@ module HiFriend::Core
   class Service
     def initialize
       @code_ast_per_file = {}
+      @global_env = GlobalEnv.load!
     end
 
     def add_workspace(rb_folder)
+      load_global_env_to_registry
+
       prefixs = ["/app", "/lib"] # XXX: to be deleted?
       updated_file_paths = []
       prefixs.each do |prefix|
@@ -17,6 +20,24 @@ module HiFriend::Core
       end
 
       update_inference(updated_file_paths)
+    end
+
+    def load_global_env_to_registry
+      @global_env.consts.each do |const|
+        HiFriend::Core.const_registry.add(const.name, nil, const.path, kind: const.kind)
+      end
+
+      @global_env.methods.each do |method|
+        HiFriend::Core.method_registry.add(
+          receiver_name: method.receiver_name,
+          name: method.name,
+          node: nil,
+          path: method.path,
+          singleton: method.singleton,
+          visibility: method.visibility,
+          type: method.type,
+        )
+      end
     end
 
     def update_rb_file(path, code, update_inference: false)
