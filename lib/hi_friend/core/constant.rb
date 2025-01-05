@@ -2,13 +2,14 @@ module HiFriend::Core
   class ClassOrModule
     attr_reader :name, :paths, :node, :kind
 
-    def initialize(name, prism_node, kind:)
+    def initialize(name, prism_node, kind:, external: false)
       @name = name
       @node = prism_node
       @paths = []
       @ivar_read_tvs = Hash.new { |h, k| h[k] = [] }
       @ivar_write_tvs = {}
       @kind = kind
+      @external = external
     end
 
     def add_path(path)
@@ -26,6 +27,10 @@ module HiFriend::Core
 
     def dangling?
       @paths.empty?
+    end
+
+    def external?
+      @external
     end
 
     def add_ivar_read_tv(ivar_read_tv)
@@ -48,10 +53,12 @@ module HiFriend::Core
   class ConstVariable
     attr_reader :name, :paths, :node
 
-    def initialize(name, prism_node)
+    def initialize(name, prism_node, external: false)
       @name = name
       @node = prism_node
       @value_tv = nil
+      @value_type = nil
+      @external = external
       @paths = []
     end
 
@@ -67,8 +74,16 @@ module HiFriend::Core
       @paths.empty?
     end
 
+    def external?
+      @external
+    end
+
     def hover
       raise NotImplementedError
+    end
+
+    def set_value_type(value_type)
+      @value_type = value_type
     end
 
     def set_value_tv(value_tv)
@@ -76,6 +91,8 @@ module HiFriend::Core
     end
 
     def infer(constraints = {})
+      return @value_type if @value_type
+
       if @value_tv.nil?
         raise "Value TV should be set before infer"
       end
