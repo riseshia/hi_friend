@@ -4,7 +4,7 @@ module HiFriend::Core
   describe Service do
     let(:const_registry) { HiFriend::Core.const_registry }
     let(:method_registry) { HiFriend::Core.method_registry }
-    let(:type_var_registry) { HiFriend::Core.type_variable_registry }
+    let(:type_vertex_registry) { HiFriend::Core.type_vertex_registry }
     let(:service) do
       Service.new
     end
@@ -12,7 +12,7 @@ module HiFriend::Core
     before(:each) do
       HiFriend::Core.const_registry.clear
       HiFriend::Core.method_registry.clear
-      HiFriend::Core.type_variable_registry.clear
+      HiFriend::Core.type_vertex_registry.clear
     end
 
     describe "#update_rb_file" do
@@ -86,15 +86,15 @@ module HiFriend::Core
             CODE
           end
 
-          it "type_var_registry has consistency" do
+          it "type_vertex_registry has consistency" do
             service.update_rb_file("test_file.rb", code)
-            var_a, one = type_var_registry.all
+            var_a, one = type_vertex_registry.all
 
             expect(var_a.name).to eq("var_a")
             expect(one.name).to eq("1")
 
             service.update_rb_file("test_file.rb", new_code)
-            var_b, two = type_var_registry.all
+            var_b, two = type_vertex_registry.all
 
             expect(var_b.name).to eq("var_b")
             expect(two.name).to eq("2")

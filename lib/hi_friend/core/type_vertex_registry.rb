@@ -1,5 +1,5 @@
 module HiFriend::Core
-  class TypeVariableRegistry
+  class TypeVertexRegistry
     def initialize
       @tv_by_id = {}
       @tvs_by_path = Hash.new { |h, k| h[k] = [] }

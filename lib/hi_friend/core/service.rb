@@ -56,7 +56,7 @@ module HiFriend::Core
       visitor = Visitor.new(
         const_registry: HiFriend::Core.const_registry,
         method_registry: HiFriend::Core.method_registry,
-        type_var_registry: HiFriend::Core.type_variable_registry,
+        type_vertex_registry: HiFriend::Core.type_vertex_registry,
         node_registry: HiFriend::Core.node_registry,
         file_path: path,
       )
@@ -73,7 +73,7 @@ module HiFriend::Core
 
     private def update_inference(paths)
       paths.each do |path|
-        tvs = HiFriend::Core.type_variable_registry.find_by_path(path)
+        tvs = HiFriend::Core.type_vertex_registry.find_by_path(path)
         tvs.each(&:infer)
       end
     end
@@ -81,7 +81,7 @@ module HiFriend::Core
     private def remove_old_version(path)
       HiFriend::Core.const_registry.remove_by_path(path)
       HiFriend::Core.method_registry.remove_by_path(path)
-      HiFriend::Core.type_variable_registry.remove_by_path(path)
+      HiFriend::Core.type_vertex_registry.remove_by_path(path)
       HiFriend::Core.node_registry.remove_by_path(path)
     end
 

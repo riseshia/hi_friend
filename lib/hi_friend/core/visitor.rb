@@ -5,7 +5,7 @@ module HiFriend::Core
     def initialize(
       const_registry:,
       method_registry:,
-      type_var_registry:,
+      type_vertex_registry:,
       node_registry:,
       file_path:
     )
@@ -13,7 +13,7 @@ module HiFriend::Core
 
       @const_registry = const_registry
       @method_registry = method_registry
-      @type_var_registry = type_var_registry
+      @type_vertex_registry = type_vertex_registry
       @node_registry = node_registry
 
       @file_path = file_path
@@ -116,12 +116,12 @@ module HiFriend::Core
     def visit_return_node(node)
       if node.arguments.nil?
         # means return nil, so mimic it
-        tv = TypeVariable::Static.new(
+        tv = TypeVertex::Static.new(
           path: @file_path,
           name: "Prism::NilNode",
           node: node,
         )
-        @type_var_registry.add(tv)
+        @type_vertex_registry.add(tv)
         @node_registry.add(@file_path, tv)
       else
         node.arguments.arguments.each do |arg|
@@ -596,139 +596,139 @@ module HiFriend::Core
     end
 
     private def find_or_create_tv(node)
-      tv = @type_var_registry.find(@file_path, node.node_id)
+      tv = @type_vertex_registry.find(@file_path, node.node_id)
       return tv if tv
 
       tv =
         case node
         when Prism::RequiredParameterNode
-          TypeVariable::Arg.new(
+          TypeVertex::Arg.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::RequiredKeywordParameterNode
-          TypeVariable::Arg.new(
+          TypeVertex::Arg.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::OptionalParameterNode
-          TypeVariable::Arg.new(
+          TypeVertex::Arg.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::OptionalKeywordParameterNode
-          TypeVariable::Arg.new(
+          TypeVertex::Arg.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::LocalVariableReadNode
-          TypeVariable::LvarRead.new(
+          TypeVertex::LvarRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::LocalVariableWriteNode, Prism::LocalVariableTargetNode
-          TypeVariable::LvarWrite.new(
+          TypeVertex::LvarWrite.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::InstanceVariableReadNode
-          TypeVariable::IvarRead.new(
+          TypeVertex::IvarRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::InstanceVariableWriteNode
-          TypeVariable::IvarWrite.new(
+          TypeVertex::IvarWrite.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::CallNode
-          TypeVariable::Call.new(
+          TypeVertex::Call.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::IfNode
-          TypeVariable::If.new(
+          TypeVertex::If.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::ArrayNode
-          TypeVariable::Array.new(
+          TypeVertex::Array.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::IntegerNode
-          TypeVariable::Static.new(
+          TypeVertex::Static.new(
             path: @file_path,
             name: node.value.to_s,
             node: node,
           )
         when Prism::StringNode
-          TypeVariable::Static.new(
+          TypeVertex::Static.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::HashNode
-          TypeVariable::Hash.new(
+          TypeVertex::Hash.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::ConstantReadNode
-          TypeVariable::ConstRead.new(
+          TypeVertex::ConstRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::ConstantPathNode
-          TypeVariable::ConstRead.new(
+          TypeVertex::ConstRead.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::StringNode
-          TypeVariable::Static.new(
+          TypeVertex::Static.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::InterpolatedStringNode
-          TypeVariable::InterpolatedString.new(
+          TypeVertex::InterpolatedString.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::EmbeddedStatementsNode
-          TypeVariable::EmbeddedStatements.new(
+          TypeVertex::EmbeddedStatements.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::SymbolNode
-          TypeVariable::Static.new(
+          TypeVertex::Static.new(
             path: @file_path,
             name: node.value.to_s,
             node: node,
           )
         when Prism::BreakNode
-          TypeVariable::Break.new(
+          TypeVertex::Break.new(
             path: @file_path,
             name: node.class.name,
             node: node,
           )
         when Prism::TrueNode, Prism::FalseNode, Prism::NilNode
-          TypeVariable::Static.new(
+          TypeVertex::Static.new(
             path: @file_path,
             name: node.class.name,
             node: node,
@@ -738,7 +738,7 @@ module HiFriend::Core
           raise "unknown type variable node: #{node.class}"
         end
 
-      @type_var_registry.add(tv)
+      @type_vertex_registry.add(tv)
       @node_registry.add(@file_path, tv)
 
       tv

@@ -4,13 +4,13 @@ module HiFriend::Core
   describe Visitor do
     let(:const_registry) { ConstRegistry.new }
     let(:method_registry) { MethodRegistry.new }
-    let(:type_var_registry) { TypeVariableRegistry.new }
+    let(:type_vertex_registry) { TypeVertexRegistry.new }
     let(:node_registry) { NodeRegistry.new }
     let(:visitor) do
       Visitor.new(
         const_registry: const_registry,
         method_registry: method_registry,
-        type_var_registry: type_var_registry,
+        type_vertex_registry: type_vertex_registry,
         node_registry: node_registry,
         file_path: "sample/sample.rb",
       )

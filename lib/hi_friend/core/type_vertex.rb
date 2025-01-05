@@ -1,5 +1,5 @@
 module HiFriend::Core
-  module TypeVariable
+  module TypeVertex
     class Base
       attr_reader :node, :path, :stable,
                   :candidates, :dependencies, :dependents,

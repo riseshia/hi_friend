@@ -1,22 +1,22 @@
 # frozen_string_literal: true
 
 module HiFriend::Core
-  module TypeVariable
-    describe "TypeVariable" do
+  module TypeVertex
+    describe "TypeVertex" do
       def true_tv
-        TypeVariable::Static.new(path: "path", name: "Prism::TrueNode", node: nil).tap do |tv|
+        TypeVertex::Static.new(path: "path", name: "Prism::TrueNode", node: nil).tap do |tv|
           tv.correct_type(Type.true)
         end
       end
 
       def false_tv
-        TypeVariable::Static.new(path: "path", name: "Prism::FalseNode", node: nil).tap do |tv|
+        TypeVertex::Static.new(path: "path", name: "Prism::FalseNode", node: nil).tap do |tv|
           tv.correct_type(Type.false)
         end
       end
 
       def integer_tv
-        TypeVariable::Static.new(path: "path", name: "Prism::IntegerNode", node: nil).tap do |tv|
+        TypeVertex::Static.new(path: "path", name: "Prism::IntegerNode", node: nil).tap do |tv|
           tv.correct_type(Type.integer)
         end
       end

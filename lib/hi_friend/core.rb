@@ -3,14 +3,14 @@ require "prism"
 require_relative "core/constant"
 require_relative "core/method"
 require_relative "core/type"
-require_relative "core/type_variable"
+require_relative "core/type_vertex"
 require_relative "core/global_env"
 
 require_relative "core/const_registry"
 require_relative "core/method_registry"
 require_relative "core/node_registry"
 require_relative "core/service"
-require_relative "core/type_variable_registry"
+require_relative "core/type_vertex_registry"
 require_relative "core/visitor"
 
 module HiFriend::Core
@@ -24,8 +24,8 @@ module HiFriend::Core
     @method_registry ||= MethodRegistry.new
   end
 
-  def type_variable_registry
-    @type_variable_registry ||= TypeVariableRegistry.new
+  def type_vertex_registry
+    @type_vertex_registry ||= TypeVertexRegistry.new
   end
 
   def node_registry
@@ -35,14 +35,14 @@ module HiFriend::Core
   def create_visitor(
     const_registry:,
     method_registry:,
-    type_var_registry:,
+    type_vertex_registry:,
     node_registry:,
     file_path:
   )
     Visitor.new(
       const_registry: const_registry,
       method_registry: method_registry,
-      type_var_registry: type_var_registry,
+      type_vertex_registry: type_vertex_registry,
       node_registry: node_registry,
       file_path: file_path
     )
