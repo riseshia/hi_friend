@@ -47,6 +47,14 @@ module HiFriend
       it "convert instance to instance" do
         expect_type_equals("instance", Type.instance)
       end
+
+      it "convert singleton class to singleton class" do
+        expect_type_equals("singleton(String)", Type.const("String", singleton: true))
+      end
+
+      it "convert class to class" do
+        expect_type_equals("String", Type.const("String", singleton: false))
+      end
     end
   end
 end
