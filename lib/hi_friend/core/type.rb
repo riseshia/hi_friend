@@ -41,6 +41,11 @@ module HiFriend::Core
       def to_human_s = "false"
     end
 
+    class Bool < Base
+      def name = "bool"
+      def to_human_s = "bool"
+    end
+
     class Integer < Base
       def name = "Integer"
       def to_human_s = "Integer"
@@ -178,6 +183,7 @@ module HiFriend::Core
     def nil = (@nil ||= Nil.new)
     def true = (@true ||= True.new)
     def false = (@false ||= False.new)
+    def bool = (@bool ||= Bool.new)
     def integer = (@integer ||= Integer.new)
     def string(literal = nil) = String.new(literal)
     def const(name, singleton:) = Const.new(name, singleton: singleton)
@@ -201,11 +207,13 @@ module HiFriend::Core
         end
       end
 
-      if uniq_types.size == 1
-        uniq_types.first
-      else
-        Union.new(uniq_types)
+      return uniq_types.first if uniq_types.size == 1
+
+      if uniq_types.size == 2 && uniq_types.include?(Type.true) && uniq_types.include?(Type.false)
+        return Type.bool
       end
+
+      Union.new(uniq_types)
     end
   end
 end
