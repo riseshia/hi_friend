@@ -1,5 +1,7 @@
 require "rbs"
 
+require_relative "../rbs_type_converter"
+
 module HiFriend::Core
   class GlobalEnv
     class << self
@@ -81,8 +83,7 @@ module HiFriend::Core
     end
 
     private def convert_rbs_type_to_our_type(type)
-      name = type.to_s.sub("::", "")
-      Type.const(name, singleton: false)
+      HiFriend::RbsTypeConverter.convert(type)
     end
   end
 end

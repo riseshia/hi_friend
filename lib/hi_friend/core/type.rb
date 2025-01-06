@@ -26,6 +26,21 @@ module HiFriend::Core
       def to_human_s = "any"
     end
 
+    class Self < Base
+      def name = "self"
+      def to_human_s = "self"
+    end
+
+    class Class < Base
+      def name = "class"
+      def to_human_s = "class"
+    end
+
+    class Instance < Base
+      def name = "instance"
+      def to_human_s = "instance"
+    end
+
     class Nil < Base
       def name = "nil"
       def to_human_s = "nil"
@@ -180,6 +195,9 @@ module HiFriend::Core
 
     def void = (@void ||= Void.new)
     def any = (@any ||= Any.new)
+    def self0 = (@self0 ||= Self.new)
+    def class0 = (@class0 ||= Class.new)
+    def instance = (@class0 ||= Instance.new)
     def nil = (@nil ||= Nil.new)
     def true = (@true ||= True.new)
     def false = (@false ||= False.new)
