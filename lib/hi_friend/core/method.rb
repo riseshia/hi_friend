@@ -21,7 +21,6 @@ module HiFriend::Core
 
     def node_id = (@node_id ||= @node.node_id)
 
-
     def add_path(path)
       @paths << path
     end
@@ -54,15 +53,6 @@ module HiFriend::Core
       @return_type = type
     end
 
-    def add_arg_tv(arg_tv)
-      @arg_tvs[arg_tv.name] = arg_tv
-      arg_tv.add_method_obj(self)
-    end
-
-    def add_return_tv(return_tv)
-      @return_tvs << return_tv
-    end
-
     def add_call_location_tv(call_tv)
       @call_location_tvs << call_tv
     end
@@ -75,6 +65,15 @@ module HiFriend::Core
   class Method < MethodBase
     attr_reader :id, :paths, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
+
+    def add_arg_tv(arg_tv)
+      @arg_tvs[arg_tv.name] = arg_tv
+      arg_tv.add_method_obj(self)
+    end
+
+    def add_return_tv(return_tv)
+      @return_tvs << return_tv
+    end
 
     def infer_arg_type(name, constraints = {})
       if @arg_types.key?(name)
@@ -120,14 +119,6 @@ module HiFriend::Core
       @receiver_obj.ivar_type_infer(ivar_name, constraints)
     end
 
-    def add_arg_tv(arg_tv)
-      raise "AttrReader does not have arguments"
-    end
-
-    def add_return_tv(return_tv)
-      raise "AttrReader can't be added return tv"
-    end
-
     def hover
       # XXX: more information
       name
@@ -150,14 +141,6 @@ module HiFriend::Core
 
     def infer_return_type(constraints = {})
       guess_ivar_type
-    end
-
-    def add_arg_tv(arg_tv)
-      raise "AttrWriter does not accept argument tv"
-    end
-
-    def add_return_tv(return_tv)
-      raise "AttrWriter does not accept return tv"
     end
 
     def hover
