@@ -5,65 +5,65 @@ module HiFriend::Core
         raise NotImplementedError
       end
 
-      def to_human_s
+      def to_ts
         raise NotImplementedError
       end
 
       def singleton? = false
 
       def ==(other)
-        self.class == other.class && self.to_human_s == other.to_human_s
+        self.class == other.class && self.to_ts == other.to_ts
       end
     end
 
     class Void < Base
       def name = "void"
-      def to_human_s = "void"
+      def to_ts = "void"
     end
 
     class Any < Base
       def name = "any"
-      def to_human_s = "any"
+      def to_ts = "any"
     end
 
     class Self < Base
       def name = "self"
-      def to_human_s = "self"
+      def to_ts = "self"
     end
 
     class Class < Base
       def name = "class"
-      def to_human_s = "class"
+      def to_ts = "class"
     end
 
     class Instance < Base
       def name = "instance"
-      def to_human_s = "instance"
+      def to_ts = "instance"
     end
 
     class Nil < Base
       def name = "nil"
-      def to_human_s = "nil"
+      def to_ts = "nil"
     end
 
     class True < Base
       def name = "true"
-      def to_human_s = "true"
+      def to_ts = "true"
     end
 
     class False < Base
       def name = "false"
-      def to_human_s = "false"
+      def to_ts = "false"
     end
 
     class Bool < Base
       def name = "bool"
-      def to_human_s = "bool"
+      def to_ts = "bool"
     end
 
     class Integer < Base
       def name = "Integer"
-      def to_human_s = "Integer"
+      def to_ts = "Integer"
     end
 
     class String < Base
@@ -77,7 +77,7 @@ module HiFriend::Core
 
       def name = "String"
 
-      def to_human_s
+      def to_ts
         if @literal
           "\"#{@literal}\""
         else
@@ -95,7 +95,7 @@ module HiFriend::Core
 
       def name = "Symbol"
 
-      def to_human_s
+      def to_ts
         ":#{@val}"
       end
     end
@@ -110,8 +110,8 @@ module HiFriend::Core
 
       def name = @element_types.map(&:name).join(' | ')
 
-      def to_human_s
-        @element_types.map(&:to_human_s).join(' | ')
+      def to_ts
+        @element_types.map(&:to_ts).join(' | ')
       end
     end
 
@@ -123,8 +123,8 @@ module HiFriend::Core
 
       def name = "[#{@element_type.name}]"
 
-      def to_human_s
-        "[#{@element_type.to_human_s}]"
+      def to_ts
+        "[#{@element_type.to_ts}]"
       end
     end
 
@@ -144,13 +144,13 @@ module HiFriend::Core
         "{ #{key.name} => #{value.name} }"
       end
 
-      def to_human_s
+      def to_ts
         if fixed?
           kv_hs = @kvs.map do |k, v|
             if k.is_a?(Symbol)
-              "#{k.to_human_s.sub(':', '')}: #{v.to_human_s}"
+              "#{k.to_ts.sub(':', '')}: #{v.to_ts}"
             else
-              "#{k.to_human_s} => #{v.to_human_s}"
+              "#{k.to_ts} => #{v.to_ts}"
             end
           end
           "{ #{kv_hs.join(', ')} }"
@@ -161,7 +161,7 @@ module HiFriend::Core
           key = Type.union(keys)
           value = Type.union(values)
 
-          "{ #{key.to_human_s} => #{value.to_human_s} }"
+          "{ #{key.to_ts} => #{value.to_ts} }"
         end
       end
 
@@ -182,7 +182,7 @@ module HiFriend::Core
 
       def singleton? = @singleton
 
-      def to_human_s
+      def to_ts
         if @singleton
           "singleton(#{@const_name})"
         else

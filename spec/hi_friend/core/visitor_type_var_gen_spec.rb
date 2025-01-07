@@ -139,8 +139,8 @@ module HiFriend::Core
           expect(a1.dependents).to eq([gt])
           expect(one.dependents).to eq([gt])
           expect(true0.dependents).to eq([if_cond])
-          expect(true0.infer.to_human_s).to eq("true")
-          expect(false0.infer.to_human_s).to eq("false")
+          expect(true0.infer.to_ts).to eq("true")
+          expect(false0.infer.to_ts).to eq("false")
 
           method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([true0, false0])
@@ -222,7 +222,7 @@ module HiFriend::Core
         it "registers all" do
           c = type_vertex_registry.all.first
 
-          expect(c.infer.to_human_s).to eq(":hoge")
+          expect(c.infer.to_ts).to eq(":hoge")
         end
       end
 
@@ -240,9 +240,9 @@ module HiFriend::Core
           bar = method_registry.find("C", "bar", visibility: :public, singleton: false)
 
           expect(foo.name).to eq("foo")
-          expect(foo.infer_return_type.to_human_s).to eq("nil")
+          expect(foo.infer_return_type.to_ts).to eq("nil")
           expect(bar.name).to eq("bar")
-          expect(bar.infer_return_type.to_human_s).to eq("nil")
+          expect(bar.infer_return_type.to_ts).to eq("nil")
         end
       end
 
@@ -260,9 +260,9 @@ module HiFriend::Core
           bar = method_registry.find("C", "bar=", visibility: :public, singleton: false)
 
           expect(foo.name).to eq("foo=")
-          expect(foo.infer_return_type.to_human_s).to eq("nil")
+          expect(foo.infer_return_type.to_ts).to eq("nil")
           expect(bar.name).to eq("bar=")
-          expect(bar.infer_return_type.to_human_s).to eq("nil")
+          expect(bar.infer_return_type.to_ts).to eq("nil")
         end
       end
 
@@ -282,13 +282,13 @@ module HiFriend::Core
           bar_write = method_registry.find("C", "bar=", visibility: :public, singleton: false)
 
           expect(foo_read.name).to eq("foo")
-          expect(foo_read.infer_return_type.to_human_s).to eq("nil")
+          expect(foo_read.infer_return_type.to_ts).to eq("nil")
           expect(foo_write.name).to eq("foo=")
-          expect(foo_write.infer_return_type.to_human_s).to eq("nil")
+          expect(foo_write.infer_return_type.to_ts).to eq("nil")
           expect(bar_read.name).to eq("bar")
-          expect(bar_read.infer_return_type.to_human_s).to eq("nil")
+          expect(bar_read.infer_return_type.to_ts).to eq("nil")
           expect(bar_write.name).to eq("bar=")
-          expect(bar_write.infer_return_type.to_human_s).to eq("nil")
+          expect(bar_write.infer_return_type.to_ts).to eq("nil")
         end
       end
 
@@ -307,7 +307,7 @@ module HiFriend::Core
           c = type_vertex_registry.all.last
 
           expect(c.name).to eq("@foo")
-          expect(c.infer.to_human_s).to eq("nil")
+          expect(c.infer.to_ts).to eq("nil")
         end
       end
 
@@ -326,7 +326,7 @@ module HiFriend::Core
           foo, one = type_vertex_registry.all.last(2)
 
           expect(foo.name).to eq("@foo")
-          expect(foo.infer.to_human_s).to eq("Integer")
+          expect(foo.infer.to_ts).to eq("Integer")
         end
       end
 
@@ -349,7 +349,7 @@ module HiFriend::Core
           foo0, one, foo1 = type_vertex_registry.all.last(3)
 
           expect(foo1.name).to eq("@foo")
-          expect(foo1.infer.to_human_s).to eq("Integer")
+          expect(foo1.infer.to_ts).to eq("Integer")
         end
       end
 
@@ -364,7 +364,7 @@ module HiFriend::Core
           arr_var, arr, one, two = type_vertex_registry.all
 
           expect(arr.name).to eq("Prism::ArrayNode")
-          expect(arr.infer.to_human_s).to eq("[Integer]")
+          expect(arr.infer.to_ts).to eq("[Integer]")
         end
       end
 
@@ -380,7 +380,7 @@ module HiFriend::Core
         it "registers all" do
           a0, b0, one, plus, a1, a2 = type_vertex_registry.all
 
-          expect(b0.infer.to_human_s).to eq("Integer")
+          expect(b0.infer.to_ts).to eq("Integer")
         end
       end
 
@@ -396,7 +396,7 @@ module HiFriend::Core
         it "registers all" do
           a0, b0, plus, a1, a2 = type_vertex_registry.all
 
-          expect(b0.infer.to_human_s).to eq("any")
+          expect(b0.infer.to_ts).to eq("any")
         end
       end
 
@@ -412,7 +412,7 @@ module HiFriend::Core
         it "registers all" do
           a0, b0, one, plus, a1, a2 = type_vertex_registry.all
 
-          expect(b0.infer.to_human_s).to eq("Integer")
+          expect(b0.infer.to_ts).to eq("Integer")
         end
       end
 
@@ -430,9 +430,9 @@ module HiFriend::Core
 
           expect(a0.dependencies).to eq([one])
           expect(b0.dependencies).to eq([two])
-          expect(a0.infer.to_human_s).to eq("Integer")
-          expect(b0.infer.to_human_s).to eq("Integer")
-          expect(array.infer.to_human_s).to eq("[Integer]")
+          expect(a0.infer.to_ts).to eq("Integer")
+          expect(b0.infer.to_ts).to eq("Integer")
+          expect(array.infer.to_ts).to eq("[Integer]")
         end
       end
 
@@ -477,7 +477,7 @@ module HiFriend::Core
 
           loop_call, one = type_vertex_registry.all
 
-          expect(loop_call.infer.to_human_s).to eq("nil")
+          expect(loop_call.infer.to_ts).to eq("nil")
         end
       end
 
@@ -496,7 +496,7 @@ module HiFriend::Core
           skip "we need to handle loop"
           loop_call, if_cond, true0, break_node = type_vertex_registry.all
 
-          expect(loop_call.infer.to_human_s).to eq("nil")
+          expect(loop_call.infer.to_ts).to eq("nil")
         end
       end
 
@@ -515,7 +515,7 @@ module HiFriend::Core
           skip "we need to handle loop"
           loop_call, if_cond, true0, break_node, one, two = type_vertex_registry.all
 
-          expect(loop_call.infer.to_human_s).to eq("1 | 2 | nil")
+          expect(loop_call.infer.to_ts).to eq("1 | 2 | nil")
         end
       end
 
@@ -529,7 +529,7 @@ module HiFriend::Core
         it "registers all" do
           a0, foo, one, bar, two = type_vertex_registry.all
 
-          expect(a0.infer.to_human_s).to eq('{ foo: Integer, "bar" => Integer }')
+          expect(a0.infer.to_ts).to eq('{ foo: Integer, "bar" => Integer }')
         end
       end
 
@@ -544,7 +544,7 @@ module HiFriend::Core
         it "registers all" do
           b0, one, a0, foo, b1, bar, two = type_vertex_registry.all
 
-          expect(a0.infer.to_human_s).to eq('{ foo: Integer, "bar" => Integer }')
+          expect(a0.infer.to_ts).to eq('{ foo: Integer, "bar" => Integer }')
         end
       end
 
@@ -563,8 +563,8 @@ module HiFriend::Core
         it "registers all" do
           one, a_class0, const_a, b0, method_hello, a_class1 = type_vertex_registry.all
 
-          expect(a_class0.infer.to_human_s).to eq('singleton(A)')
-          expect(b0.infer.to_human_s).to eq("Integer")
+          expect(a_class0.infer.to_ts).to eq('singleton(A)')
+          expect(b0.infer.to_ts).to eq("Integer")
         end
       end
 
@@ -579,10 +579,10 @@ module HiFriend::Core
         it "registers all" do
           a0, foo, b0, itpl_str, bar, embedded, a1 = type_vertex_registry.all
 
-          expect(a0.infer.to_human_s).to eq('"foo"')
-          expect(b0.infer.to_human_s).to eq("String")
-          expect(embedded.infer.to_human_s).to eq('"foo"')
-          expect(itpl_str.infer.to_human_s).to eq("String")
+          expect(a0.infer.to_ts).to eq('"foo"')
+          expect(b0.infer.to_ts).to eq("String")
+          expect(embedded.infer.to_ts).to eq('"foo"')
+          expect(itpl_str.infer.to_ts).to eq("String")
         end
       end
     end

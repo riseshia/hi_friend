@@ -30,7 +30,7 @@ module HiFriend::Core
           end
 
           it "return only one type" do
-            expect(tv.infer.to_human_s).to eq("true")
+            expect(tv.infer.to_ts).to eq("true")
           end
         end
       end
@@ -44,7 +44,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.infer.to_human_s).to eq("true")
+            expect(tv.infer.to_ts).to eq("true")
           end
         end
       end
@@ -60,7 +60,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.infer.to_human_s).to eq("true")
+            expect(tv.infer.to_ts).to eq("true")
           end
         end
       end
@@ -76,7 +76,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.infer.to_human_s).to eq("any")
+            expect(tv.infer.to_ts).to eq("any")
           end
         end
       end
@@ -113,7 +113,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.infer.to_human_s).to eq("Integer")
+            expect(tv.infer.to_ts).to eq("Integer")
           end
         end
       end
@@ -136,7 +136,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.infer.to_human_s).to eq("bool")
+            expect(tv.infer.to_ts).to eq("bool")
           end
         end
       end

@@ -37,7 +37,7 @@ module HiFriend::Core
       end
 
       def hover
-        @inferred_type.to_human_s
+        @inferred_type.to_ts
       end
 
       def guess_const_by_received_methods(method_names)

@@ -14,7 +14,7 @@ module HiFriend::Core
         end
 
         it "return true | nil" do
-          expect(result.to_human_s).to eq("true | nil")
+          expect(result.to_ts).to eq("true | nil")
         end
       end
 
@@ -28,7 +28,7 @@ module HiFriend::Core
         end
 
         it "return true | nil" do
-          expect(result.to_human_s).to eq("true | nil")
+          expect(result.to_ts).to eq("true | nil")
         end
       end
 
@@ -54,7 +54,7 @@ module HiFriend::Core
         end
 
         it "return true" do
-          expect(result.to_human_s).to eq("true | Integer | nil")
+          expect(result.to_ts).to eq("true | Integer | nil")
         end
       end
 
@@ -67,7 +67,7 @@ module HiFriend::Core
         end
 
         it "return true" do
-          expect(result.to_human_s).to eq("true | nil")
+          expect(result.to_ts).to eq("true | nil")
         end
       end
 
@@ -80,7 +80,7 @@ module HiFriend::Core
         end
 
         it "return bool" do
-          expect(result.to_human_s).to eq("bool")
+          expect(result.to_ts).to eq("bool")
         end
       end
     end

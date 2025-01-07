@@ -48,7 +48,7 @@ module HiFriend::Core
       it "registers all" do
         ref_const = type_vertex_registry.all.first
 
-        expect(ref_const.infer.to_human_s).to eq("singleton(C)")
+        expect(ref_const.infer.to_ts).to eq("singleton(C)")
       end
     end
 
@@ -68,7 +68,7 @@ module HiFriend::Core
       it "registers all" do
         ref_const = type_vertex_registry.all.first
 
-        expect(ref_const.infer.to_human_s).to eq("singleton(A::B)")
+        expect(ref_const.infer.to_ts).to eq("singleton(A::B)")
       end
     end
 
@@ -93,10 +93,10 @@ module HiFriend::Core
       it "registers all" do
         abs_const, rel_const0, rel_const1, rel_const2 = type_vertex_registry.all
 
-        expect(abs_const.infer.to_human_s).to eq("singleton(A)")
-        expect(rel_const0.infer.to_human_s).to eq("singleton(A::B::A)")
-        expect(rel_const1.infer.to_human_s).to eq("singleton(A::B::A::B)")
-        expect(rel_const2.infer.to_human_s).to eq("singleton(A::B)")
+        expect(abs_const.infer.to_ts).to eq("singleton(A)")
+        expect(rel_const0.infer.to_ts).to eq("singleton(A::B::A)")
+        expect(rel_const1.infer.to_ts).to eq("singleton(A::B::A::B)")
+        expect(rel_const2.infer.to_ts).to eq("singleton(A::B)")
       end
     end
 
@@ -114,7 +114,7 @@ module HiFriend::Core
       it "registers all" do
         one = type_vertex_registry.all.first
 
-        expect(one.infer.to_human_s).to eq("singleton(C)")
+        expect(one.infer.to_ts).to eq("singleton(C)")
       end
     end
 
@@ -132,7 +132,7 @@ module HiFriend::Core
       it "registers all" do
         one = type_vertex_registry.all.first
 
-        expect(one.infer.to_human_s).to eq("Integer")
+        expect(one.infer.to_ts).to eq("Integer")
       end
     end
   end
