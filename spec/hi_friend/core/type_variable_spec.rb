@@ -136,7 +136,7 @@ module HiFriend::Core
           end
 
           it "return right hand value" do
-            expect(tv.infer.to_human_s).to eq("true | false")
+            expect(tv.infer.to_human_s).to eq("bool")
           end
         end
       end
