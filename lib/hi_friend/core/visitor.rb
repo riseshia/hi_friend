@@ -72,12 +72,12 @@ module HiFriend::Core
     end
 
     def visit_required_parameter_node(node)
-      tv = find_or_create_tv(node)
-      @current_method_obj.add_arg_tv(tv)
+      arg_tv = find_or_create_tv(node)
+      @current_method_obj.add_arg_tv(arg_tv)
 
       super
 
-      @lvars.push(tv)
+      @lvars.push(arg_tv)
     end
 
     def visit_optional_parameter_node(node)
@@ -93,24 +93,24 @@ module HiFriend::Core
     end
 
     def visit_required_keyword_parameter_node(node)
-      tv = find_or_create_tv(node)
-      @current_method_obj.add_arg_tv(tv)
+      kwarg_tv = find_or_create_tv(node)
+      @current_method_obj.add_kwarg_tv(kwarg_tv)
 
       super
 
-      @lvars.push(tv)
+      @lvars.push(kwarg_tv)
     end
 
     def visit_optional_keyword_parameter_node(node)
-      tv = find_or_create_tv(node)
-      @current_method_obj.add_arg_tv(tv)
+      kwarg_tv = find_or_create_tv(node)
+      @current_method_obj.add_kwarg_tv(kwarg_tv)
 
       value_tv = find_or_create_tv(node.value)
-      tv.add_dependency(value_tv)
+      kwarg_tv.add_dependency(value_tv)
 
       super
 
-      @lvars.push(tv)
+      @lvars.push(kwarg_tv)
     end
 
     def visit_return_node(node)
@@ -195,18 +195,18 @@ module HiFriend::Core
 
     def visit_local_variable_read_node(node)
       lvar_node = node
-      lvar_tv = find_or_create_tv(lvar_node)
+      lvar_read_tv = find_or_create_tv(lvar_node)
 
-      lvar_def_ref = find_latest_lvar_tv(lvar_tv.name)
-      if lvar_def_ref
-        lvar_tv.add_dependency(lvar_def_ref)
+      lvar_decl_tv = find_latest_lvar_tv(lvar_read_tv.name)
+      if lvar_decl_tv
+        lvar_read_tv.add_dependency(lvar_decl_tv)
       else
         raise "undefined local variable: #{lvar_node.name}. It should be defined somewhere before."
       end
 
       super
 
-      @last_evaluated_tv = lvar_tv
+      @last_evaluated_tv = lvar_read_tv
     end
 
     def visit_local_variable_write_node(node)

@@ -65,6 +65,10 @@ module HiFriend::Core
         @method_obj = method_obj
       end
 
+      def order(order)
+        @order = order
+      end
+
       def infer(constraints = {})
         # delegate to method_obj
         @inferred_type = @method_obj.infer_arg_type(@name, constraints)

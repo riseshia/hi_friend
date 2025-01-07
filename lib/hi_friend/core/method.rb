@@ -14,7 +14,7 @@ module HiFriend::Core
       @arg_types = {}
       @return_type = nil
 
-      @arg_tvs = {}
+      @arg_tvs = []
       @return_tvs = []
       @call_location_tvs = []
     end
@@ -66,24 +66,53 @@ module HiFriend::Core
     attr_reader :id, :paths, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
 
+    def initialize(id:, name:, receiver_type:, node:, visibility:)
+      super
+      @kwarg_tvs = {}
+    end
+
     def add_arg_tv(arg_tv)
-      @arg_tvs[arg_tv.name] = arg_tv
+      @arg_tvs << arg_tv
       arg_tv.add_method_obj(self)
+      arg_tv.order(@arg_tvs.size - 1)
+    end
+
+    def add_kwarg_tv(kwarg_tv)
+      @kwarg_tvs[kwarg_tv.name] = kwarg_tv
+      kwarg_tv.add_method_obj(self)
     end
 
     def add_return_tv(return_tv)
       @return_tvs << return_tv
     end
 
+    private def arg_type_by_name(name)
+      @arg_tvs.find { |tv| tv.name == name } || @kwarg_tvs[name]
+    end
+
     def infer_arg_type(name, constraints = {})
-      if @arg_types.key?(name)
-        @arg_types[name]
-      elsif @arg_tvs[name].dependencies.size > 0
-        # has default value
-        Type.union(@arg_tvs[name].dependencies.map(&:infer))
-      else
-        Type.any
+      # use type declaration if exists
+      return @arg_types[name] if @arg_types.key?(name)
+
+      arg_tv = arg_type_by_name(name)
+
+      # use inferred type if default value type could be inferred
+      inferred_types_by_default_value = arg_tv.dependencies.map(&:infer)
+      if inferred_types_by_default_value.size > 0
+        inferred_type_by_default_value = Type.union(inferred_types_by_default_value)
+        if !inferred_type_by_default_value.is_a?(Type::Any)
+          return inferred_type_by_default_value
+        end
       end
+
+      # use inferred type from constraints
+      # XXX: TBW
+      # inferred_type_by_def = Type.union(arg_tv.dependents.map(&:infer))
+      # return inferred_type_by_def unless inferred_type_by_def.is_a?(Type::Any)
+
+      # try to infer from arguments from call location
+      # XXX: TBW
+      Type.any
     end
 
     def infer_return_type(constraints = {})
