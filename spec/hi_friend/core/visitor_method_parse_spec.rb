@@ -29,7 +29,7 @@ module HiFriend::Core
       end
 
       it "registers method" do
-        expect(method_registry.find("", "hello", visibility: :public, singleton: false)).not_to be_nil
+        expect(method_registry.find("Object", "hello", visibility: :public, singleton: false)).not_to be_nil
       end
     end
 

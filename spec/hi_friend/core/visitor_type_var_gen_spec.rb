@@ -43,7 +43,7 @@ module HiFriend::Core
           expect(a.dependencies).to eq([one])
           expect(one.dependents).to eq([a])
 
-          method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
+          method_obj = method_registry.find("Object", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([a])
         end
       end
@@ -66,7 +66,7 @@ module HiFriend::Core
           expect(a1.dependencies).to eq([two])
           expect(two.dependents).to eq([a1])
 
-          method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
+          method_obj = method_registry.find("Object", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([a1])
         end
       end
@@ -94,7 +94,7 @@ module HiFriend::Core
           expect(a2.dependents).to eq([plus])
           expect(two.dependents).to eq([plus])
 
-          method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
+          method_obj = method_registry.find("Object", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([a1])
         end
       end
@@ -115,7 +115,7 @@ module HiFriend::Core
           expect(a0.dependents).to eq([plus])
           expect(one.dependents).to eq([plus])
 
-          method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
+          method_obj = method_registry.find("Object", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([plus])
         end
       end
@@ -142,7 +142,7 @@ module HiFriend::Core
           expect(true0.infer.to_ts).to eq("true")
           expect(false0.infer.to_ts).to eq("false")
 
-          method_obj = method_registry.find("", "hello", visibility: :public, singleton: false)
+          method_obj = method_registry.find("Object", "hello", visibility: :public, singleton: false)
           expect(method_obj.return_tvs).to eq([true0, false0])
         end
       end

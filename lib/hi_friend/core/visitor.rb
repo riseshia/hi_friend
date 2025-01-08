@@ -56,8 +56,9 @@ module HiFriend::Core
       qualified_const_name = build_qualified_const_name([])
       singleton = node.receiver.is_a?(Prism::SelfNode) || @in_singleton
 
+      receiver_name = qualified_const_name.empty? ? "Object" : qualified_const_name
       method_obj = @method_registry.add(
-        receiver_name: qualified_const_name,
+        receiver_name: receiver_name,
         name: node.name,
         node: node,
         path: @file_path,
