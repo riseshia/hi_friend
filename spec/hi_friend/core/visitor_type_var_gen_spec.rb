@@ -89,7 +89,6 @@ module HiFriend::Core
           expect(a1.dependencies).to eq([plus])
           expect(plus.dependencies).to eq([a2, two])
           expect(plus.dependents).to eq([a1])
-          expect(plus.scope).to eq("Object")
           expect(a2.dependencies).to eq([a0])
           expect(a2.dependents).to eq([plus])
           expect(two.dependents).to eq([plus])

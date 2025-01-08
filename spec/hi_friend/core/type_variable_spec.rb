@@ -85,7 +85,10 @@ module HiFriend::Core
         describe "#infer" do
           # 1 + 2
           let(:tv) do
-            described_class.new(path: "path", name: "+", node: nil).tap do |tv|
+            node = double(Prism::CallNode, name: :+)
+            allow(node).to receive(:receiver).and_return(double(Prism::IntegerNode))
+
+            described_class.new(path: "path", name: "+", node: node).tap do |tv|
               one = integer_tv
               two = integer_tv
 
