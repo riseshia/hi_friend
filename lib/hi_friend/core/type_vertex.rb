@@ -221,6 +221,7 @@ module HiFriend::Core
         super
         @receiver_tv = nil
         @args = []
+        @fast_inferred_receiver_type = Type.any
       end
 
       def add_receiver_tv(receiver_tv)
@@ -239,15 +240,17 @@ module HiFriend::Core
         @scope = const_name
       end
 
-      def infer(constraints = {})
-        method_name = @name
-
-        method_visibility_scope = :public
-        receiver_type =
+      # This method will be called before in earnest inference.
+      # type inference with recevied method name to be done before that,
+      # because most of method call receivers are not constant, but variable,
+      # which is not determined its type until inference time(or never).
+      def fast_infer_receiver_type
+        @fast_inferred_receiver_type =
           if @receiver_tv
-            @receiver_tv.infer({ received_methods: [method_name] })
+            receiver_type = guess_const_by_received_method(@name)
+
+            receiver_type || Type.any
           else # receiver is self
-            method_visibility_scope = :private
             const = HiFriend::Core.const_registry.find(@scope)
 
             if const
@@ -258,11 +261,29 @@ module HiFriend::Core
               Type.any
             end
           end
+      end
+
+      def infer(constraints = {})
+        method_name = @name
+
+        method_visibility_scope = receiver_type_is_self? ? :private : :public
+        receiver_type =
+          if receiver_type_is_self?
+            determine_type_of_self
+          elsif @fast_inferred_receiver_type.is_a?(Type::Any)
+            # if receiver type still unknown, try to infer it with slow path.
+            @receiver_tv.infer({ received_methods: [method_name] })
+          else
+            @fast_inferred_receiver_type
+          end
 
         @inferred_type =
           if receiver_type.is_a?(Type::Any)
             Type.any
-          elsif !receiver_type.is_a?(Type::Union)
+          elsif receiver_type.is_a?(Type::Union)
+            # XXX: Someday this case should be handled. such as A | B
+            Type.any
+          else
             method_obj = lookup_method(
               const_registry: HiFriend::Core.const_registry,
               method_registry: HiFriend::Core.method_registry,
@@ -272,10 +293,29 @@ module HiFriend::Core
               visibility: method_visibility_scope,
             )
             method_obj.infer_return_type(constraints)
-          else
-            # XXX: Someday this case should be handled. such as A | B
-            Type.any
           end
+      end
+
+      private def receiver_type_is_self?
+        @receiver_tv.nil?
+      end
+
+      private def determine_type_of_self
+        const = HiFriend::Core.const_registry.find(@scope)
+
+        if const
+          Type.const(const.name, singleton: false)
+        else
+          # XXX: Someday this case should be removed.
+          #      It's a workaround for the case that builtin class.
+          Type.any
+        end
+      end
+
+      private def guess_const_by_received_method(method_name)
+        candidate = HiFriend::Core.method_registry.guess_method(method_name)
+
+        candidate&.receiver_type
       end
 
       private def lookup_method(const_registry:, method_registry:, const_name:, method_name:, visibility:, singleton:)

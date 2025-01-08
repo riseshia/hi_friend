@@ -72,6 +72,12 @@ module HiFriend::Core
     end
 
     private def update_inference(paths)
+      # phase 1: try fast inference to guess method receiver type.
+      HiFriend::Core.type_vertex_registry.each_call_tv do |call_tv|
+        call_tv.fast_infer_receiver_type
+      end
+
+      # phase 2: do full inference.
       paths.each do |path|
         tvs = HiFriend::Core.type_vertex_registry.find_by_path(path)
         tvs.each(&:infer)
