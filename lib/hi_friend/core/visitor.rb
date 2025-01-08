@@ -17,7 +17,7 @@ module HiFriend::Core
       @node_registry = node_registry
 
       @file_path = file_path
-      @current_scope = []
+      @current_scope = ["Object"]
       @lvars = []
       @in_singleton = false
       @current_method_name = nil
@@ -53,12 +53,10 @@ module HiFriend::Core
     end
 
     def visit_def_node(node)
-      qualified_const_name = build_qualified_const_name([])
       singleton = node.receiver.is_a?(Prism::SelfNode) || @in_singleton
 
-      receiver_name = qualified_const_name.empty? ? "Object" : qualified_const_name
       method_obj = @method_registry.add(
-        receiver_name: receiver_name,
+        receiver_name: current_self_type_name,
         name: node.name,
         node: node,
         path: @file_path,
@@ -228,8 +226,7 @@ module HiFriend::Core
     def visit_instance_variable_read_node(node)
       ivar_read_tv = find_or_create_tv(node)
 
-      current_const_name = build_qualified_const_name([])
-      const = @const_registry.find(current_const_name)
+      const = @const_registry.find(current_self_type_name)
       const.add_ivar_read_tv(ivar_read_tv)
       ivar_read_tv.receiver(const)
 
@@ -246,8 +243,7 @@ module HiFriend::Core
 
       ivar_write_tv.add_dependency(value_tv)
 
-      current_const_name = build_qualified_const_name([])
-      const = @const_registry.find(current_const_name)
+      const = @const_registry.find(current_self_type_name)
       const.add_ivar_write_tv(ivar_write_tv)
       ivar_write_tv.receiver(const)
 
@@ -326,14 +322,14 @@ module HiFriend::Core
     end
 
     def visit_call_node(node)
+      current_const_name = current_self_type_name
       case node.name
       when :attr_reader
         # def {name} = @name
-        qualified_const_name = build_qualified_const_name([])
-        const = @const_registry.find(qualified_const_name)
+        const = @const_registry.find(current_self_type_name)
         node.arguments&.arguments&.each do |arg_node|
           method_obj = @method_registry.add(
-            receiver_name: qualified_const_name,
+            receiver_name: current_const_name,
             name: arg_node.unescaped,
             node: arg_node,
             path: @file_path,
@@ -345,12 +341,11 @@ module HiFriend::Core
         end
       when :attr_writer
         # def {name}=(name) = @name = name
-        qualified_const_name = build_qualified_const_name([])
-        const = @const_registry.find(qualified_const_name)
+        const = @const_registry.find(current_self_type_name)
         node.arguments&.arguments&.each do |arg_node|
           method_name = "#{arg_node.unescaped}="
           method_obj = @method_registry.add(
-            receiver_name: qualified_const_name,
+            receiver_name: current_const_name,
             name: method_name,
             node: arg_node,
             path: @file_path,
@@ -363,12 +358,11 @@ module HiFriend::Core
       when :attr_accessor
         # def {name} = @name
         # def {name}=(name) = @name = name
-        qualified_const_name = build_qualified_const_name([])
-        const = @const_registry.find(qualified_const_name)
+        const = @const_registry.find(current_self_type_name)
         node.arguments&.arguments&.each do |arg_node|
           # reader
           method_obj = @method_registry.add(
-            receiver_name: qualified_const_name,
+            receiver_name: current_const_name,
             name: arg_node.unescaped,
             node: arg_node,
             path: @file_path,
@@ -381,7 +375,7 @@ module HiFriend::Core
           # writer
           method_name = "#{arg_node.unescaped}="
           method_obj = @method_registry.add(
-            receiver_name: qualified_const_name,
+            receiver_name: current_const_name,
             name: method_name,
             node: arg_node,
             path: @file_path,
@@ -404,9 +398,7 @@ module HiFriend::Core
           call_tv.add_arg_tv(arg_tv)
         end
 
-        qualified_const_name = build_qualified_const_name([])
-        scope_const_name = qualified_const_name == "" ? "Object" : qualified_const_name
-        call_tv.add_scope(scope_const_name)
+        call_tv.add_scope(current_const_name)
 
         super
 
@@ -542,7 +534,15 @@ module HiFriend::Core
     end
 
     private def build_qualified_const_name(const_names)
-      (@current_scope + const_names).map(&:to_s).join("::")
+      (@current_scope[1..] + const_names).map(&:to_s).join("::")
+    end
+
+    private def current_self_type_name
+      if @current_scope.size == 1
+        @current_scope[0]
+      else
+        @current_scope[1..].map(&:to_s).join("::")
+      end
     end
 
     private def in_if_cond(if_cond_tv)
