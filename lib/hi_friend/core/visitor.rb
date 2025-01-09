@@ -388,11 +388,13 @@ module HiFriend::Core
       else
         call_tv = find_or_create_tv(node)
 
+        self_type = Type.const(current_const_name, singleton: @in_singleton)
+        call_tv.self_type_of_context(self_type)
         if node.receiver
           receiver_tv = find_or_create_tv(node.receiver)
           call_tv.add_receiver_tv(receiver_tv)
         else # receiver is implicit self
-          call_tv.add_receiver_type(Type.const(current_const_name, singleton: @in_singleton))
+          call_tv.add_receiver_type(self_type)
         end
 
         node.arguments&.arguments&.each do |arg|

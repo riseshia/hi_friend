@@ -223,12 +223,17 @@ module HiFriend::Core
         @args = []
         @receiver_type = Type.any
         @fast_inferred_receiver_type = Type.any
+        @self_type_of_context = nil
       end
 
       def add_receiver_tv(receiver_tv)
         @receiver_tv = receiver_tv
         @dependencies << receiver_tv
         receiver_tv.add_dependent(self)
+      end
+
+      def self_type_of_context(self_type_of_context)
+        @self_type_of_context = self_type_of_context
       end
 
       def add_receiver_type(receiver_type)
@@ -258,37 +263,56 @@ module HiFriend::Core
             #      It's a workaround for the case that builtin class.
             Type.any
           end
+
+        if !@fast_inferred_receiver_type.is_a?(Type::Any)
+          method_obj = lookup_method(
+            const_name: @fast_inferred_receiver_type.name,
+            method_name: @name,
+            singleton: @fast_inferred_receiver_type.singleton?,
+            visibility: allowed_method_visibility(@fast_inferred_receiver_type),
+          )
+        end
       end
 
       def infer(constraints = {})
         method_name = @name
 
-        method_visibility_scope = receiver_type_is_self? ? :private : :public
-        receiver_type =
-          if @fast_inferred_receiver_type.is_a?(Type::Any)
-            # if receiver type still unknown, try to infer it with slow path.
-            @receiver_tv.infer({ received_methods: [method_name] })
-          else
-            @fast_inferred_receiver_type
-          end
+        @receiver_type = infer_receiver_type(constraints)
 
         @inferred_type =
-          if receiver_type.is_a?(Type::Any)
+          if @receiver_type.is_a?(Type::Any)
             Type.any
-          elsif receiver_type.is_a?(Type::Union)
+          elsif @receiver_type.is_a?(Type::Union)
             # XXX: Someday this case should be handled. such as A | B
             Type.any
           else
             method_obj = lookup_method(
-              const_registry: HiFriend::Core.const_registry,
-              method_registry: HiFriend::Core.method_registry,
-              const_name: receiver_type.name,
+              const_name: @receiver_type.name,
               method_name: method_name,
-              singleton: receiver_type.singleton?,
-              visibility: method_visibility_scope,
+              singleton: @receiver_type.singleton?,
+              visibility: allowed_method_visibility(@receiver_type),
             )
             method_obj.infer_return_type(constraints)
           end
+      end
+
+      private def allowed_method_visibility(receiver_type)
+        if receiver_type_is_self?
+          :private
+        elsif @self_type_of_context == receiver_type
+          :protected
+        else
+          :public
+        end
+      end
+
+      private def infer_receiver_type(constraints = {})
+        if @fast_inferred_receiver_type.is_a?(Type::Any)
+          # if receiver type still unknown, try to infer it with slow path.
+          @receiver_tv.infer(constraints.merge({ received_methods: [@name] }))
+        else
+          @fast_inferred_receiver_type
+        end
       end
 
       private def receiver_type_is_self?
@@ -301,8 +325,10 @@ module HiFriend::Core
         candidate&.receiver_type
       end
 
-      private def lookup_method(const_registry:, method_registry:, const_name:, method_name:, visibility:, singleton:)
+      private def lookup_method(const_name:, method_name:, visibility:, singleton:)
         # const_obj = const_registry.find(const_name)
+
+        method_registry = HiFriend::Core.method_registry
         method_registry.find(const_name, method_name, visibility: visibility, singleton: singleton)
       end
     end
