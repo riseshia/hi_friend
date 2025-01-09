@@ -2,6 +2,9 @@
 
 module HiFriend::Core
   class Visitor < Prism::Visitor
+    attr_reader :const_registry, :method_registry, :type_vertex_registry, :node_registry,
+                :file_path, :current_in_singleton
+
     def initialize(
       const_registry:,
       method_registry:,
@@ -19,7 +22,7 @@ module HiFriend::Core
       @file_path = file_path
       @current_scope = ["Object"]
       @lvars = []
-      @in_singleton = false
+      @current_in_singleton = false
       @current_method_name = nil
       @current_method_obj = nil
       @current_if_cond_tv = nil
@@ -53,7 +56,7 @@ module HiFriend::Core
     end
 
     def visit_def_node(node)
-      singleton = node.receiver.is_a?(Prism::SelfNode) || @in_singleton
+      singleton = node.receiver.is_a?(Prism::SelfNode) || @current_in_singleton
 
       method_obj = @method_registry.add(
         receiver_name: current_self_type_name,
@@ -323,88 +326,11 @@ module HiFriend::Core
 
     def visit_call_node(node)
       current_const_name = current_self_type_name
-      case node.name
-      when :attr_reader
-        # def {name} = @name
-        const = @const_registry.find(current_self_type_name)
-        node.arguments&.arguments&.each do |arg_node|
-          method_obj = @method_registry.add(
-            receiver_name: current_const_name,
-            name: arg_node.unescaped,
-            node: arg_node,
-            path: @file_path,
-            singleton: @in_singleton,
-            type: :attr_reader,
-            visibility: :public,
-          )
-          method_obj.receiver_obj(const)
-        end
-      when :attr_writer
-        # def {name}=(name) = @name = name
-        const = @const_registry.find(current_self_type_name)
-        node.arguments&.arguments&.each do |arg_node|
-          method_name = "#{arg_node.unescaped}="
-          method_obj = @method_registry.add(
-            receiver_name: current_const_name,
-            name: method_name,
-            node: arg_node,
-            path: @file_path,
-            singleton: @in_singleton,
-            visibility: :public,
-            type: :attr_writer,
-          )
-          method_obj.receiver_obj(const)
-        end
-      when :attr_accessor
-        # def {name} = @name
-        # def {name}=(name) = @name = name
-        const = @const_registry.find(current_self_type_name)
-        node.arguments&.arguments&.each do |arg_node|
-          # reader
-          method_obj = @method_registry.add(
-            receiver_name: current_const_name,
-            name: arg_node.unescaped,
-            node: arg_node,
-            path: @file_path,
-            singleton: @in_singleton,
-            visibility: :public,
-            type: :attr_writer,
-          )
-          method_obj.receiver_obj(const)
+      method_name = node.name.to_s
 
-          # writer
-          method_name = "#{arg_node.unescaped}="
-          method_obj = @method_registry.add(
-            receiver_name: current_const_name,
-            name: method_name,
-            node: arg_node,
-            path: @file_path,
-            singleton: @in_singleton,
-            visibility: :public,
-            type: :attr_writer,
-          )
-          method_obj.receiver_obj(const)
-        end
-      else
-        call_tv = find_or_create_tv(node)
-
-        self_type = Type.const(current_const_name, singleton: @in_singleton)
-        call_tv.self_type_of_context(self_type)
-        if node.receiver
-          receiver_tv = find_or_create_tv(node.receiver)
-          call_tv.add_receiver_tv(receiver_tv)
-        else # receiver is implicit self
-          call_tv.add_receiver_type(self_type)
-        end
-
-        node.arguments&.arguments&.each do |arg|
-          arg_tv = find_or_create_tv(arg)
-          call_tv.add_arg_tv(arg_tv)
-        end
-
+      hook = HiFriend::Core::CallHook.fetch_matched_hook(current_const_name, method_name)
+      hook.call(self, node) do
         super
-
-        @last_evaluated_tv = call_tv
       end
     end
 
@@ -535,11 +461,7 @@ module HiFriend::Core
       end
     end
 
-    private def build_qualified_const_name(const_names)
-      (@current_scope[1..] + const_names).map(&:to_s).join("::")
-    end
-
-    private def current_self_type_name
+    def current_self_type_name
       if @current_scope.size == 1
         @current_scope[0]
       else
@@ -547,58 +469,18 @@ module HiFriend::Core
       end
     end
 
-    private def in_if_cond(if_cond_tv)
-      prev_in_if_cond_tv = @current_if_cond_tv
-      @current_if_cond_tv = if_cond_tv
+    def in_singleton
+      prev_in_singleton = @current_in_singleton
+      @current_in_singleton = true
       yield
-      @current_if_cond_tv = prev_in_if_cond_tv
+      @current_in_singleton = prev_in_singleton
     end
 
-    private def in_if_cond?
-      @current_if_cond_tv
+    def last_evaluated_tv(tv)
+      @last_evaluated_tv = tv
     end
 
-    private def in_scope(const_names)
-      @current_scope.push(*const_names)
-      yield
-      const_names.size.times { @current_scope.pop }
-    end
-
-    private def in_singleton
-      prev_in_singleton = @in_singleton
-      @in_singleton = true
-      yield
-      @in_singleton = prev_in_singleton
-    end
-
-    private def in_method(method_name, method_obj)
-      prev_in_method_name = @current_method_name
-      @current_method_name = method_name
-      prev_method_obj = @current_method_obj
-      @current_method_obj = method_obj
-      prev_lvars = @lvars
-      @lvars = []
-      @return_tvs = []
-
-      yield
-
-      @lvars = prev_lvars
-      @return_tvs.each do |tv|
-        @current_method_obj.add_return_tv(tv)
-      end
-      @current_method_name = prev_in_method_name
-      @current_method_obj = prev_method_obj
-    end
-
-    private def find_latest_lvar_tv(name)
-      @lvars.reverse_each.find { |lvar| lvar.name == name }
-    end
-
-    private def in_method?
-      @current_method_obj != nil
-    end
-
-    private def find_or_create_tv(node)
+    def find_or_create_tv(node)
       tv = @type_vertex_registry.find(@file_path, node.node_id)
       return tv if tv
 
@@ -745,6 +627,54 @@ module HiFriend::Core
       @node_registry.add(@file_path, tv)
 
       tv
+    end
+
+    private def build_qualified_const_name(const_names)
+      (@current_scope[1..] + const_names).map(&:to_s).join("::")
+    end
+
+    private def in_if_cond(if_cond_tv)
+      prev_in_if_cond_tv = @current_if_cond_tv
+      @current_if_cond_tv = if_cond_tv
+      yield
+      @current_if_cond_tv = prev_in_if_cond_tv
+    end
+
+    private def in_if_cond?
+      @current_if_cond_tv
+    end
+
+    private def in_scope(const_names)
+      @current_scope.push(*const_names)
+      yield
+      const_names.size.times { @current_scope.pop }
+    end
+
+    private def in_method(method_name, method_obj)
+      prev_in_method_name = @current_method_name
+      @current_method_name = method_name
+      prev_method_obj = @current_method_obj
+      @current_method_obj = method_obj
+      prev_lvars = @lvars
+      @lvars = []
+      @return_tvs = []
+
+      yield
+
+      @lvars = prev_lvars
+      @return_tvs.each do |tv|
+        @current_method_obj.add_return_tv(tv)
+      end
+      @current_method_name = prev_in_method_name
+      @current_method_obj = prev_method_obj
+    end
+
+    private def find_latest_lvar_tv(name)
+      @lvars.reverse_each.find { |lvar| lvar.name == name }
+    end
+
+    private def in_method?
+      @current_method_obj != nil
     end
   end
 end
