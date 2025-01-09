@@ -5,6 +5,8 @@ module HiFriend::Core
     attr_reader :const_registry, :method_registry, :type_vertex_registry, :node_registry,
                 :file_path, :current_in_singleton
 
+    attr_accessor :current_method_visibility
+
     def initialize(
       const_registry:,
       method_registry:,
@@ -25,6 +27,7 @@ module HiFriend::Core
       @current_in_singleton = false
       @current_method_name = nil
       @current_method_obj = nil
+      @current_method_visibility = :private # main start with private
       @current_if_cond_tv = nil
       @last_evaluated_tv_stack = []
     end
@@ -64,7 +67,7 @@ module HiFriend::Core
         node: node,
         path: @file_path,
         singleton: singleton,
-        visibility: :public, # XXX: pass current scope visibility
+        visibility: @current_method_visibility,
       )
       @node_registry.add(@file_path, method_obj)
 

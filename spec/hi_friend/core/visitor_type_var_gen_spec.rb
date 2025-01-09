@@ -584,6 +584,105 @@ module HiFriend::Core
           expect(itpl_str.infer.to_ts).to eq("String")
         end
       end
+
+      context "with default method visibility on Object" do
+        let(:code) do
+          <<~CODE
+            def foo = 1
+          CODE
+        end
+
+        it "registers foo as private method" do
+          method_obj = method_registry.find("Object", "foo", visibility: :private, singleton: false)
+          expect(method_obj).not_to be_nil
+          expect(method_obj.visibility).to eq(:private)
+        end
+      end
+
+      context "with method visibility after no arg public" do
+        let(:code) do
+          <<~CODE
+            public
+            def foo = 1
+          CODE
+        end
+
+        it "registers foo as public method" do
+          method_obj = method_registry.find("Object", "foo", singleton: false)
+          expect(method_obj).not_to be_nil
+          expect(method_obj.visibility).to eq(:public)
+        end
+      end
+
+      context "with method visibility set with def" do
+        let(:code) do
+          <<~CODE
+            public def foo = 1
+            def bar = 2
+          CODE
+        end
+
+        it "registers foo as public method" do
+          method_obj = method_registry.find("Object", "foo", singleton: false)
+          expect(method_obj).not_to be_nil
+          expect(method_obj.visibility).to eq(:public)
+        end
+
+        it "registers bar as private method" do
+          method_obj = method_registry.find("Object", "bar", singleton: false)
+          expect(method_obj).not_to be_nil
+          expect(method_obj.visibility).to eq(:private)
+        end
+      end
+
+      context "with method visibility set with method names" do
+        let(:code) do
+          <<~CODE
+            def foo = 1
+            def bar = 2
+            def baz = 3
+            public :foo, "bar"
+          CODE
+        end
+
+        it "registers foo, bar as public method" do
+          foo_obj = method_registry.find("Object", "foo", singleton: false)
+          expect(foo_obj).not_to be_nil
+          expect(foo_obj.visibility).to eq(:public)
+
+          foo_obj = method_registry.find("Object", "foo", singleton: false)
+          expect(foo_obj).not_to be_nil
+          expect(foo_obj.visibility).to eq(:public)
+        end
+
+        it "registers baz as private method" do
+          method_obj = method_registry.find("Object", "baz", singleton: false)
+          expect(method_obj).not_to be_nil
+          expect(method_obj.visibility).to eq(:private)
+        end
+      end
+
+      context "with required params" do
+        let(:code) do
+          <<~CODE
+            def foo(a, b)
+              a + b
+            end
+
+            foo(1, 2)
+          CODE
+        end
+
+        it "registers all" do
+          a0, b0, *_rest = type_vertex_registry.all
+          type_vertex_registry.each_call_tv do |call_tv|
+            call_tv.fast_infer_receiver_type
+          end
+
+          expect(a0.infer.to_ts).to eq("Integer")
+          expect(b0.infer.to_ts).to eq("Integer")
+        end
+      end
     end
   end
 end

@@ -1,7 +1,9 @@
 module HiFriend::Core
   class MethodBase
-    attr_reader :id, :paths, :name, :node, :receiver_type, :visibility,
+    attr_reader :id, :paths, :name, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
+
+    attr_accessor :visibility
 
     def initialize(id:, name:, receiver_type:, node:, visibility:)
       @id = id
