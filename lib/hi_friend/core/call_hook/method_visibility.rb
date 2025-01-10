@@ -32,12 +32,17 @@ module HiFriend::Core
           method_obj.visibility = target_visibility
         else
           node.arguments.arguments.each do |arg_node|
-            method_obj = visitor.method_registry.find(
-              current_const_name,
-              arg_node.unescaped,
-              singleton: visitor.current_in_singleton,
-            )
-            method_obj.visibility = target_visibility
+            # Handle string or symbol only.
+            if arg_node.respond_to?(:unescaped)
+              method_obj = visitor.method_registry.find(
+                current_const_name,
+                arg_node.unescaped,
+                singleton: visitor.current_in_singleton,
+              )
+              method_obj.visibility = target_visibility
+            else
+              # Do nothing with arg node, such lvar.
+            end
           end
         end
       end
