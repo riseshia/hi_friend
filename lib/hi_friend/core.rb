@@ -17,7 +17,7 @@ require_relative "core/call_hook"
 require_relative "core/call_hook/attr_reader"
 require_relative "core/call_hook/attr_writer"
 require_relative "core/call_hook/attr_accessor"
-require_relative "core/call_hook/public"
+require_relative "core/call_hook/method_visibility"
 require_relative "core/call_hook/normal_method" # This should be required at last
 
 module HiFriend::Core

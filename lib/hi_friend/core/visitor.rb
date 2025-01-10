@@ -5,8 +5,6 @@ module HiFriend::Core
     attr_reader :const_registry, :method_registry, :type_vertex_registry, :node_registry,
                 :file_path, :current_in_singleton
 
-    attr_accessor :current_method_visibility
-
     def initialize(
       const_registry:,
       method_registry:,
@@ -27,7 +25,7 @@ module HiFriend::Core
       @current_in_singleton = false
       @current_method_name = nil
       @current_method_obj = nil
-      @current_method_visibility = :private # main start with private
+      @current_method_visibility_stack = [:private] # main start with private
       @current_if_cond_tv = nil
       @last_evaluated_tv_stack = []
     end
@@ -67,7 +65,7 @@ module HiFriend::Core
         node: node,
         path: @file_path,
         singleton: singleton,
-        visibility: @current_method_visibility,
+        visibility: current_method_visibility,
       )
       @node_registry.add(@file_path, method_obj)
 
@@ -479,6 +477,23 @@ module HiFriend::Core
       @current_in_singleton = prev_in_singleton
     end
 
+    def current_method_visibility
+      @current_method_visibility_stack.last
+    end
+
+    # start module / class scope visibility with public
+    def add_new_method_visibility
+      @current_method_visibility_stack << :public
+    end
+
+    def remove_current_method_visibility
+      @current_method_visibility_stack.pop
+    end
+
+    def change_current_method_visibility(visibility)
+      @current_method_visibility_stack[-1] = visibility
+    end
+
     def last_evaluated_tv(tv)
       @last_evaluated_tv = tv
     end
@@ -648,9 +663,13 @@ module HiFriend::Core
     end
 
     private def in_scope(const_names)
+      add_new_method_visibility
       @current_scope.push(*const_names)
+
       yield
+
       const_names.size.times { @current_scope.pop }
+      remove_current_method_visibility
     end
 
     private def in_method(method_name, method_obj)
