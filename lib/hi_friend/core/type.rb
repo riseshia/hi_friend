@@ -100,6 +100,17 @@ module HiFriend::Core
       end
     end
 
+    class Duck < Base
+      def initialize(method_name)
+        super()
+
+        @method_name = method_name
+      end
+
+      def name = "##{@method_name}"
+      def to_ts = "##{@method_name}"
+    end
+
     class Union < Base
       attr_reader :element_types
 
