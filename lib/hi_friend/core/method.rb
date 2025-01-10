@@ -14,6 +14,7 @@ module HiFriend::Core
       @visibility = visibility
 
       @arg_types = []
+      @kwarg_types = {}
       @return_type = nil
 
       @arg_tvs = []
@@ -93,6 +94,33 @@ module HiFriend::Core
       return @arg_types[order] if @arg_types[order]
 
       arg_tv = @arg_tvs[order]
+
+      # use inferred type if default value type could be inferred
+      inferred_types_by_default_value = arg_tv.dependencies.map(&:infer)
+      if inferred_types_by_default_value.size > 0
+        inferred_type_by_default_value = Type.union(inferred_types_by_default_value)
+        if !inferred_type_by_default_value.is_a?(Type::Any)
+          return inferred_type_by_default_value
+        end
+      end
+
+      # use inferred type from constraints
+      received_methods = constraints.fetch(:received_methods, [])
+      inferred_type_by_received_methods = guess_type_by_received_methods(received_methods)
+      if !inferred_type_by_received_methods.is_a?(Type::Any)
+        return inferred_type_by_received_methods
+      end
+
+      # try to infer from arguments from call location
+      # XXX: TBW
+      Type.any
+    end
+
+    def infer_kwarg_type(name, constraints = {})
+      # use type declaration if exists
+      return @kwarg_types[name] if @kwarg_types[name]
+
+      arg_tv = @kwarg_tvs[name]
 
       # use inferred type if default value type could be inferred
       inferred_types_by_default_value = arg_tv.dependencies.map(&:infer)

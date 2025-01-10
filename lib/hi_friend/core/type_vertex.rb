@@ -81,7 +81,35 @@ module HiFriend::Core
         # delegate to method_obj
         @inferred_type = @method_obj.infer_arg_type(
           @order,
-          constraints.merge({ received_methods: received_methods })
+          constraints.merge({ received_methods: received_methods }),
+        )
+      end
+    end
+
+    class Kwarg < Base
+      attr_reader :method_obj
+
+      def initialize(path:, name:, node:)
+        super
+        @method_obj = nil
+      end
+
+      def add_method_obj(method_obj)
+        @method_obj = method_obj
+      end
+
+      def infer(constraints = {})
+        received_methods =
+          if constraints[:received_methods]
+            (constraints[:received_methods] + @received_methods).uniq
+          else
+            @received_methods
+          end
+
+        # delegate to method_obj
+        @inferred_type = @method_obj.infer_kwarg_type(
+          @name,
+          constraints.merge({ received_methods: received_methods }),
         )
       end
     end

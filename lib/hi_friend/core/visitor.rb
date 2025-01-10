@@ -511,7 +511,7 @@ module HiFriend::Core
             node: node,
           )
         when Prism::RequiredKeywordParameterNode
-          TypeVertex::Arg.new(
+          TypeVertex::Kwarg.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
@@ -523,7 +523,7 @@ module HiFriend::Core
             node: node,
           )
         when Prism::OptionalKeywordParameterNode
-          TypeVertex::Arg.new(
+          TypeVertex::Kwarg.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
