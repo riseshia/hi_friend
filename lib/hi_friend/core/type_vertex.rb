@@ -4,7 +4,7 @@ module HiFriend::Core
       attr_reader :node, :path, :stable,
                   :candidates, :dependencies, :dependents,
                   :inferred_type
-      attr_accessor :name
+      attr_accessor :name, :received_methods
 
       def initialize(path:, name:, node:)
         @path = path
@@ -15,6 +15,7 @@ module HiFriend::Core
         @dependencies = []
         @dependents = []
         @inferred_type = Type.any
+        @received_methods = []
       end
 
       def leaf? = @dependents.empty?

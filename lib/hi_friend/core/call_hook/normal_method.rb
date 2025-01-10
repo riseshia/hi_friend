@@ -16,6 +16,7 @@ module HiFriend::Core
         call_tv.self_type_of_context(self_type)
         if node.receiver
           receiver_tv = visitor.find_or_create_tv(node.receiver)
+          receiver_tv.received_methods.push(call_tv.name)
           call_tv.add_receiver_tv(receiver_tv)
         else # receiver is implicit self
           call_tv.add_receiver_type(self_type)
