@@ -83,6 +83,19 @@ module HiFriend::Core
           expect(result.to_ts).to eq("bool")
         end
       end
+
+      context "when types are true and false" do
+        let(:types) do
+          [
+            Type.true,
+            Type.false,
+          ]
+        end
+
+        it "return bool" do
+          expect(result.to_ts).to eq("bool")
+        end
+      end
     end
   end
 end

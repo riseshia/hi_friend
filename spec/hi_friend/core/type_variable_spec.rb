@@ -106,7 +106,7 @@ module HiFriend::Core
                 visibility: :public,
               )
               method_obj = HiFriend::Core.method_registry.find("Integer", "+", visibility: :public, singleton: false)
-              method_obj.add_arg_type("a", Type.integer)
+              method_obj.add_arg_type(0, Type.integer)
               method_obj.add_return_type(Type.integer)
             end
           end

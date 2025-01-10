@@ -13,7 +13,7 @@ module HiFriend::Core
       @receiver_type = receiver_type
       @visibility = visibility
 
-      @arg_types = {}
+      @arg_types = []
       @return_type = nil
 
       @arg_tvs = []
@@ -47,8 +47,8 @@ module HiFriend::Core
       raise NotImplementedError
     end
 
-    def add_arg_type(name, type)
-      @arg_types[name] = type
+    def add_arg_type(order, type)
+      @arg_types[order] = type
     end
 
     def add_return_type(type)
@@ -88,15 +88,11 @@ module HiFriend::Core
       @return_tvs << return_tv
     end
 
-    private def arg_type_by_name(name)
-      @arg_tvs.find { |tv| tv.name == name } || @kwarg_tvs[name]
-    end
-
-    def infer_arg_type(name, constraints = {})
+    def infer_arg_type(order, constraints = {})
       # use type declaration if exists
-      return @arg_types[name] if @arg_types.key?(name)
+      return @arg_types[order] if @arg_types[order]
 
-      arg_tv = arg_type_by_name(name)
+      arg_tv = @arg_tvs[order]
 
       # use inferred type if default value type could be inferred
       inferred_types_by_default_value = arg_tv.dependencies.map(&:infer)
@@ -108,13 +104,19 @@ module HiFriend::Core
       end
 
       # use inferred type from constraints
-      # XXX: TBW
-      # inferred_type_by_def = Type.union(arg_tv.dependents.map(&:infer))
-      # return inferred_type_by_def unless inferred_type_by_def.is_a?(Type::Any)
+      received_methods = constraints.fetch(:received_methods, [])
+      inferred_type_by_received_methods = guess_type_by_received_methods(received_methods)
+      if !inferred_type_by_received_methods.is_a?(Type::Any)
+        return inferred_type_by_received_methods
+      end
 
       # try to infer from arguments from call location
       # XXX: TBW
       Type.any
+    end
+
+    private def guess_type_by_received_methods(method_names)
+      HiFriend::Core.method_registry.guess_receiver_type_by_methods(method_names)
     end
 
     def infer_return_type(constraints = {})

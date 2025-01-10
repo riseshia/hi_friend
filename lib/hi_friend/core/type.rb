@@ -215,6 +215,7 @@ module HiFriend::Core
     def bool = (@bool ||= Bool.new)
     def integer = (@integer ||= Integer.new)
     def string(literal = nil) = String.new(literal)
+    def duck(name) = Duck.new(name)
     def const(name, singleton:) = Const.new(name, singleton: singleton)
     def symbol(name) = Symbol.new(name)
     def array(el_type) = Array.new(el_type)

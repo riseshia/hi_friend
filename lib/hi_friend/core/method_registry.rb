@@ -1,8 +1,11 @@
+require "set"
+
 module HiFriend::Core
   class MethodRegistry
     def initialize
       @method_by_id = {}
       @methods_by_path = Hash.new { |h, k| h[k] = [] }
+      @methods_by_name = Hash.new { |h, k| h[k] = [] }
     end
 
     def add(
@@ -27,6 +30,7 @@ module HiFriend::Core
       method.add_path(path)
 
       @methods_by_path[path] << method
+      @methods_by_name[name] << method
 
       method
     end
@@ -47,6 +51,7 @@ module HiFriend::Core
         methods.each do |method|
           method.remove_path(path)
           @method_by_id.delete(method.id) if method.dangling?
+          @methods_by_name[method.name].delete_if { |m| m == method }
         end
       end
 
@@ -77,10 +82,31 @@ module HiFriend::Core
     def clear
       @method_by_id.clear
       @methods_by_path.clear
+      @methods_by_name.clear
+    end
+
+    def guess_receiver_type_by_methods(method_names)
+      return Type.any if method_names.empty?
+
+      sets = method_names.map do |method_name|
+        Set.new(@methods_by_name[method_name].map(&:receiver_type))
+      end
+
+      candidates = sets.reduce(&:intersection)
+
+      if candidates.size == 1
+        candidates.first
+      else
+        if method_names.size == 1
+          Type.duck(method_names.first)
+        else
+          Type.any
+        end
+      end
     end
 
     def guess_method(name)
-      candidates = @method_by_id.values.select { |v| v.name == name }
+      candidates = @methods_by_name[name]
 
       if candidates.size == 1
         candidates.values.first

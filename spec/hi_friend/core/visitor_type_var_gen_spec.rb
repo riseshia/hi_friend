@@ -674,13 +674,12 @@ module HiFriend::Core
         end
 
         it "registers all" do
-          a0, b0, *_rest = type_vertex_registry.all
-          type_vertex_registry.each_call_tv do |call_tv|
-            call_tv.fast_infer_receiver_type
-          end
+          a0, b0, plus, a1, b1, foo, one, two = type_vertex_registry.all
 
-          expect(a0.infer.to_ts).to eq("Integer")
-          expect(b0.infer.to_ts).to eq("Integer")
+          plus.infer
+
+          expect(a0.inferred_type.to_ts).to eq("#+")
+          expect(b0.inferred_type.to_ts).to eq("any")
         end
       end
     end

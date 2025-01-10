@@ -71,8 +71,18 @@ module HiFriend::Core
       end
 
       def infer(constraints = {})
+        received_methods =
+          if constraints[:received_methods]
+            (constraints[:received_methods] + @received_methods).uniq
+          else
+            @received_methods
+          end
+
         # delegate to method_obj
-        @inferred_type = @method_obj.infer_arg_type(@name, constraints)
+        @inferred_type = @method_obj.infer_arg_type(
+          @order,
+          constraints.merge({ received_methods: received_methods })
+        )
       end
     end
 
@@ -85,11 +95,15 @@ module HiFriend::Core
     class LvarRead < Base
       def infer(constraints = {})
         guessed_type = Type.any
-        if constraints[:received_methods]
-          guessed_type = guess_const_by_received_methods(constraints[:received_methods])
-        end
 
-        accurate_type = @dependencies[0].infer(constraints)
+        received_methods =
+          if constraints[:received_methods]
+            (constraints[:received_methods] + @received_methods).uniq
+          else
+            @received_methods
+          end
+        accurate_type = @dependencies[0].infer(constraints.merge({ received_methods: received_methods }))
+
         @inferred_type =
           if accurate_type.is_a?(Type::Any)
             guessed_type
@@ -284,6 +298,9 @@ module HiFriend::Core
           if @receiver_type.is_a?(Type::Any)
             Type.any
           elsif @receiver_type.is_a?(Type::Union)
+            # XXX: Someday this case should be handled. such as A | B
+            Type.any
+          elsif @receiver_type.is_a?(Type::Duck)
             # XXX: Someday this case should be handled. such as A | B
             Type.any
           else
