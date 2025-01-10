@@ -65,7 +65,7 @@ module HiFriend::Core
         end
       end
 
-      describe Arg do
+      describe Param do
         describe "#infer" do
           let(:tv) do
             described_class.new(path: "path", name: "a", node: nil).tap do |tv|

@@ -505,25 +505,25 @@ module HiFriend::Core
       tv =
         case node
         when Prism::RequiredParameterNode
-          TypeVertex::Arg.new(
+          TypeVertex::Param.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::RequiredKeywordParameterNode
-          TypeVertex::Kwarg.new(
+          TypeVertex::Kwparam.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::OptionalParameterNode
-          TypeVertex::Arg.new(
+          TypeVertex::Param.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::OptionalKeywordParameterNode
-          TypeVertex::Kwarg.new(
+          TypeVertex::Kwparam.new(
             path: @file_path,
             name: node.name.to_s,
             node: node,

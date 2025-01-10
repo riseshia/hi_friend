@@ -54,7 +54,7 @@ module HiFriend::Core
       end
     end
 
-    class Arg < Base
+    class Param < Base
       attr_reader :method_obj
 
       def initialize(path:, name:, node:)
@@ -86,7 +86,7 @@ module HiFriend::Core
       end
     end
 
-    class Kwarg < Base
+    class Kwparam < Base
       attr_reader :method_obj
 
       def initialize(path:, name:, node:)
