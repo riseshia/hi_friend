@@ -120,10 +120,10 @@ module HiFriend::Core
       # use type declaration if exists
       return @kwarg_types[name] if @kwarg_types[name]
 
-      arg_tv = @kwarg_tvs[name]
+      kwarg_tv = @kwarg_tvs[name]
 
       # use inferred type if default value type could be inferred
-      inferred_types_by_default_value = arg_tv.dependencies.map(&:infer)
+      inferred_types_by_default_value = kwarg_tv.dependencies.map(&:infer)
       if inferred_types_by_default_value.size > 0
         inferred_type_by_default_value = Type.union(inferred_types_by_default_value)
         if !inferred_type_by_default_value.is_a?(Type::Any)

@@ -264,6 +264,7 @@ module HiFriend::Core
         super
         @receiver_tv = nil
         @args = []
+        @kwargs = {}
         @receiver_type = Type.any
         @fast_inferred_receiver_type = Type.any
         @self_type_of_context = nil
@@ -287,6 +288,12 @@ module HiFriend::Core
         @args << arg
         @dependencies << arg
         arg.add_dependent(self)
+      end
+
+      def add_kwarg_tv(kwarg)
+        @kwargs[kwarg.name] = kwarg
+        @dependencies << kwarg
+        kwarg.add_dependent(self)
       end
 
       # This method will be called before in earnest inference.

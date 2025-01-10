@@ -23,8 +23,18 @@ module HiFriend::Core
         end
 
         node.arguments&.arguments&.each do |arg|
-          arg_tv = visitor.find_or_create_tv(arg)
-          call_tv.add_arg_tv(arg_tv)
+          if arg.is_a?(Prism::KeywordHashNode)
+            arg.elements.each do |assoc_node|
+              name = assoc_node.key.value
+
+              arg_tv = visitor.find_or_create_tv(assoc_node.value)
+              arg_tv.name = name
+              call_tv.add_kwarg_tv(arg_tv)
+            end
+          else
+            arg_tv = visitor.find_or_create_tv(arg)
+            call_tv.add_arg_tv(arg_tv)
+          end
         end
 
         block.call

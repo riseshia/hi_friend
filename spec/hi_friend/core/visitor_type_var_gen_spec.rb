@@ -682,6 +682,27 @@ module HiFriend::Core
           expect(b0.inferred_type.to_ts).to eq("any")
         end
       end
+
+      context "with required kw params" do
+        let(:code) do
+          <<~CODE
+            def foo(b, a:)
+              a + b
+            end
+
+            foo(1, a: 2)
+          CODE
+        end
+
+        it "registers all" do
+          b0, a0, plus, a1, b1, foo, one, two = type_vertex_registry.all
+
+          plus.infer
+
+          expect(a0.inferred_type.to_ts).to eq("#+")
+          expect(b0.inferred_type.to_ts).to eq("any")
+        end
+      end
     end
   end
 end
