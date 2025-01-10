@@ -61,11 +61,11 @@ module HiFriend::Core
 
           it "method_registry has consistency" do
             service.update_rb_file("test_file.rb", code)
-            expect(method_registry.find("Object", "method_a", visibility: :public)).not_to be_nil
+            expect(method_registry.find("Object", "method_a")).not_to be_nil
 
             service.update_rb_file("test_file.rb", new_code)
-            expect(method_registry.find("Object", "method_a", visibility: :public)).to be_nil
-            expect(method_registry.find("Object", "method_b", visibility: :public)).not_to be_nil
+            expect(method_registry.find("Object", "method_a")).to be_nil
+            expect(method_registry.find("Object", "method_b")).not_to be_nil
           end
         end
 
