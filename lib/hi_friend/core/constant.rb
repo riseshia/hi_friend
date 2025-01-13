@@ -10,6 +10,19 @@ module HiFriend::Core
       @ivar_write_tvs = {}
       @kind = kind
       @external = external
+      @superclass_scope = ""
+      @superclass_name = "Object"
+      @superclass_declared_paths = []
+    end
+
+    def add_superclass(scope, name, path)
+      @superclass_scope = scope
+      @superclass_name = name
+      @superclass_declared_paths << path
+    end
+
+    def superclass
+      HiFriend::Core.const_registry.lookup(@superclass_scope, @superclass_name)
     end
 
     def add_path(path)
@@ -18,6 +31,14 @@ module HiFriend::Core
 
     def remove_path(given_path)
       @paths.delete_if { |path| path == given_path }
+
+      @superclass_declared_paths.delete_if { |path| path == given_path }
+      reset_superclass if @superclass_declared_paths.empty?
+    end
+
+    private def reset_superclass
+      @superclass_scope = ""
+      @superclass_name = "Object"
     end
 
     def remove_ivar_ref_path(given_path)

@@ -43,7 +43,22 @@ module HiFriend::Core
     def visit_class_node(node)
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
-      @const_registry.add(qualified_const_name, node, @file_path, kind: :class)
+
+      klass = @const_registry.add(
+        qualified_const_name,
+        node,
+        @file_path,
+        kind: :class,
+      )
+
+      if node.superclass
+        superclass = extract_const_names(node.superclass).join("::")
+        klass.add_superclass(
+          self.current_self_type_name,
+          superclass,
+          @file_path,
+        )
+      end
 
       in_scope(const_names) do
         super

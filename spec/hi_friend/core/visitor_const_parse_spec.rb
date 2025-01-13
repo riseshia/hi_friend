@@ -2,9 +2,9 @@
 
 module HiFriend::Core
   describe Visitor do
-    let(:const_registry) { ConstRegistry.new }
-    let(:method_registry) { MethodRegistry.new }
-    let(:type_vertex_registry) { TypeVertexRegistry.new }
+    let(:const_registry) { HiFriend::Core.const_registry }
+    let(:method_registry) { HiFriend::Core.method_registry }
+    let(:type_vertex_registry) { HiFriend::Core.type_vertex_registry }
     let(:node_registry) { NodeRegistry.new }
     let(:visitor) do
       Visitor.new(
@@ -17,6 +17,11 @@ module HiFriend::Core
     end
 
     before(:each) do
+      const_registry.clear
+      method_registry.clear
+      type_vertex_registry.clear
+      node_registry.clear
+
       parse_result = Prism.parse(code)
       parse_result.value.accept(visitor)
     end
@@ -133,6 +138,27 @@ module HiFriend::Core
         one = type_vertex_registry.all.first
 
         expect(one.infer.to_ts).to eq("Integer")
+      end
+    end
+
+    context "with class with constant path" do
+      let(:code) do
+        <<~CODE
+        module A
+          class A0; end
+
+          module B
+            class C < A0
+            end
+          end
+        end
+        CODE
+      end
+
+      it "registers all" do
+        c = const_registry.find("A::B::C")
+
+        expect(c.superclass.name).to eq("A::A0")
       end
     end
   end
