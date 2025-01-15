@@ -24,7 +24,9 @@ module HiFriend::Core
 
     def load_global_env_to_registry
       @global_env.consts.each do |const|
-        HiFriend::Core.const_registry.add(const.name, nil, const.path, kind: const.kind)
+        const.paths.each do |const_path|
+          HiFriend::Core.const_registry.add(const.name, nil, const_path, kind: const.kind)
+        end
       end
 
       @global_env.methods.each do |method|
