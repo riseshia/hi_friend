@@ -5,7 +5,7 @@ module HiFriend::Core
       @consts_by_path = Hash.new { |h, k| h[k] = [] }
     end
 
-    def add(const_name, node, path, kind:)
+    def create(const_name, node, path, kind:)
       @const_by_name[const_name] ||=
         begin
           if kind == :var

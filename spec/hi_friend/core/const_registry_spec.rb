@@ -11,9 +11,9 @@ module HiFriend::Core
     describe "#lookup" do
       context "without scope" do
         before do
-          const_registry.add("A", nil, "test_file.rb", kind: :class)
-          const_registry.add("B", nil, "test_file.rb", kind: :class)
-          const_registry.add("B::A", nil, "test_file.rb", kind: :class)
+          const_registry.create("A", nil, "test_file.rb", kind: :class)
+          const_registry.create("B", nil, "test_file.rb", kind: :class)
+          const_registry.create("B::A", nil, "test_file.rb", kind: :class)
         end
 
         it "returns A" do
@@ -29,12 +29,12 @@ module HiFriend::Core
 
       context "with scope" do
         before do
-          const_registry.add("A", nil, "test_file.rb", kind: :class)
-          const_registry.add("A::B0", nil, "test_file.rb", kind: :class)
-          const_registry.add("A::B0::C", nil, "test_file.rb", kind: :class)
-          const_registry.add("A::B1", nil, "test_file.rb", kind: :class)
-          const_registry.add("B0", nil, "test_file.rb", kind: :class)
-          const_registry.add("B0::C", nil, "test_file.rb", kind: :class)
+          const_registry.create("A", nil, "test_file.rb", kind: :class)
+          const_registry.create("A::B0", nil, "test_file.rb", kind: :class)
+          const_registry.create("A::B0::C", nil, "test_file.rb", kind: :class)
+          const_registry.create("A::B1", nil, "test_file.rb", kind: :class)
+          const_registry.create("B0", nil, "test_file.rb", kind: :class)
+          const_registry.create("B0::C", nil, "test_file.rb", kind: :class)
         end
 
         it "returns A" do

@@ -33,7 +33,7 @@ module HiFriend::Core
     def visit_module_node(node)
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
-      @const_registry.add(qualified_const_name, node, @file_path, kind: :module)
+      @const_registry.create(qualified_const_name, node, @file_path, kind: :module)
 
       in_scope(const_names) do
         super
@@ -44,7 +44,7 @@ module HiFriend::Core
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
 
-      klass = @const_registry.add(
+      klass = @const_registry.create(
         qualified_const_name,
         node,
         @file_path,
@@ -154,7 +154,7 @@ module HiFriend::Core
     def visit_constant_write_node(node)
       # we need this some day
       qualified_const_name = build_qualified_const_name([node.name])
-      @const_registry.add(qualified_const_name, node, @file_path, kind: :var)
+      @const_registry.create(qualified_const_name, node, @file_path, kind: :var)
 
       super
     end
@@ -197,7 +197,7 @@ module HiFriend::Core
       const = @const_registry.lookup(scope_name, const_name)
 
       if const.nil?
-        const = @const_registry.add(scope_name, node, @file_path, kind: :unknown)
+        const = @const_registry.create(scope_name, node, @file_path, kind: :unknown)
       end
 
       if const.is_a?(ConstVariable) || const.node.constant_path != node
