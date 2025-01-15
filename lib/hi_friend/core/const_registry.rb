@@ -23,6 +23,16 @@ module HiFriend::Core
       const
     end
 
+    def add(const)
+      @const_by_name[const.name] ||= const
+
+      const.paths.each do |path|
+        @consts_by_path[path] << const
+      end
+
+      const
+    end
+
     def remove_by_path(path)
       consts = @consts_by_path.delete(path)
       if consts
