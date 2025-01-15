@@ -74,7 +74,7 @@ module HiFriend::Core
     def visit_def_node(node)
       singleton = node.receiver.is_a?(Prism::SelfNode) || @current_in_singleton
 
-      method_obj = @method_registry.add(
+      method_obj = @method_registry.create(
         receiver_name: current_self_type_name,
         name: node.name,
         node: node,

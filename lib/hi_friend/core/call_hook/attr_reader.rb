@@ -14,7 +14,7 @@ module HiFriend::Core
         node.arguments&.arguments&.each do |arg_node|
           # Handle string or symbol only.
           if arg_node.respond_to?(:unescaped)
-            method_obj = visitor.method_registry.add(
+            method_obj = visitor.method_registry.create(
               receiver_name: current_const_name,
               name: arg_node.unescaped,
               node: arg_node,

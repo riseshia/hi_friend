@@ -8,7 +8,7 @@ module HiFriend::Core
       @methods_by_name = Hash.new { |h, k| h[k] = [] }
     end
 
-    def add(
+    def create(
       receiver_name:,
       name:,
       node:,

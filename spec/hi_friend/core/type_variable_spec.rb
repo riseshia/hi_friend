@@ -97,7 +97,7 @@ module HiFriend::Core
 
               node = double(Prism::CallNode, name: :+)
 
-              HiFriend::Core.method_registry.add(
+              HiFriend::Core.method_registry.create(
                 receiver_name: "Integer",
                 name: "+",
                 node: node,
