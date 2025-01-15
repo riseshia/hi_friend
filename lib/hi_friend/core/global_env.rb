@@ -35,15 +35,19 @@ module HiFriend::Core
         @consts << const
 
         singleton_def = builder.build_singleton(type_name)
-        singleton_def.methods.each do |method_def|
-          method = convert_rbs_method_to_method(const, method_def)
-          @methods << method
+        singleton_def.methods.each do |method_name, method_def|
+          method_def.defs.each do |method_tdef|
+            method = convert_rbs_method_to_method(const, method_tdef)
+            @methods << method
+          end
         end
 
         instance_def = builder.build_instance(type_name)
-        instance_def.methods.each do |method_def|
-          method = convert_rbs_method_to_method(const, method_def)
-          @methods << method
+        instance_def.methods.each do |method_name, method_def|
+          method_def.defs.each do |method_tdef|
+            method = convert_rbs_method_to_method(const, method_tdef)
+            @methods << method
+          end
         end
       end
 
@@ -78,7 +82,16 @@ module HiFriend::Core
       const
     end
 
-    private def convert_rbs_method_to_method(const, method_def)
+    private def convert_rbs_method_to_method(const, method_tdef)
+      method_sig = method_tdef.type.type
+
+      required_positionals = method_sig.required_positionals
+      optional_positionals = method_sig.optional_positionals
+      required_keywords = method_sig.required_keywords
+      optional_keywords = method_sig.optional_keywords
+      rest_keywords = method_sig.rest_keywords
+      rest_positionals = method_sig.rest_positionals
+
       # XXX: to be implemented
     end
 
