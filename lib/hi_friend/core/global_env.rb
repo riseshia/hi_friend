@@ -54,20 +54,44 @@ module HiFriend::Core
 
         singleton_def = @builder.build_singleton(type_name)
         singleton_def.methods.each do |method_name, rbs_method_def|
-          accessiblity = rbs_method_def.accessibility
+          accessibility = rbs_method_def.accessibility
+
+          method = Method.new(
+            name: method_name,
+            receiver_type: Type.const(type_name, singleton: true),
+            node: nil,
+            visibility: accessibility,
+          )
+
+          locations = []
           rbs_method_def.defs.each do |rbs_method_tdef|
-            method_def = convert_rbs_function_type_to_method_def(rbs_method_tdef.type.type, accessiblity)
-            # @methods << method_def
+            method_def = convert_rbs_function_type_to_method_def(rbs_method_tdef.type.type, accessibility)
+            locations << rbs_method_tdef.type.location.name
           end
+          locations.uniq.each { |path| method.add_path(path) }
+
+          @methods << method
         end
 
         instance_def = @builder.build_instance(type_name)
         instance_def.methods.each do |method_name, rbs_method_def|
-          accessiblity = rbs_method_def.accessibility
+          accessibility = rbs_method_def.accessibility
+
+          method = Method.new(
+            name: method_name,
+            receiver_type: Type.const(type_name, singleton: false),
+            node: nil,
+            visibility: accessibility,
+          )
+
+          locations = []
           rbs_method_def.defs.each do |rbs_method_tdef|
-            method_def = convert_rbs_function_type_to_method_def(rbs_method_tdef.type.type, accessiblity)
-            # @methods << method_def
+            method_def = convert_rbs_function_type_to_method_def(rbs_method_tdef.type.type, accessibility)
+            locations << rbs_method_tdef.type.location.name
           end
+          locations.uniq.each { |path| method.add_path(path) }
+
+          @methods << method
         end
       end
 

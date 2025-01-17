@@ -17,20 +17,24 @@ module HiFriend::Core
       visibility:,
       type: :method
     )
-      id = build_id(receiver_name, name, singleton: singleton)
-
-      @method_by_id[id] ||= method_class(type).new(
-        id: id,
+      method = method_class(type).new(
         name: name,
         node: node,
         receiver_type: Type.const(receiver_name, singleton: singleton),
         visibility: visibility,
       )
-      method = @method_by_id[id]
       method.add_path(path)
 
-      @methods_by_path[path] << method
-      @methods_by_name[name] << method
+      add(method)
+    end
+
+    def add(method)
+      @method_by_id[method.id] ||= method
+
+      method.paths.each do |path|
+        @methods_by_path[path] << method
+      end
+      @methods_by_name[method.name] << method
 
       method
     end

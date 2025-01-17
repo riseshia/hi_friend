@@ -28,15 +28,7 @@ module HiFriend::Core
       end
 
       @global_env.methods.each do |method|
-        HiFriend::Core.method_registry.create(
-          receiver_name: method.receiver_name,
-          name: method.name,
-          node: nil,
-          path: method.path,
-          singleton: method.singleton,
-          visibility: method.visibility,
-          type: method.type,
-        )
+        HiFriend::Core.method_registry.add(method)
       end
     end
 

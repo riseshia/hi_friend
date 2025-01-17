@@ -1,25 +1,25 @@
 module HiFriend::Core
   class MethodBase
     attr_reader :id, :paths, :name, :node, :receiver_type,
-                :arg_tvs, :return_tvs, :return_type
+                :arg_tvs, :return_tvs, :return_type,
+                :definition
 
     attr_accessor :visibility
 
-    def initialize(id:, name:, receiver_type:, node:, visibility:)
-      @id = id
+    def initialize(name:, receiver_type:, node:, visibility:)
       @name = name
       @paths = []
       @node = node
       @receiver_type = receiver_type
       @visibility = visibility
 
-      @arg_types = []
-      @kwarg_types = {}
-      @return_type = nil
+      @definition = nil
 
       @arg_tvs = []
       @return_tvs = []
       @call_location_tvs = []
+
+      @id = build_id
     end
 
     def node_id = (@node_id ||= @node.node_id)
@@ -48,14 +48,6 @@ module HiFriend::Core
       raise NotImplementedError
     end
 
-    def add_arg_type(order, type)
-      @arg_types[order] = type
-    end
-
-    def add_return_type(type)
-      @return_type = type
-    end
-
     def add_call_location_tv(call_tv)
       @call_location_tvs << call_tv
     end
@@ -63,13 +55,19 @@ module HiFriend::Core
     def hover
       raise NotImplementedError
     end
+
+    private def build_id
+      const_name = @receiver_type.name
+      middle = @receiver_type.singleton? ? "." : "#"
+      "#{const_name}#{middle}#{@name}"
+    end
   end
 
   class Method < MethodBase
     attr_reader :id, :paths, :node, :receiver_type,
                 :arg_tvs, :return_tvs, :return_type
 
-    def initialize(id:, name:, receiver_type:, node:, visibility:)
+    def initialize(name:, receiver_type:, node:, visibility:)
       super
       @kwarg_tvs = {}
     end
@@ -90,8 +88,7 @@ module HiFriend::Core
     end
 
     def infer_arg_type(order, constraints = {})
-      # use type declaration if exists
-      return @arg_types[order] if @arg_types[order]
+      # XXX: use type declaration if exists
 
       arg_tv = @arg_tvs[order]
 
@@ -117,8 +114,7 @@ module HiFriend::Core
     end
 
     def infer_kwarg_type(name, constraints = {})
-      # use type declaration if exists
-      return @kwarg_types[name] if @kwarg_types[name]
+      # XXX: use type declaration if exists
 
       kwarg_tv = @kwarg_tvs[name]
 
@@ -148,6 +144,7 @@ module HiFriend::Core
     end
 
     def infer_return_type(constraints = {})
+      # XXX: use type declaration if exists
       if @return_type
         @return_type
       else
@@ -164,10 +161,6 @@ module HiFriend::Core
 
   class AttrReader < MethodBase
     def infer_arg_type(_)
-      raise "AttrReader does not have arguments"
-    end
-
-    def add_arg_type(_, _)
       raise "AttrReader does not have arguments"
     end
 
@@ -189,11 +182,6 @@ module HiFriend::Core
   class AttrWriter < MethodBase
     def infer_arg_type(_)
       guess_ivar_type
-    end
-
-    def add_arg_type(_, _)
-      # XXX: TBW
-      raise "AttrWriter does not accept argument type"
     end
 
     def receiver_obj(const)
