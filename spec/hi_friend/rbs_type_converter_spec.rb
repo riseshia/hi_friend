@@ -3,11 +3,17 @@
 module HiFriend
   describe RbsTypeConverter do
     describe "#convert" do
+      let(:builder) do
+        loader = RBS::EnvironmentLoader.new
+        environment = RBS::Environment.from_loader(loader).resolve_type_names
+        RBS::DefinitionBuilder.new(env: environment)
+      end
+
       Type = HiFriend::Core::Type
 
       def expect_type_equals(rbs_type, hi_friend_type)
         rbs_type = RBS::Parser.parse_type(rbs_type)
-        result = described_class.convert(rbs_type)
+        result = described_class.convert(builder, rbs_type)
 
         expect(result).to eq(hi_friend_type)
       end
@@ -52,8 +58,12 @@ module HiFriend
         expect_type_equals("singleton(String)", Type.const("String", singleton: true))
       end
 
-      it "convert class to class" do
-        expect_type_equals("String", Type.const("String", singleton: false))
+      it "convert symbol to Symbol" do
+        expect_type_equals("symbol", Type.const("Symbol", singleton: false))
+      end
+
+      it "convert Symbol to Symbol" do
+        expect_type_equals("Symbol", Type.const("Symbol", singleton: false))
       end
     end
   end

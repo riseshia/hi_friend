@@ -2,6 +2,7 @@ require "prism"
 
 require_relative "core/constant"
 require_relative "core/method"
+require_relative "core/method_definition"
 require_relative "core/type"
 require_relative "core/type_vertex"
 require_relative "core/global_env"

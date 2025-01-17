@@ -24,7 +24,7 @@ module HiFriend::Core
     private def load_stdlib_from_rbs
       loader = RBS::EnvironmentLoader.new
       environment = RBS::Environment.from_loader(loader).resolve_type_names
-      builder = RBS::DefinitionBuilder.new(env: environment)
+      @builder = RBS::DefinitionBuilder.new(env: environment)
 
       @consts = [] # try reset
       @methods = [] # try reset
@@ -34,19 +34,21 @@ module HiFriend::Core
         const = convert_rbs_class_decl_to_const(kind, class_decl)
         @consts << const
 
-        singleton_def = builder.build_singleton(type_name)
-        singleton_def.methods.each do |method_name, method_def|
-          method_def.defs.each do |method_tdef|
-            method = convert_rbs_method_to_method(const, method_tdef)
-            @methods << method
+        singleton_def = @builder.build_singleton(type_name)
+        singleton_def.methods.each do |method_name, rbs_method_def|
+          accessiblity = rbs_method_def.accessibility
+          rbs_method_def.defs.each do |rbs_method_tdef|
+            method_def = convert_rbs_method_to_method(rbs_method_tdef, accessiblity)
+            # @methods << method_def
           end
         end
 
-        instance_def = builder.build_instance(type_name)
-        instance_def.methods.each do |method_name, method_def|
-          method_def.defs.each do |method_tdef|
-            method = convert_rbs_method_to_method(const, method_tdef)
-            @methods << method
+        instance_def = @builder.build_instance(type_name)
+        instance_def.methods.each do |method_name, rbs_method_def|
+          accessiblity = rbs_method_def.accessibility
+          rbs_method_def.defs.each do |rbs_method_tdef|
+            method_def = convert_rbs_method_to_method(rbs_method_tdef, accessiblity)
+            # @methods << method_def
           end
         end
       end
@@ -82,21 +84,44 @@ module HiFriend::Core
       const
     end
 
-    private def convert_rbs_method_to_method(const, method_tdef)
+    private def convert_rbs_method_to_method(method_tdef, visibility)
       method_sig = method_tdef.type.type
 
-      required_positionals = method_sig.required_positionals
-      optional_positionals = method_sig.optional_positionals
-      required_keywords = method_sig.required_keywords
-      optional_keywords = method_sig.optional_keywords
-      rest_keywords = method_sig.rest_keywords
-      rest_positionals = method_sig.rest_positionals
+      if method_sig.is_a?(RBS::Types::UntypedFunction)
+        return AnyFunction.new.tap do |md|
+          md.visibility = visibility
+          md.return_type = convert_rbs_type_to_our_type(method_sig.return_type)
+        end
+      end
 
-      # XXX: to be implemented
+      MethodDefinition.new.tap do |md|
+        md.visibility = visibility
+        md.return_type = convert_rbs_type_to_our_type(method_sig.return_type)
+
+        method_sig.required_positionals.each do |type|
+          md.required_positionals[type.name] = convert_rbs_type_to_our_type(type.type)
+        end
+        method_sig.optional_positionals.each do |type|
+          md.optional_positionals[type.name] = convert_rbs_type_to_our_type(type.type)
+        end
+        method_sig.required_keywords.each do |name, type|
+          md.required_keywords[name] = convert_rbs_type_to_our_type(type.type)
+        end
+        method_sig.optional_keywords.each do |name, type|
+          md.optional_keywords[name] = convert_rbs_type_to_our_type(type.type)
+        end
+
+        if method_sig.rest_positionals
+          md.rest_positionals[method_sig.rest_positionals.name] = convert_rbs_type_to_our_type(method_sig.rest_positionals.type)
+        end
+        if method_sig.rest_keywords
+          md.rest_keywords[method_sig.rest_keywords.name] = convert_rbs_type_to_our_type(method_sig.rest_keywords.type)
+        end
+      end
     end
 
     private def convert_rbs_type_to_our_type(type)
-      HiFriend::RbsTypeConverter.convert(type)
+      HiFriend::RbsTypeConverter.convert(@builder, type)
     end
   end
 end
