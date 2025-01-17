@@ -29,6 +29,19 @@ module HiFriend::Core
       @consts = [] # try reset
       @methods = [] # try reset
 
+      environment.interface_decls.each do |type_name, interface_decl|
+        name = type_name.to_s.sub("::", "")
+        decl = interface_decl.decl
+        path = decl.location.name
+        interface = Interface.new(name, path)
+
+        decl.members.each do |rbs_method_def|
+          method_defs = rbs_method_def.overloads.map do |overload|
+            convert_rbs_function_type_to_method_def(overload.method_type.type, :public)
+          end
+        end
+      end
+
       environment.class_decls.each do |type_name, class_decl|
         kind = environment.class_decl?(type_name) ? :class : :module
         const = convert_rbs_class_decl_to_const(kind, class_decl)
@@ -38,7 +51,7 @@ module HiFriend::Core
         singleton_def.methods.each do |method_name, rbs_method_def|
           accessiblity = rbs_method_def.accessibility
           rbs_method_def.defs.each do |rbs_method_tdef|
-            method_def = convert_rbs_method_to_method(rbs_method_tdef, accessiblity)
+            method_def = convert_rbs_function_type_to_method_def(rbs_method_tdef.type.type, accessiblity)
             # @methods << method_def
           end
         end
@@ -47,7 +60,7 @@ module HiFriend::Core
         instance_def.methods.each do |method_name, rbs_method_def|
           accessiblity = rbs_method_def.accessibility
           rbs_method_def.defs.each do |rbs_method_tdef|
-            method_def = convert_rbs_method_to_method(rbs_method_tdef, accessiblity)
+            method_def = convert_rbs_function_type_to_method_def(rbs_method_tdef.type.type, accessiblity)
             # @methods << method_def
           end
         end
@@ -84,38 +97,36 @@ module HiFriend::Core
       const
     end
 
-    private def convert_rbs_method_to_method(method_tdef, visibility)
-      method_sig = method_tdef.type.type
-
-      if method_sig.is_a?(RBS::Types::UntypedFunction)
+    private def convert_rbs_function_type_to_method_def(function_type, visibility)
+      if function_type.is_a?(RBS::Types::UntypedFunction)
         return AnyFunction.new.tap do |md|
           md.visibility = visibility
-          md.return_type = convert_rbs_type_to_our_type(method_sig.return_type)
+          md.return_type = convert_rbs_type_to_our_type(function_type.return_type)
         end
       end
 
       MethodDefinition.new.tap do |md|
         md.visibility = visibility
-        md.return_type = convert_rbs_type_to_our_type(method_sig.return_type)
+        md.return_type = convert_rbs_type_to_our_type(function_type.return_type)
 
-        method_sig.required_positionals.each do |type|
+        function_type.required_positionals.each do |type|
           md.required_positionals[type.name] = convert_rbs_type_to_our_type(type.type)
         end
-        method_sig.optional_positionals.each do |type|
+        function_type.optional_positionals.each do |type|
           md.optional_positionals[type.name] = convert_rbs_type_to_our_type(type.type)
         end
-        method_sig.required_keywords.each do |name, type|
+        function_type.required_keywords.each do |name, type|
           md.required_keywords[name] = convert_rbs_type_to_our_type(type.type)
         end
-        method_sig.optional_keywords.each do |name, type|
+        function_type.optional_keywords.each do |name, type|
           md.optional_keywords[name] = convert_rbs_type_to_our_type(type.type)
         end
 
-        if method_sig.rest_positionals
-          md.rest_positionals[method_sig.rest_positionals.name] = convert_rbs_type_to_our_type(method_sig.rest_positionals.type)
+        if function_type.rest_positionals
+          md.rest_positionals[function_type.rest_positionals.name] = convert_rbs_type_to_our_type(function_type.rest_positionals.type)
         end
-        if method_sig.rest_keywords
-          md.rest_keywords[method_sig.rest_keywords.name] = convert_rbs_type_to_our_type(method_sig.rest_keywords.type)
+        if function_type.rest_keywords
+          md.rest_keywords[function_type.rest_keywords.name] = convert_rbs_type_to_our_type(function_type.rest_keywords.type)
         end
       end
     end

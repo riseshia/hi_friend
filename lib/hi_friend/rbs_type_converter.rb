@@ -41,6 +41,9 @@ module HiFriend
               convert(builder, union_or_not)
             end
           end
+        when RBS::Types::Interface
+          name = rbs_type.to_s.sub("::", "")
+          Type.interface(name)
         else
           # pp rbs_type
           # raise "Unknown RBS type: #{rbs_type.class}"

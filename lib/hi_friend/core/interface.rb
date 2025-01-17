@@ -5,11 +5,11 @@ module HiFriend::Core
     def initialize(name, path)
       @name = name
       @path = nil
-      @method_defs = {}
+      @method_defs = Hash.new { |h, k| h[k] = [] }
     end
 
     def add_method_def(name, method_def)
-      @method_defs[name] = method_def
+      @method_defs[name] << method_def
     end
   end
 end
