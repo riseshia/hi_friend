@@ -6,6 +6,7 @@ module HiFriend::Core
     attr_accessor :required_positionals, :optional_positionals,
                   :required_keywords, :optional_keywords,
                   :rest_positionals, :rest_keywords,
+                  :trailing_positionals,
                   :return_type,
                   :visibility
 
@@ -16,6 +17,7 @@ module HiFriend::Core
       @optional_keywords = {}
       @rest_positionals = {}
       @rest_keywords = {}
+      @trailing_positionals = {}
       @return_type = Type.any
       @visibility = :public
     end

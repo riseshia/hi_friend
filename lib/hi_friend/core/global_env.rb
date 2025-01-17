@@ -128,6 +128,10 @@ module HiFriend::Core
         if function_type.rest_keywords
           md.rest_keywords[function_type.rest_keywords.name] = convert_rbs_type_to_our_type(function_type.rest_keywords.type)
         end
+
+        function_type.trailing_positionals.each do |type|
+          md.trailing_positionals[type.name] = convert_rbs_type_to_our_type(type.type)
+        end
       end
     end
 
