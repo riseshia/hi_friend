@@ -100,6 +100,18 @@ module HiFriend::Core
       end
     end
 
+    # equivalent to rbs Interface
+    class Interface < Base
+      def initialize(name)
+        super()
+
+        @name = name
+      end
+
+      def name = @name
+      def to_ts = @name
+    end
+
     class Duck < Base
       def initialize(method_name)
         super()
