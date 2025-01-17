@@ -10,11 +10,12 @@ module HiFriend::Core
       end
     end
 
-    attr_reader :consts, :methods
+    attr_reader :consts, :methods, :interfaces
 
     def initialize
       @consts = []
       @methods = []
+      @interfaces = []
     end
 
     def load!
@@ -28,6 +29,7 @@ module HiFriend::Core
 
       @consts = [] # try reset
       @methods = [] # try reset
+      @interfaces = [] # try reset
 
       environment.interface_decls.each do |type_name, interface_decl|
         name = type_name.to_s.sub("::", "")
@@ -36,10 +38,13 @@ module HiFriend::Core
         interface = Interface.new(name, path)
 
         decl.members.each do |rbs_method_def|
-          method_defs = rbs_method_def.overloads.map do |overload|
-            convert_rbs_function_type_to_method_def(overload.method_type.type, :public)
+          rbs_method_def.overloads.map do |overload|
+            method_def = convert_rbs_function_type_to_method_def(overload.method_type.type, :public)
+            interface.add_method_def(rbs_method_def.name.to_s, method_def)
           end
         end
+
+        @interfaces << interface
       end
 
       environment.class_decls.each do |type_name, class_decl|
