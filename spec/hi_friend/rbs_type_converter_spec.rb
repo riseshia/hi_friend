@@ -65,6 +65,15 @@ module HiFriend
       it "convert Symbol to Symbol" do
         expect_type_equals("Symbol", Type.const("Symbol", singleton: false))
       end
+
+      it "convert ::interned to symbol | String | _Str" do
+        expected_type = Type.union([
+          Type.const("Symbol", singleton: false),
+          Type.const("String", singleton: false),
+          Type.interface("_ToStr"),
+        ])
+        expect_type_equals("::interned", expected_type)
+      end
     end
   end
 end
