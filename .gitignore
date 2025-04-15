@@ -13,4 +13,6 @@
 .rspec_status
 /log
 
+/.github/copilot-instructions.md
+
 /a.rb
