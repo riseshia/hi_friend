@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS receivers (
   id INTEGER PRIMARY KEY,
-  full_path TEXT NOT NULL,
+  full_qualified_name TEXT NOT NULL,
   name TEXT NOT NULL,
   is_singleton BOOLEAN NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER,
   file_hash TEXT,
-  UNIQUE(full_path, file_path)
+  UNIQUE(full_qualified_name, file_path)
 );
 
-CREATE INDEX idx_receivers_full_path ON receivers(full_path);
+CREATE INDEX idx_receivers_full_qualified_name ON receivers(full_qualified_name);
 CREATE INDEX idx_receivers_file_path ON receivers(file_path);
 
 CREATE VIEW OR REPLACE view_receivers AS
