@@ -6,6 +6,7 @@ module HiFriend::Core
                 :file_path, :current_in_singleton
 
     def initialize(
+      db:,
       const_registry:,
       method_registry:,
       type_vertex_registry:,
@@ -14,6 +15,7 @@ module HiFriend::Core
     )
       super()
 
+      @db = db
       @const_registry = const_registry
       @method_registry = method_registry
       @type_vertex_registry = type_vertex_registry
@@ -49,6 +51,15 @@ module HiFriend::Core
         node,
         @file_path,
         kind: :class,
+      )
+
+      receiver = Receiver.insert_class(
+        db: @db,
+        full_qualified_name: qualified_const_name,
+        name: node.name.to_s,
+        file_path: @file_path,
+        line: node.location.start_line,
+        file_hash: "xxxx", # XXX: to be fixed
       )
 
       if node.superclass

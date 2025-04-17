@@ -1,3 +1,5 @@
+require "sqlite3"
+
 module HiFriend::Core
   class Storage
     def initialize

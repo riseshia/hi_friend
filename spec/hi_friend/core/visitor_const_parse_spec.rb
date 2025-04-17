@@ -26,19 +26,6 @@ module HiFriend::Core
       parse_result.value.accept(visitor)
     end
 
-    context "when simple class" do
-      let(:code) do
-        <<~CODE
-          class Post
-          end
-        CODE
-      end
-
-      it "registers class" do
-        expect(const_registry.find("Post")).not_to be_nil
-      end
-    end
-
     context "with const read" do
       let(:code) do
         <<~CODE

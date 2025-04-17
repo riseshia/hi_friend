@@ -1,5 +1,7 @@
 require "prism"
 
+require_relative "core/receiver"
+
 require_relative "core/constant"
 require_relative "core/interface"
 require_relative "core/method"
