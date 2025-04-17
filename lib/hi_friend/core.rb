@@ -1,5 +1,7 @@
 require "prism"
 
+require_relative "core/constant"
+require_relative "core/interface"
 require_relative "core/method"
 require_relative "core/method_definition"
 require_relative "core/type"
@@ -26,6 +28,10 @@ require_relative "core/call_hook/normal_method" # This should be required at las
 module HiFriend::Core
   module_function
 
+  def db
+    @db ||= Storage.new
+  end
+
   def const_registry
     @const_registry ||= ConstRegistry.new
   end
@@ -43,6 +49,7 @@ module HiFriend::Core
   end
 
   def create_visitor(
+    db:,
     const_registry:,
     method_registry:,
     type_vertex_registry:,
@@ -50,6 +57,7 @@ module HiFriend::Core
     file_path:
   )
     Visitor.new(
+      db: db,
       const_registry: const_registry,
       method_registry: method_registry,
       type_vertex_registry: type_vertex_registry,
