@@ -32,6 +32,21 @@ module HiFriend::Core
         SQL
       end
 
+      def insert_module(
+        db:, full_qualified_name:, name:,
+        file_path:, line:, file_hash:
+      )
+        db.execute(<<~SQL)
+          INSERT INTO receivers (
+            full_qualified_name, name,
+            is_singleton, file_path, line, file_hash
+          ) VALUES (
+            'singleton(#{full_qualified_name})', 'singleton(#{name})',
+            true, '#{file_path}', '#{line}', '#{file_hash}'
+          )
+        SQL
+      end
+
       def from_row(row)
         new(*row)
       end
@@ -52,7 +67,7 @@ module HiFriend::Core
       @id = id
       @full_qualified_name = full_qualified_name
       @name = name
-      @is_singleton = is_singleton
+      @is_singleton = is_singleton == 1
       @file_path = file_path
       @line = line
       @file_hash = file_hash

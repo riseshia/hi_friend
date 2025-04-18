@@ -34,93 +34,161 @@ module HiFriend::Core
     def expect_class_exists(fqname)
       receiver = Receiver.find_by_fqname(db, fqname)
       expect(receiver).not_to be_nil
+      expect(receiver.is_singleton).to eq(false)
 
       singleton_receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
       expect(singleton_receiver).not_to be_nil
+      expect(singleton_receiver.is_singleton).to eq(true)
     end
 
-    context "when simple class" do
-      let(:code) do
-        <<~CODE
-          class Post
-          end
-        CODE
-      end
-
-      it "registers one class" do
-        expect_class_exists("Post")
-      end
+    def expect_module_exists(fqname)
+      receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
+      expect(receiver).not_to be_nil
+      expect(receiver.is_singleton).to eq(true)
     end
 
-    context "when class with const path" do
-      let(:code) do
-        <<~CODE
-          class Post::Comment
-          end
-        CODE
-      end
-
-      it "registers one class" do
-        expect_class_exists("Post::Comment")
-      end
-    end
-
-    context "when class in class" do
-      let(:code) do
-        <<~CODE
-          class Post
-            class Comment
+    describe "Parse class def" do
+      context "when simple class" do
+        let(:code) do
+          <<~CODE
+            class Post
             end
-          end
-        CODE
+          CODE
+        end
+
+        it "registers one class" do
+          expect_class_exists("Post")
+        end
       end
 
-      it "registers one class" do
-        expect_class_exists("Post::Comment")
-      end
-    end
-
-    context "when class in module" do
-      let(:code) do
-        <<~CODE
-          module Post
-            class Comment
+      context "when class with const path" do
+        let(:code) do
+          <<~CODE
+            class Post::Comment
             end
-          end
-        CODE
+          CODE
+        end
+
+        it "registers one class" do
+          expect_class_exists("Post::Comment")
+        end
       end
 
-      it "registers one class" do
-        expect_class_exists("Post::Comment")
-      end
-    end
-
-    context "when every const with constant path" do
-      let(:code) do
-        <<~CODE
-          module A::B
-            class C::D
-              class E::F
+      context "when class in class" do
+        let(:code) do
+          <<~CODE
+            class Post
+              class Comment
               end
             end
-          end
-        CODE
+          CODE
+        end
+
+        it "registers one class" do
+          expect_class_exists("Post::Comment")
+        end
       end
 
-      it "registers one class" do
-        expect_class_exists("A::B::C::D::E::F")
+      context "when class in module" do
+        let(:code) do
+          <<~CODE
+            module Post
+              class Comment
+              end
+            end
+          CODE
+        end
+
+        it "registers one class" do
+          expect_class_exists("Post::Comment")
+        end
+      end
+
+      context "when every const with constant path" do
+        let(:code) do
+          <<~CODE
+            module A::B
+              class C::D
+                class E::F
+                end
+              end
+            end
+          CODE
+        end
+
+        it "registers one class" do
+          expect_class_exists("A::B::C::D::E::F")
+        end
+      end
+
+      context "when const with assign" do
+        let(:code) do
+          <<~CODE
+            CustomError = Class.new(StandardError)
+          CODE
+        end
+
+        xit "registers one class" do
+          expect_class_exists("CustomError")
+        end
       end
     end
 
-    context "when const with assign" do
-      let(:code) do
-        <<~CODE
-          CustomError = Class.new(StandardError)
-        CODE
+    describe "Parse module def" do
+      context "when simple module" do
+        let(:code) do
+          <<~CODE
+            module A
+            end
+          CODE
+        end
+
+        it "registers one module" do
+          expect_module_exists("A")
+        end
       end
 
-      xit "registers one class" do
-        expect_class_exists("CustomError")
+      context "when const path" do
+        let(:code) do
+          <<~CODE
+            module A::B
+            end
+          CODE
+        end
+
+        it "registers one module" do
+          expect_module_exists("A::B")
+        end
+      end
+
+      context "when nest module path" do
+        let(:code) do
+          <<~CODE
+            module A
+              module C
+              end
+            end
+          CODE
+        end
+
+        it "registers one module" do
+          expect_module_exists("A::C")
+        end
+      end
+
+      context "when nest module path" do
+        let(:code) do
+          <<~CODE
+            module A::B
+              module C::D
+              end
+            end
+          CODE
+        end
+
+        it "registers one module" do
+          expect_module_exists("A::B::C::D")
+        end
       end
     end
   end

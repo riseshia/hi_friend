@@ -37,6 +37,15 @@ module HiFriend::Core
       qualified_const_name = build_qualified_const_name(const_names)
       @const_registry.create(qualified_const_name, node, @file_path, kind: :module)
 
+      receiver = Receiver.insert_module(
+        db: @db,
+        full_qualified_name: qualified_const_name,
+        name: node.name.to_s,
+        file_path: @file_path,
+        line: node.location.start_line,
+        file_hash: "xxxx", # XXX: to be fixed
+      )
+
       in_scope(const_names) do
         super
       end
