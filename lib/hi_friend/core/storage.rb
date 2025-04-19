@@ -6,7 +6,7 @@ module HiFriend::Core
       @db = SQLite3::Database.new(":memory:")
       schema_path = File.expand_path("#{__dir__}/../../../db/schema.sql")
       schema_sql = File.read(schema_path)
-      @db.execute(schema_sql)
+      @db.execute_batch(schema_sql)
     end
 
     def execute(query)

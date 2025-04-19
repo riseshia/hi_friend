@@ -72,11 +72,19 @@ module HiFriend::Core
       )
 
       if node.superclass
-        superclass = extract_const_names(node.superclass).join("::")
+        superclass_name = extract_const_names(node.superclass).join("::")
         klass.add_superclass(
           self.current_self_type_name,
-          superclass,
+          superclass_name,
           @file_path,
+        )
+
+        Inheritance.insert(
+          db: @db,
+          child_fqname: qualified_const_name,
+          parent_fqname: superclass_name,
+          file_path: @file_path,
+          line: node.location.start_line,
         )
       end
 

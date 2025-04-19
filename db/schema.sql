@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS receivers (
 CREATE INDEX idx_receivers_full_qualified_name ON receivers(full_qualified_name);
 CREATE INDEX idx_receivers_file_path ON receivers(file_path);
 
-CREATE VIEW OR REPLACE view_receivers AS
+DROP VIEW IF EXISTS view_receivers;
+CREATE VIEW view_receivers AS
 SELECT
   full_path,
   MAX(is_singleton) AS is_singleton,
@@ -35,14 +36,14 @@ CREATE INDEX idx_methods_name ON methods(name);
 
 CREATE TABLE IF NOT EXISTS inheritances (
   id INTEGER PRIMARY KEY,
-  child_receiver_full_path TEXT NOT NULL,
-  parent_receiver_full_path TEXT NOT NULL,
+  child_receiver_full_name TEXT NOT NULL,
+  parent_receiver_full_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER
 );
 
-CREATE INDEX idx_inheritances_parent ON inheritances(parent_receiver_full_path);
-CREATE INDEX idx_inheritances_child ON inheritances(child_receiver_full_path);
+CREATE INDEX idx_inheritances_parent ON inheritances(parent_receiver_full_name);
+CREATE INDEX idx_inheritances_child ON inheritances(child_receiver_full_name);
 
 CREATE TABLE IF NOT EXISTS mixins (
   id INTEGER PRIMARY KEY,

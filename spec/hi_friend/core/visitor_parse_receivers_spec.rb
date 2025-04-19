@@ -41,6 +41,11 @@ module HiFriend::Core
       expect(singleton_receiver.is_singleton).to eq(true)
     end
 
+    def expect_class_inherits(child_fqname, parent_fqname)
+      receiver = Receiver.find_by_fqname(db, child_fqname)
+      expect(receiver).not_to be_nil
+    end
+
     def expect_module_exists(fqname)
       receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
       expect(receiver).not_to be_nil
@@ -118,6 +123,42 @@ module HiFriend::Core
 
         it "registers one class" do
           expect_class_exists("A::B::C::D::E::F")
+        end
+      end
+
+      context "when inherit" do
+        let(:code) do
+          <<~CODE
+            class A
+            end
+
+            class B < A
+            end
+          CODE
+        end
+
+        it "registers all classes" do
+          expect_class_exists("A")
+          expect_class_exists("B")
+          expect_class_inherits("B", "A")
+        end
+      end
+
+      context "when inherit with const path" do
+        let(:code) do
+          <<~CODE
+            class A
+            end
+
+            class B < A
+            end
+          CODE
+        end
+
+        it "registers all classes" do
+          expect_class_exists("A")
+          expect_class_exists("B")
+          expect_class_inherits("B", "A")
         end
       end
 
