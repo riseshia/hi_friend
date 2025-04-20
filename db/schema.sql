@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS receivers (
   id INTEGER PRIMARY KEY,
   full_qualified_name TEXT NOT NULL,
-  name TEXT NOT NULL,
   is_singleton BOOLEAN NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER,
@@ -16,8 +15,7 @@ DROP VIEW IF EXISTS view_receivers;
 CREATE VIEW view_receivers AS
 SELECT
   full_path,
-  MAX(is_singleton) AS is_singleton,
-  MIN(name) AS name
+  MAX(is_singleton) AS is_singleton
 FROM receivers
 GROUP BY full_path;
 

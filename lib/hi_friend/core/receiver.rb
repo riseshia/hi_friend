@@ -3,7 +3,7 @@ module HiFriend::Core
     class << self
       def find_by_fqname(db, fqname)
         rows = db.execute(<<~SQL)
-          SELECT id, full_qualified_name, name, is_singleton, file_path, line, file_hash
+          SELECT id, full_qualified_name, is_singleton, file_path, line, file_hash
           FROM receivers
           WHERE full_qualified_name = '#{fqname}'
           LIMIT 1
@@ -15,33 +15,33 @@ module HiFriend::Core
       end
 
       def insert_class(
-        db:, full_qualified_name:, name:,
+        db:, full_qualified_name:,
         file_path:, line:, file_hash:
       )
         db.execute(<<~SQL)
           INSERT INTO receivers (
-            full_qualified_name, name,
+            full_qualified_name,
             is_singleton, file_path, line, file_hash
           ) VALUES (
-            '#{full_qualified_name}', '#{name}',
+            '#{full_qualified_name}',
             false, '#{file_path}', '#{line}', '#{file_hash}'
           ), (
-            'singleton(#{full_qualified_name})', 'singleton(#{name})',
+            'singleton(#{full_qualified_name})',
             true, '#{file_path}', '#{line}', '#{file_hash}'
           )
         SQL
       end
 
       def insert_module(
-        db:, full_qualified_name:, name:,
+        db:, full_qualified_name:,
         file_path:, line:, file_hash:
       )
         db.execute(<<~SQL)
           INSERT INTO receivers (
-            full_qualified_name, name,
+            full_qualified_name,
             is_singleton, file_path, line, file_hash
           ) VALUES (
-            'singleton(#{full_qualified_name})', 'singleton(#{name})',
+            'singleton(#{full_qualified_name})',
             true, '#{file_path}', '#{line}', '#{file_hash}'
           )
         SQL
@@ -52,13 +52,12 @@ module HiFriend::Core
       end
     end
 
-    attr_reader :id, :full_qualified_name, :name,
+    attr_reader :id, :full_qualified_name,
                 :is_singleton, :file_path, :line, :file_hash
 
     def initialize(
       id,
       full_qualified_name,
-      name,
       is_singleton,
       file_path,
       line,
@@ -66,7 +65,6 @@ module HiFriend::Core
     )
       @id = id
       @full_qualified_name = full_qualified_name
-      @name = name
       @is_singleton = is_singleton == 1
       @file_path = file_path
       @line = line
