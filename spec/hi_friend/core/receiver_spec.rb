@@ -2,6 +2,10 @@
 
 module HiFriend::Core
   RSpec.describe Receiver do
+    def fetch_rows_by_fqname(fqname)
+      db.execute("SELECT full_qualified_name, is_singleton, file_path, line, file_hash FROM receivers WHERE full_qualified_name = '#{fqname}'")
+    end
+
     let(:db) { Storage.new }
 
     describe ".find_by_fqname" do
@@ -47,15 +51,25 @@ module HiFriend::Core
           file_hash: "hash456"
         )
 
-        rows = db.execute("SELECT * FROM receivers WHERE full_qualified_name = 'A::B'")
+        rows = fetch_rows_by_fqname("A::B")
         expect(rows.size).to eq(1)
 
         row = rows.first
-        expect(row[1]).to eq("A::B")
-        expect(row[2]).to eq(0)
-        expect(row[3]).to eq("/path/to/module.rb")
-        expect(row[4]).to eq(20)
-        expect(row[5]).to eq("hash456")
+        expect(row[0]).to eq("A::B")
+        expect(row[1]).to eq(0)
+        expect(row[2]).to eq("/path/to/module.rb")
+        expect(row[3]).to eq(20)
+        expect(row[4]).to eq("hash456")
+
+        rows = fetch_rows_by_fqname("singleton(A::B)")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row[0]).to eq("singleton(A::B)")
+        expect(row[1]).to eq(1)
+        expect(row[2]).to eq("/path/to/module.rb")
+        expect(row[3]).to eq(20)
+        expect(row[4]).to eq("hash456")
       end
     end
 
@@ -69,15 +83,15 @@ module HiFriend::Core
           file_hash: "hash456"
         )
 
-        rows = db.execute("SELECT * FROM receivers WHERE full_qualified_name = 'A::B'")
+        rows = fetch_rows_by_fqname("A::B")
         expect(rows.size).to eq(1)
 
         row = rows.first
-        expect(row[1]).to eq("A::B")
-        expect(row[2]).to eq(0)
-        expect(row[3]).to eq("/path/to/module.rb")
-        expect(row[4]).to eq(20)
-        expect(row[5]).to eq("hash456")
+        expect(row[0]).to eq("A::B")
+        expect(row[1]).to eq(0)
+        expect(row[2]).to eq("/path/to/module.rb")
+        expect(row[3]).to eq(20)
+        expect(row[4]).to eq("hash456")
       end
     end
   end
