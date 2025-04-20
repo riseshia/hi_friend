@@ -55,24 +55,6 @@ module HiFriend::Core
     @node_registry ||= NodeRegistry.new
   end
 
-  def create_visitor(
-    db:,
-    const_registry:,
-    method_registry:,
-    type_vertex_registry:,
-    node_registry:,
-    file_path:
-  )
-    Visitor.new(
-      db: db,
-      const_registry: const_registry,
-      method_registry: method_registry,
-      type_vertex_registry: type_vertex_registry,
-      node_registry: node_registry,
-      file_path: file_path
-    )
-  end
-
   def build_source(path, code)
     Source.new(path: path, hash: Digest::SHA256.hexdigest(code))
   end
