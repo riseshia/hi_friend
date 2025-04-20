@@ -32,13 +32,11 @@ module HiFriend::Core
       end
     end
 
-    def update_rb_file(path, code, update_inference: false)
-      parse_result =
-        if code
-          Prism.parse(code)
-        else
-          Prism.parse_file(path)
-        end
+    def update_rb_file(path, passed_code, update_inference: false)
+      code = passed_code || File.read(path)
+
+      source = HiFriend::Core.build_source(path, code)
+      parse_result = Prism.parse(code)
 
       if @code_ast_per_file.key?(path)
         remove_old_version(path)
@@ -50,7 +48,7 @@ module HiFriend::Core
         method_registry: HiFriend::Core.method_registry,
         type_vertex_registry: HiFriend::Core.type_vertex_registry,
         node_registry: HiFriend::Core.node_registry,
-        file_path: path,
+        source: source,
       )
       # pp parse_result.value
       parse_result.value.accept(visitor)

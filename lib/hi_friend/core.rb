@@ -1,3 +1,5 @@
+require "digest/sha2"
+
 require "prism"
 
 require_relative "core/receiver"
@@ -29,6 +31,8 @@ require_relative "core/call_hook/method_visibility"
 require_relative "core/call_hook/normal_method" # This should be required at last
 
 module HiFriend::Core
+  Source = Data.define(:path, :hash)
+
   module_function
 
   def db
@@ -67,5 +71,9 @@ module HiFriend::Core
       node_registry: node_registry,
       file_path: file_path
     )
+  end
+
+  def build_source(path, code)
+    Source.new(path: path, hash: Digest::SHA256.hexdigest(code))
   end
 end

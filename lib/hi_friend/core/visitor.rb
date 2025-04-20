@@ -3,7 +3,7 @@
 module HiFriend::Core
   class Visitor < Prism::Visitor
     attr_reader :const_registry, :method_registry, :type_vertex_registry, :node_registry,
-                :file_path, :current_in_singleton
+                :source, :current_in_singleton
 
     def initialize(
       db:,
@@ -11,7 +11,7 @@ module HiFriend::Core
       method_registry:,
       type_vertex_registry:,
       node_registry:,
-      file_path:
+      source:
     )
       super()
 
@@ -21,7 +21,7 @@ module HiFriend::Core
       @type_vertex_registry = type_vertex_registry
       @node_registry = node_registry
 
-      @file_path = file_path
+      @source = source
       @current_scope = ["Object"]
       @lvars = []
       @current_in_singleton = false
@@ -35,15 +35,15 @@ module HiFriend::Core
     def visit_module_node(node)
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
-      @const_registry.create(qualified_const_name, node, @file_path, kind: :module)
+      @const_registry.create(qualified_const_name, node, @source.path, kind: :module)
 
       receiver = Receiver.insert_module(
         db: @db,
         full_qualified_name: qualified_const_name,
         name: node.name.to_s,
-        file_path: @file_path,
+        file_path: @source.path,
         line: node.location.start_line,
-        file_hash: "xxxx", # XXX: to be fixed
+        file_hash: @source.hash,
       )
 
       in_scope(const_names) do
@@ -58,7 +58,7 @@ module HiFriend::Core
       klass = @const_registry.create(
         qualified_const_name,
         node,
-        @file_path,
+        @source.path,
         kind: :class,
       )
 
@@ -66,9 +66,9 @@ module HiFriend::Core
         db: @db,
         full_qualified_name: qualified_const_name,
         name: node.name.to_s,
-        file_path: @file_path,
+        file_path: @source.path,
         line: node.location.start_line,
-        file_hash: "xxxx", # XXX: to be fixed
+        file_hash: @source.hash,
       )
 
       if node.superclass
@@ -76,14 +76,14 @@ module HiFriend::Core
         klass.add_superclass(
           self.current_self_type_name,
           superclass_name,
-          @file_path,
+          @source.path,
         )
 
         Inheritance.insert(
           db: @db,
           child_fqname: qualified_const_name,
           parent_fqname: superclass_name,
-          file_path: @file_path,
+          file_path: @source.path,
           line: node.location.start_line,
         )
       end
@@ -106,11 +106,11 @@ module HiFriend::Core
         receiver_name: current_self_type_name,
         name: node.name,
         node: node,
-        path: @file_path,
+        path: @source.path,
         singleton: singleton,
         visibility: current_method_visibility,
       )
-      @node_registry.add(@file_path, method_obj)
+      @node_registry.add(@source.path, method_obj)
 
       in_method(node.name, method_obj) do
         super
@@ -163,12 +163,12 @@ module HiFriend::Core
       if node.arguments.nil?
         # means return nil, so mimic it
         tv = TypeVertex::Static.new(
-          path: @file_path,
+          path: @source.path,
           name: "Prism::NilNode",
           node: node,
         )
         @type_vertex_registry.add(tv)
-        @node_registry.add(@file_path, tv)
+        @node_registry.add(@source.path, tv)
       else
         node.arguments.arguments.each do |arg|
           arg_tv = find_or_create_tv(arg)
@@ -182,7 +182,7 @@ module HiFriend::Core
     def visit_constant_write_node(node)
       # we need this some day
       qualified_const_name = build_qualified_const_name([node.name])
-      @const_registry.create(qualified_const_name, node, @file_path, kind: :var)
+      @const_registry.create(qualified_const_name, node, @source.path, kind: :var)
 
       super
     end
@@ -225,7 +225,7 @@ module HiFriend::Core
       const = @const_registry.lookup(scope_name, const_name)
 
       if const.nil?
-        const = @const_registry.create(scope_name, node, @file_path, kind: :unknown)
+        const = @const_registry.create(scope_name, node, @source.path, kind: :unknown)
       end
 
       if const.is_a?(ConstVariable) || const.node.constant_path != node
@@ -542,140 +542,140 @@ module HiFriend::Core
     end
 
     def find_or_create_tv(node)
-      tv = @type_vertex_registry.find(@file_path, node.node_id)
+      tv = @type_vertex_registry.find(@source.path, node.node_id)
       return tv if tv
 
       tv =
         case node
         when Prism::RequiredParameterNode
           TypeVertex::Param.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::RequiredKeywordParameterNode
           TypeVertex::Kwparam.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::OptionalParameterNode
           TypeVertex::Param.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::OptionalKeywordParameterNode
           TypeVertex::Kwparam.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::LocalVariableReadNode
           TypeVertex::LvarRead.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::LocalVariableWriteNode, Prism::LocalVariableTargetNode
           TypeVertex::LvarWrite.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::InstanceVariableReadNode
           TypeVertex::IvarRead.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::InstanceVariableWriteNode
           TypeVertex::IvarWrite.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::CallNode
           TypeVertex::Call.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::IfNode
           TypeVertex::If.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::ArrayNode
           TypeVertex::Array.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::IntegerNode
           TypeVertex::Static.new(
-            path: @file_path,
+            path: @source.path,
             name: node.value.to_s,
             node: node,
           )
         when Prism::StringNode
           TypeVertex::Static.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::HashNode
           TypeVertex::Hash.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::ConstantReadNode
           TypeVertex::ConstRead.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::ConstantPathNode
           TypeVertex::ConstRead.new(
-            path: @file_path,
+            path: @source.path,
             name: node.name.to_s,
             node: node,
           )
         when Prism::StringNode
           TypeVertex::Static.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::InterpolatedStringNode
           TypeVertex::InterpolatedString.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::EmbeddedStatementsNode
           TypeVertex::EmbeddedStatements.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::SymbolNode
           TypeVertex::Static.new(
-            path: @file_path,
+            path: @source.path,
             name: node.value.to_s,
             node: node,
           )
         when Prism::BreakNode
           TypeVertex::Break.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
         when Prism::TrueNode, Prism::FalseNode, Prism::NilNode
           TypeVertex::Static.new(
-            path: @file_path,
+            path: @source.path,
             name: node.class.name,
             node: node,
           )
@@ -685,7 +685,7 @@ module HiFriend::Core
         end
 
       @type_vertex_registry.add(tv)
-      @node_registry.add(@file_path, tv)
+      @node_registry.add(@source.path, tv)
 
       tv
     end

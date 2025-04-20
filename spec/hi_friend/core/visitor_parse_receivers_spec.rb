@@ -9,6 +9,7 @@ module HiFriend::Core
     let(:method_registry) { HiFriend::Core.method_registry }
     let(:type_vertex_registry) { HiFriend::Core.type_vertex_registry }
     let(:node_registry) { NodeRegistry.new }
+    let(:source) { HiFriend::Core::Source.new(path: "sample/sample.rb", hash: "1234567890") }
 
     let(:visitor) do
       Visitor.new(
@@ -17,7 +18,7 @@ module HiFriend::Core
         method_registry: method_registry,
         type_vertex_registry: type_vertex_registry,
         node_registry: node_registry,
-        file_path: "sample/sample.rb",
+        source: source,
       )
     end
 
