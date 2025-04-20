@@ -36,14 +36,14 @@ CREATE INDEX idx_methods_name ON methods(name);
 
 CREATE TABLE IF NOT EXISTS inheritances (
   id INTEGER PRIMARY KEY,
-  child_receiver_full_name TEXT NOT NULL,
-  parent_receiver_full_name TEXT NOT NULL,
+  child_receiver_full_qualified_name TEXT NOT NULL,
+  parent_receiver_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER
 );
 
-CREATE INDEX idx_inheritances_parent ON inheritances(parent_receiver_full_name);
-CREATE INDEX idx_inheritances_child ON inheritances(child_receiver_full_name);
+CREATE INDEX idx_inheritances_parent ON inheritances(parent_receiver_name);
+CREATE INDEX idx_inheritances_child ON inheritances(child_receiver_full_qualified_name);
 
 CREATE TABLE IF NOT EXISTS mixins (
   id INTEGER PRIMARY KEY,

@@ -45,6 +45,10 @@ module HiFriend::Core
     def expect_class_inherits(child_fqname, parent_fqname)
       receiver = Receiver.find_by_fqname(db, child_fqname)
       expect(receiver).not_to be_nil
+
+      inheritance = Inheritance.find_by_child_fqname(db, child_fqname)
+      expect(inheritance).not_to be_nil
+      expect(inheritance.parent_receiver_name).to eq(parent_fqname)
     end
 
     def expect_module_exists(fqname)

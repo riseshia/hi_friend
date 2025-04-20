@@ -81,8 +81,8 @@ module HiFriend::Core
 
         Inheritance.insert(
           db: @db,
-          child_fqname: qualified_const_name,
-          parent_fqname: superclass_name,
+          child_receiver_fqname: qualified_const_name,
+          parent_receiver_name: superclass_name,
           file_path: @source.path,
           line: node.location.start_line,
         )
