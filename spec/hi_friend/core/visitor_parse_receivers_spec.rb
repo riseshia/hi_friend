@@ -150,18 +150,20 @@ module HiFriend::Core
       context "when inherit with const path" do
         let(:code) do
           <<~CODE
-            class A
+            module A
+              class B
+              end
             end
 
-            class B < A
+            class C < A::B
             end
           CODE
         end
 
         it "registers all classes" do
-          expect_class_exists("A")
-          expect_class_exists("B")
-          expect_class_inherits("B", "A")
+          expect_class_exists("A::B")
+          expect_class_exists("C")
+          expect_class_inherits("C", "A::B")
         end
       end
 
