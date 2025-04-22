@@ -44,7 +44,7 @@ module HiFriend::Core
       receiver = Receiver.find_by_fqname(db, child_fqname)
       expect(receiver).not_to be_nil
 
-      inheritance = IncludedModule.find_by_child_fqname(db, child_fqname)
+      inheritance = IncludedModule.where(db, kind: :inherit, child_fqname: child_fqname).first
       expect(inheritance).not_to be_nil
       expect(inheritance.parent_receiver_name).to eq(parent_fqname)
     end

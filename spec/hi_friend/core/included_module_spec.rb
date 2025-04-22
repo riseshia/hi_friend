@@ -6,13 +6,13 @@ module HiFriend::Core
   RSpec.describe IncludedModule do
     let(:db) { Storage.new }
 
-    describe ".find_by_child_fqname" do
+    describe ".where_by_child_fqname" do
       before do
         db.execute(<<~SQL)
           INSERT INTO included_modules (
-            child_receiver_fqname, parent_receiver_name, file_path, line
+            kind, child_receiver_fqname, parent_receiver_name, file_path, line
           ) VALUES (
-            'B', 'A',
+            'inherit', 'B', 'A',
             '/path/to/file.rb', 10
           )
         SQL
@@ -20,7 +20,7 @@ module HiFriend::Core
 
       context "when parent exists" do
         it "returns parent name" do
-          included_module = described_class.find_by_child_fqname(db, "B")
+          included_module = described_class.where(db, kind: :inherit, child_fqname: "B").first
           expect(included_module.parent_receiver_name).to eq("A")
           expect(included_module.file_path).to eq("/path/to/file.rb")
           expect(included_module.line).to eq(10)
@@ -29,7 +29,7 @@ module HiFriend::Core
 
       context "when parent does not exist" do
         it "returns nil" do
-          included_module = described_class.find_by_child_fqname(db, "C")
+          included_module = described_class.where(db, kind: :inherit, child_fqname: "C").first
           expect(included_module).to be_nil
         end
       end
@@ -39,6 +39,7 @@ module HiFriend::Core
       it "executes the correct SQL query" do
         IncludedModule.insert(
           db: db,
+          kind: :inherit,
           child_receiver_fqname: "B",
           parent_receiver_name: "A",
           file_path: "path/to/file.rb",
