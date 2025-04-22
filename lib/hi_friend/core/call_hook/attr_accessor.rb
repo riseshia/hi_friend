@@ -20,7 +20,7 @@ module HiFriend::Core
               receiver_name: current_const_name,
               name: arg_node.unescaped,
               node: arg_node,
-              path: visitor.file_path,
+              path: visitor.source.path,
               singleton: visitor.current_in_singleton,
               visibility: :public,
               type: :attr_writer,

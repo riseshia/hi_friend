@@ -2,9 +2,7 @@
 
 module HiFriend::Core
   describe "ParseReceivers" do
-    let(:db) do
-      Storage.new
-    end
+    let(:db) { Storage.new }
     let(:const_registry) { HiFriend::Core.const_registry }
     let(:method_registry) { HiFriend::Core.method_registry }
     let(:type_vertex_registry) { HiFriend::Core.type_vertex_registry }

@@ -3,6 +3,7 @@ module HiFriend::Core
     def initialize
       @code_ast_per_file = {}
       @global_env = GlobalEnv.load!
+      @db = Storage.new
     end
 
     def add_workspace(rb_folder)
@@ -44,6 +45,7 @@ module HiFriend::Core
       @code_ast_per_file[path] = parse_result.value
 
       visitor = Visitor.new(
+        db: @db,
         const_registry: HiFriend::Core.const_registry,
         method_registry: HiFriend::Core.method_registry,
         type_vertex_registry: HiFriend::Core.type_vertex_registry,

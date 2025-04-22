@@ -2,17 +2,20 @@
 
 module HiFriend::Core
   describe Visitor do
+    let(:db) { Storage.new }
     let(:const_registry) { HiFriend::Core.const_registry }
     let(:method_registry) { HiFriend::Core.method_registry }
     let(:type_vertex_registry) { HiFriend::Core.type_vertex_registry }
     let(:node_registry) { NodeRegistry.new }
+    let(:source) { HiFriend::Core::Source.new(path: "sample/sample.rb", hash: "1234567890") }
     let(:visitor) do
       Visitor.new(
+        db: db,
         const_registry: const_registry,
         method_registry: method_registry,
         type_vertex_registry: type_vertex_registry,
         node_registry: node_registry,
-        file_path: "sample/sample.rb",
+        source: source,
       )
     end
 
