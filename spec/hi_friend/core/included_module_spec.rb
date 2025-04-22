@@ -10,7 +10,7 @@ module HiFriend::Core
       before do
         db.execute(<<~SQL)
           INSERT INTO included_modules (
-            child_receiver_full_qualified_name, parent_receiver_name, file_path, line
+            child_receiver_fqname, parent_receiver_name, file_path, line
           ) VALUES (
             'B', 'A',
             '/path/to/file.rb', 10
@@ -45,7 +45,7 @@ module HiFriend::Core
           line: 10
         )
 
-        rows = db.execute("SELECT child_receiver_full_qualified_name, parent_receiver_name, file_path, line FROM included_modules WHERE child_receiver_full_qualified_name = 'B'")
+        rows = db.execute("SELECT child_receiver_fqname, parent_receiver_name, file_path, line FROM included_modules WHERE child_receiver_fqname = 'B'")
         expect(rows.size).to eq(1)
 
         row = rows.first

@@ -3,9 +3,9 @@ module HiFriend::Core
     class << self
       def find_by_fqname(db, fqname)
         rows = db.execute(<<~SQL)
-          SELECT id, full_qualified_name, is_singleton, file_path, line, file_hash
+          SELECT id, fqname, is_singleton, file_path, line, file_hash
           FROM receivers
-          WHERE full_qualified_name = '#{fqname}'
+          WHERE fqname = '#{fqname}'
           LIMIT 1
         SQL
 
@@ -15,33 +15,33 @@ module HiFriend::Core
       end
 
       def insert_class(
-        db:, full_qualified_name:,
+        db:, fqname:,
         file_path:, line:, file_hash:
       )
         db.execute(<<~SQL)
           INSERT INTO receivers (
-            full_qualified_name,
+            fqname,
             is_singleton, file_path, line, file_hash
           ) VALUES (
-            '#{full_qualified_name}',
+            '#{fqname}',
             false, '#{file_path}', '#{line}', '#{file_hash}'
           ), (
-            'singleton(#{full_qualified_name})',
+            'singleton(#{fqname})',
             true, '#{file_path}', '#{line}', '#{file_hash}'
           )
         SQL
       end
 
       def insert_module(
-        db:, full_qualified_name:,
+        db:, fqname:,
         file_path:, line:, file_hash:
       )
         db.execute(<<~SQL)
           INSERT INTO receivers (
-            full_qualified_name,
+            fqname,
             is_singleton, file_path, line, file_hash
           ) VALUES (
-            'singleton(#{full_qualified_name})',
+            'singleton(#{fqname})',
             true, '#{file_path}', '#{line}', '#{file_hash}'
           )
         SQL
@@ -52,19 +52,19 @@ module HiFriend::Core
       end
     end
 
-    attr_reader :id, :full_qualified_name,
+    attr_reader :id, :fqname,
                 :is_singleton, :file_path, :line, :file_hash
 
     def initialize(
       id,
-      full_qualified_name,
+      fqname,
       is_singleton,
       file_path,
       line,
       file_hash
     )
       @id = id
-      @full_qualified_name = full_qualified_name
+      @fqname = fqname
       @is_singleton = is_singleton == 1
       @file_path = file_path
       @line = line

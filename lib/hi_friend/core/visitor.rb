@@ -39,7 +39,7 @@ module HiFriend::Core
 
       receiver = Receiver.insert_module(
         db: @db,
-        full_qualified_name: qualified_const_name,
+        fqname: qualified_const_name,
         file_path: @source.path,
         line: node.location.start_line,
         file_hash: @source.hash,
@@ -63,7 +63,7 @@ module HiFriend::Core
 
       receiver = Receiver.insert_class(
         db: @db,
-        full_qualified_name: qualified_const_name,
+        fqname: qualified_const_name,
         file_path: @source.path,
         line: node.location.start_line,
         file_hash: @source.hash,

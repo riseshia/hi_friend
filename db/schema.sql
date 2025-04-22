@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS receivers (
   id INTEGER PRIMARY KEY,
-  full_qualified_name TEXT NOT NULL,
+  fqname TEXT NOT NULL,
   is_singleton BOOLEAN NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER,
   file_hash TEXT,
-  UNIQUE(full_qualified_name, file_path)
+  UNIQUE(fqname, file_path)
 );
 
-CREATE INDEX idx_receivers_full_qualified_name ON receivers(full_qualified_name);
+CREATE INDEX idx_receivers_fqname ON receivers(fqname);
 CREATE INDEX idx_receivers_file_path ON receivers(file_path);
 
 DROP VIEW IF EXISTS view_receivers;
@@ -34,14 +34,14 @@ CREATE INDEX idx_methods_name ON methods(name);
 
 CREATE TABLE IF NOT EXISTS included_modules (
   id INTEGER PRIMARY KEY,
-  child_receiver_full_qualified_name TEXT NOT NULL,
+  child_receiver_fqname TEXT NOT NULL,
   parent_receiver_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER
 );
 
 CREATE INDEX idx_included_modules_parent ON included_modules(parent_receiver_name);
-CREATE INDEX idx_included_modules_child ON included_modules(child_receiver_full_qualified_name);
+CREATE INDEX idx_included_modules_child ON included_modules(child_receiver_fqname);
 
 CREATE TABLE IF NOT EXISTS mixins (
   id INTEGER PRIMARY KEY,

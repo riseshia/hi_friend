@@ -3,7 +3,7 @@
 module HiFriend::Core
   RSpec.describe Receiver do
     def fetch_rows_by_fqname(fqname)
-      db.execute("SELECT full_qualified_name, is_singleton, file_path, line, file_hash FROM receivers WHERE full_qualified_name = '#{fqname}'")
+      db.execute("SELECT fqname, is_singleton, file_path, line, file_hash FROM receivers WHERE fqname = '#{fqname}'")
     end
 
     let(:db) { Storage.new }
@@ -13,7 +13,7 @@ module HiFriend::Core
         before do
           db.execute(<<~SQL)
             INSERT INTO receivers (
-              full_qualified_name,
+              fqname,
               is_singleton, file_path, line, file_hash
             ) VALUES (
               'Test::Class',
@@ -25,7 +25,7 @@ module HiFriend::Core
         it "returns a receiver instance" do
           receiver = described_class.find_by_fqname(db, "Test::Class")
           expect(receiver).to be_a(Receiver)
-          expect(receiver.full_qualified_name).to eq("Test::Class")
+          expect(receiver.fqname).to eq("Test::Class")
           expect(receiver.is_singleton).to eq(false)
           expect(receiver.file_path).to eq("/path/to/file.rb")
           expect(receiver.line).to eq(10)
@@ -45,7 +45,7 @@ module HiFriend::Core
       it "inserts a new receiver record" do
         described_class.insert_class(
           db: db,
-          full_qualified_name: "A::B",
+          fqname: "A::B",
           file_path: "/path/to/module.rb",
           line: 20,
           file_hash: "hash456"
@@ -77,7 +77,7 @@ module HiFriend::Core
       it "inserts a new receiver record" do
         described_class.insert_class(
           db: db,
-          full_qualified_name: "A::B",
+          fqname: "A::B",
           file_path: "/path/to/module.rb",
           line: 20,
           file_hash: "hash456"
