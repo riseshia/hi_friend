@@ -56,5 +56,35 @@ module HiFriend::Core
         expect(row[3]).to eq(10)
       end
     end
+
+    describe ".insert_inherit" do
+      it "executes the correct SQL query" do
+        IncludedModule.insert_inherit(
+          db: db,
+          child_receiver_fqname: "B",
+          parent_receiver_name: "A",
+          file_path: "path/to/file.rb",
+          line: 10
+        )
+
+        rows = db.execute("SELECT child_receiver_fqname, parent_receiver_name, file_path, line FROM included_modules WHERE child_receiver_fqname = 'B'")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row[0]).to eq("B")
+        expect(row[1]).to eq("A")
+        expect(row[2]).to eq("path/to/file.rb")
+        expect(row[3]).to eq(10)
+
+        rows = db.execute("SELECT child_receiver_fqname, parent_receiver_name, file_path, line FROM included_modules WHERE child_receiver_fqname = 'singleton(B)'")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row[0]).to eq("singleton(B)")
+        expect(row[1]).to eq("A")
+        expect(row[2]).to eq("path/to/file.rb")
+        expect(row[3]).to eq(10)
+      end
+    end
   end
 end

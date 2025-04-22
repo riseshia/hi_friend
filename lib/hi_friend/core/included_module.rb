@@ -21,6 +21,25 @@ module HiFriend::Core
         new(*row)
       end
 
+      def insert_inherit(
+        db:, child_receiver_fqname:, parent_receiver_name:,
+        file_path:, line:
+      )
+        kind = :inherit
+        db.execute(<<~SQL)
+          INSERT INTO included_modules (
+            kind, child_receiver_fqname, parent_receiver_name,
+            file_path, line
+          ) VALUES (
+            '#{kind}', '#{child_receiver_fqname}', '#{parent_receiver_name}',
+            '#{file_path}', '#{line}'
+          ), (
+            '#{kind}', 'singleton(#{child_receiver_fqname})', '#{parent_receiver_name}',
+            '#{file_path}', '#{line}'
+          )
+        SQL
+      end
+
       def insert(
         db:, kind:, child_receiver_fqname:, parent_receiver_name:,
         file_path:, line:

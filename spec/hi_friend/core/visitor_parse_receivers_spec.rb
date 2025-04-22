@@ -164,6 +164,7 @@ module HiFriend::Core
           expect_class_exists("A::B")
           expect_class_exists("C")
           expect_class_inherits("C", "A::B")
+          expect_class_inherits("singleton(C)", "A::B")
         end
       end
 
