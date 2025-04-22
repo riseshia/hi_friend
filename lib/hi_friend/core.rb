@@ -3,7 +3,7 @@ require "digest/sha2"
 require "prism"
 
 require_relative "core/receiver"
-require_relative "core/inheritance"
+require_relative "core/included_module"
 
 require_relative "core/constant"
 require_relative "core/interface"

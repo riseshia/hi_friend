@@ -3,13 +3,13 @@
 require "spec_helper"
 
 module HiFriend::Core
-  RSpec.describe Inheritance do
+  RSpec.describe IncludedModule do
     let(:db) { Storage.new }
 
     describe ".find_by_child_fqname" do
       before do
         db.execute(<<~SQL)
-          INSERT INTO inheritances (
+          INSERT INTO included_modules (
             child_receiver_full_qualified_name, parent_receiver_name, file_path, line
           ) VALUES (
             'B', 'A',
@@ -20,24 +20,24 @@ module HiFriend::Core
 
       context "when parent exists" do
         it "returns parent name" do
-          inheritance = described_class.find_by_child_fqname(db, "B")
-          expect(inheritance.parent_receiver_name).to eq("A")
-          expect(inheritance.file_path).to eq("/path/to/file.rb")
-          expect(inheritance.line).to eq(10)
+          included_module = described_class.find_by_child_fqname(db, "B")
+          expect(included_module.parent_receiver_name).to eq("A")
+          expect(included_module.file_path).to eq("/path/to/file.rb")
+          expect(included_module.line).to eq(10)
         end
       end
 
       context "when parent does not exist" do
         it "returns nil" do
-          inheritance = described_class.find_by_child_fqname(db, "C")
-          expect(inheritance).to be_nil
+          included_module = described_class.find_by_child_fqname(db, "C")
+          expect(included_module).to be_nil
         end
       end
     end
 
     describe ".insert" do
       it "executes the correct SQL query" do
-        Inheritance.insert(
+        IncludedModule.insert(
           db: db,
           child_receiver_fqname: "B",
           parent_receiver_name: "A",
@@ -45,7 +45,7 @@ module HiFriend::Core
           line: 10
         )
 
-        rows = db.execute("SELECT child_receiver_full_qualified_name, parent_receiver_name, file_path, line FROM inheritances WHERE child_receiver_full_qualified_name = 'B'")
+        rows = db.execute("SELECT child_receiver_full_qualified_name, parent_receiver_name, file_path, line FROM included_modules WHERE child_receiver_full_qualified_name = 'B'")
         expect(rows.size).to eq(1)
 
         row = rows.first

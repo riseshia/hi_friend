@@ -77,7 +77,7 @@ module HiFriend::Core
           @source.path,
         )
 
-        Inheritance.insert(
+        IncludedModule.insert(
           db: @db,
           child_receiver_fqname: qualified_const_name,
           parent_receiver_name: superclass_name,

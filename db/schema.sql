@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS methods (
 CREATE INDEX idx_methods_receiver_id ON methods(receiver_id);
 CREATE INDEX idx_methods_name ON methods(name);
 
-CREATE TABLE IF NOT EXISTS inheritances (
+CREATE TABLE IF NOT EXISTS included_modules (
   id INTEGER PRIMARY KEY,
   child_receiver_full_qualified_name TEXT NOT NULL,
   parent_receiver_name TEXT NOT NULL,
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS inheritances (
   line INTEGER
 );
 
-CREATE INDEX idx_inheritances_parent ON inheritances(parent_receiver_name);
-CREATE INDEX idx_inheritances_child ON inheritances(child_receiver_full_qualified_name);
+CREATE INDEX idx_included_modules_parent ON included_modules(parent_receiver_name);
+CREATE INDEX idx_included_modules_child ON included_modules(child_receiver_full_qualified_name);
 
 CREATE TABLE IF NOT EXISTS mixins (
   id INTEGER PRIMARY KEY,

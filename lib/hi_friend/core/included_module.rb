@@ -1,11 +1,11 @@
 module HiFriend::Core
-  class Inheritance
+  class IncludedModule
     class << self
       def find_by_child_fqname(db, child_fqname)
         rows = db.execute(<<~SQL)
           SELECT child_receiver_full_qualified_name, parent_receiver_name,
                  file_path, line
-          FROM inheritances
+          FROM included_modules
           WHERE child_receiver_full_qualified_name = '#{child_fqname}'
           LIMIT 1
         SQL
@@ -21,7 +21,7 @@ module HiFriend::Core
         file_path:, line:
       )
         db.execute(<<~SQL)
-          INSERT INTO inheritances (
+          INSERT INTO included_modules (
             child_receiver_full_qualified_name, parent_receiver_name,
             file_path, line
           ) VALUES (
@@ -40,7 +40,7 @@ module HiFriend::Core
         file_path:, line:
       )
         db.execute(<<~SQL)
-          INSERT INTO inheritances (
+          INSERT INTO included_modules (
             child_receiver_full_qualified_name, parent_receiver_name,
             file_path, line
           ) VALUES (
