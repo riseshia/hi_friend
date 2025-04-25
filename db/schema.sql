@@ -14,10 +14,8 @@ CREATE INDEX idx_receivers_file_path ON receivers(file_path);
 DROP VIEW IF EXISTS view_receivers;
 CREATE VIEW view_receivers AS
 SELECT
-  full_path,
-  MAX(is_singleton) AS is_singleton
-FROM receivers
-GROUP BY full_path;
+  distinct fqname
+FROM receivers;
 
 CREATE TABLE IF NOT EXISTS methods (
   id INTEGER PRIMARY KEY,
