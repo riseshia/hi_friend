@@ -3,7 +3,7 @@
 module HiFriend::Core
   class Visitor < Prism::Visitor
     attr_reader :const_registry, :method_registry, :type_vertex_registry, :node_registry,
-                :source, :current_in_singleton
+                :source, :current_in_singleton, :db
 
     def initialize(
       db:,
@@ -484,7 +484,7 @@ module HiFriend::Core
       @last_evaluated_tv = value_tv
     end
 
-    private def extract_const_names(const_read_node_or_const_path_node)
+    def extract_const_names(const_read_node_or_const_path_node)
       if const_read_node_or_const_path_node.is_a?(Prism::ConstantReadNode)
         [const_read_node_or_const_path_node.name]
       else

@@ -44,18 +44,6 @@ CREATE TABLE IF NOT EXISTS included_modules (
 CREATE INDEX idx_included_modules_parent ON included_modules(parent_receiver_name);
 CREATE INDEX idx_included_modules_child ON included_modules(child_receiver_fqname);
 
-CREATE TABLE IF NOT EXISTS mixins (
-  id INTEGER PRIMARY KEY,
-  target_receiver_full_path TEXT NOT NULL,
-  mixin_receiver_full_path TEXT NOT NULL,
-  kind TEXT NOT NULL CHECK (kind IN ('include', 'prepend')),
-  file_path TEXT NOT NULL,
-  line INTEGER
-);
-
-CREATE INDEX idx_mixins_mixin ON mixins(mixin_receiver_full_path);
-CREATE INDEX idx_mixins_target ON mixins(target_receiver_full_path);
-
 CREATE TABLE IF NOT EXISTS method_responses (
   receiver_full_path TEXT NOT NULL,
   method_name TEXT NOT NULL,

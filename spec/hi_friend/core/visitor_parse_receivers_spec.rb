@@ -49,6 +49,15 @@ module HiFriend::Core
       expect(inheritance.parent_receiver_name).to eq(parent_fqname)
     end
 
+    def expect_class_includes(child_fqname, parent_fqname)
+      receiver = Receiver.find_by_fqname(db, child_fqname)
+      expect(receiver).not_to be_nil
+
+      inheritance = IncludedModule.where(db, kind: :include, child_fqname: child_fqname).first
+      expect(inheritance).not_to be_nil
+      expect(inheritance.parent_receiver_name).to eq(parent_fqname)
+    end
+
     def expect_module_exists(fqname)
       receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
       expect(receiver).not_to be_nil
@@ -165,6 +174,46 @@ module HiFriend::Core
           expect_class_exists("C")
           expect_class_inherits("C", "A::B")
           expect_class_inherits("singleton(C)", "A::B")
+        end
+      end
+
+      context "when include" do
+        let(:code) do
+          <<~CODE
+            module A
+            end
+
+            class B
+              include A
+            end
+          CODE
+        end
+
+        it "registers all classes" do
+          expect_module_exists("A")
+          expect_class_exists("B")
+          expect_class_includes("B", "A")
+        end
+      end
+
+      context "when include with const path" do
+        let(:code) do
+          <<~CODE
+            module A
+              class B
+              end
+            end
+
+            class C
+              include A::B
+            end
+          CODE
+        end
+
+        it "registers all classes" do
+          expect_module_exists("A::B")
+          expect_class_exists("A::B")
+          expect_class_includes("C", "A::B")
         end
       end
 

@@ -1,0 +1,30 @@
+module HiFriend::Core
+  module CallHook
+    # attr_accessor to
+    #   def {name} = @name
+    #   def {name}=(name) = @name = name
+    class ModuleInclude < Base
+      def matched?(_const_name, method_name)
+        method_name == "include"
+      end
+
+      def call(visitor, node, &block)
+        current_const_name = visitor.current_self_type_name
+
+        node.arguments&.arguments&.each do |arg_node|
+          names = visitor.extract_const_names(arg_node)
+          included_module_name = names.join("::")
+
+          IncludedModule.insert(
+            db: visitor.db,
+            kind: :include,
+            child_receiver_fqname: current_const_name,
+            parent_receiver_name: included_module_name,
+            file_path: visitor.source.path,
+            line: node.location.start_line,
+          )
+        end
+      end
+    end
+  end
+end
