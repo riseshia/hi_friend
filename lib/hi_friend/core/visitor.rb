@@ -79,8 +79,8 @@ module HiFriend::Core
 
         IncludedModule.insert_inherit(
           db: @db,
-          child_receiver_fqname: qualified_const_name,
-          parent_receiver_name: superclass_name,
+          target_fqname: qualified_const_name,
+          passed_name: superclass_name,
           file_path: @source.path,
           line: node.location.start_line,
         )

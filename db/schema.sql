@@ -33,14 +33,14 @@ CREATE INDEX idx_methods_name ON methods(name);
 CREATE TABLE IF NOT EXISTS included_modules (
   id INTEGER PRIMARY KEY,
   kind TEXT NOT NULL CHECK (kind IN ('include', 'extend', 'inherit')),
-  child_receiver_fqname TEXT NOT NULL,
-  parent_receiver_name TEXT NOT NULL,
+  target_fqname TEXT NOT NULL,
+  passed_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER
 );
 
-CREATE INDEX idx_included_modules_parent ON included_modules(parent_receiver_name);
-CREATE INDEX idx_included_modules_child ON included_modules(child_receiver_fqname);
+CREATE INDEX idx_included_modules_parent ON included_modules(passed_name);
+CREATE INDEX idx_included_modules_target_fqname ON included_modules(target_fqname);
 
 CREATE TABLE IF NOT EXISTS method_responses (
   receiver_full_path TEXT NOT NULL,

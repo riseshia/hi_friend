@@ -46,7 +46,7 @@ module HiFriend::Core
 
       inheritance = IncludedModule.where(db, kind: :inherit, child_fqname: child_fqname).first
       expect(inheritance).not_to be_nil
-      expect(inheritance.parent_receiver_name).to eq(parent_fqname)
+      expect(inheritance.passed_name).to eq(parent_fqname)
     end
 
     def expect_class_includes(child_fqname, parent_fqname)
@@ -55,7 +55,7 @@ module HiFriend::Core
 
       inheritance = IncludedModule.where(db, kind: :include, child_fqname: child_fqname).first
       expect(inheritance).not_to be_nil
-      expect(inheritance.parent_receiver_name).to eq(parent_fqname)
+      expect(inheritance.passed_name).to eq(parent_fqname)
     end
 
     def expect_module_exists(fqname)
