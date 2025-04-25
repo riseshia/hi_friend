@@ -49,13 +49,23 @@ module HiFriend::Core
       expect(inheritance.passed_name).to eq(parent_fqname)
     end
 
-    def expect_class_includes(child_fqname, parent_fqname)
+    def expect_class_includes(child_fqname, passed_name)
       receiver = Receiver.find_by_fqname(db, child_fqname)
       expect(receiver).not_to be_nil
 
       inheritance = IncludedModule.where(db, kind: :include, child_fqname: child_fqname).first
       expect(inheritance).not_to be_nil
-      expect(inheritance.passed_name).to eq(parent_fqname)
+      expect(inheritance.passed_name).to eq(passed_name)
+    end
+
+    def expect_class_extends(child_fqname, passed_name)
+      singleton_of_child_fqname = "singleton(#{child_fqname})"
+      receiver = Receiver.find_by_fqname(db, singleton_of_child_fqname)
+      expect(receiver).not_to be_nil
+
+      inheritance = IncludedModule.where(db, kind: :include, child_fqname: singleton_of_child_fqname).first
+      expect(inheritance).not_to be_nil
+      expect(inheritance.passed_name).to eq(passed_name)
     end
 
     def expect_module_exists(fqname)
@@ -214,6 +224,46 @@ module HiFriend::Core
           expect_module_exists("A::B")
           expect_class_exists("A::B")
           expect_class_includes("C", "A::B")
+        end
+      end
+
+      context "when extend" do
+        let(:code) do
+          <<~CODE
+            module A
+            end
+
+            class B
+              extend A
+            end
+          CODE
+        end
+
+        it "registers all classes" do
+          expect_module_exists("A")
+          expect_class_exists("B")
+          expect_class_extends("B", "A")
+        end
+      end
+
+      context "when extend with const path" do
+        let(:code) do
+          <<~CODE
+            module A
+              class B
+              end
+            end
+
+            class C
+              extend A::B
+            end
+          CODE
+        end
+
+        it "registers all classes" do
+          expect_module_exists("A::B")
+          expect_class_exists("A::B")
+          expect_class_extends("C", "A::B")
         end
       end
 

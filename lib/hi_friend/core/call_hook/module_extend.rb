@@ -1,11 +1,11 @@
 module HiFriend::Core
   module CallHook
     # class A
-    #   include B
+    #   extend B
     # end
-    class ModuleInclude < Base
+    class ModuleExtend < Base
       def matched?(_const_name, method_name)
-        method_name == "include"
+        method_name == "extend"
       end
 
       def call(visitor, node, &block)
@@ -13,13 +13,13 @@ module HiFriend::Core
 
         node.arguments&.arguments&.each do |arg_node|
           names = visitor.extract_const_names(arg_node)
-          included_module_name = names.join("::")
+          extended_module_name = names.join("::")
 
           IncludedModule.insert(
             db: visitor.db,
             kind: :include,
-            target_fqname: current_const_name,
-            passed_name: included_module_name,
+            target_fqname: "singleton(#{current_const_name})",
+            passed_name: extended_module_name,
             file_path: visitor.source.path,
             line: node.location.start_line,
           )
