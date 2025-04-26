@@ -20,6 +20,7 @@ FROM receivers;
 CREATE TABLE IF NOT EXISTS methods (
   id INTEGER PRIMARY KEY,
   receiver_id INTEGER NOT NULL,
+  visibility TEXT NOT NULL CHECK (visibility IN ('public', 'protected', 'private')),
   name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER,
