@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS methods (
   name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER,
-  is_from_mixin BOOLEAN DEFAULT 0,
   UNIQUE(receiver_id, name, file_path)
 );
 

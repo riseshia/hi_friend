@@ -6,7 +6,7 @@ module HiFriend::Core
   RSpec.describe IncludedModule do
     let(:db) { Storage.new }
 
-    describe ".where_by_child_fqname" do
+    describe ".where" do
       before do
         db.execute(<<~SQL)
           INSERT INTO included_modules (
