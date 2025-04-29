@@ -77,5 +77,9 @@ module HiFriend::Core
       @line = line
       @file_hash = file_hash
     end
+
+    def singleton_fqname
+      "singleton(#{fqname})"
+    end
   end
 end

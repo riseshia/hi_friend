@@ -354,12 +354,18 @@ module HiFriend::Core
       end
     end
 
-    describe "Parse method def in class" do
+    describe "Parse instance method def in class" do
       let(:code) do
         <<~CODE
           class A
             def default_public_method = 1
+            private def explicit_private_method = 1
+            def defered_private_method = 1
+            private :defered_private_method
+
             private
+
+            def default_private_method = 1
             public def explicit_public_method = 1
             def defered_public_method = 1
             public :defered_public_method
@@ -371,6 +377,56 @@ module HiFriend::Core
         expect_receiver_responds("A", :public, "default_public_method")
         expect_receiver_responds("A", :public, "explicit_public_method")
         expect_receiver_responds("A", :public, "defered_public_method")
+
+        expect_receiver_responds("A", :private, "default_private_method")
+        expect_receiver_responds("A", :private, "explicit_private_method")
+        expect_receiver_responds("A", :private, "defered_private_method")
+      end
+    end
+
+    describe "Parse class method def in class" do
+      let(:code) do
+        <<~CODE
+          class A
+            class << self
+              def default_public_method = 1
+              private def explicit_private_method = 1
+              def defered_private_method = 1
+              private :defered_private_method
+
+              private
+
+              def default_private_method = 1
+              public def explicit_public_method = 1
+              def defered_public_method = 1
+              public :defered_public_method
+            end
+          end
+        CODE
+      end
+
+      it "registers method with correct visibility" do
+        expect_receiver_responds("singleton(A)", :public, "default_public_method")
+        expect_receiver_responds("singleton(A)", :public, "explicit_public_method")
+        expect_receiver_responds("singleton(A)", :public, "defered_public_method")
+
+        expect_receiver_responds("singleton(A)", :private, "default_private_method")
+        expect_receiver_responds("singleton(A)", :private, "explicit_private_method")
+        expect_receiver_responds("singleton(A)", :private, "defered_private_method")
+      end
+    end
+
+    describe "Parse self method def in class" do
+      let(:code) do
+        <<~CODE
+          class A
+            def self.default_public_method = 1
+          end
+        CODE
+      end
+
+      it "registers method with correct visibility" do
+        expect_receiver_responds("singleton(A)", :public, "default_public_method")
       end
     end
 
@@ -391,6 +447,41 @@ module HiFriend::Core
         expect_receiver_responds("A", :public, "default_public_method")
         expect_receiver_responds("A", :public, "explicit_public_method")
         expect_receiver_responds("A", :public, "defered_public_method")
+      end
+    end
+
+    describe "Parse module function method def in module" do
+      let(:code) do
+        <<~CODE
+          module A
+            def defer_method = 1
+            module_function :defer_method
+
+            module_function
+            def default_method = 1
+          end
+        CODE
+      end
+
+      it "registers method with correct visibility" do
+        expect_receiver_responds("singleton(A)", :public, "default_method")
+        expect_receiver_responds("singleton(A)", :public, "defer_method")
+        expect_receiver_responds("A", :private, "default_method")
+        expect_receiver_responds("A", :private, "defer_method")
+      end
+    end
+
+    describe "Parse self method def in module" do
+      let(:code) do
+        <<~CODE
+          module A
+            def self.default_public_method = 1
+          end
+        CODE
+      end
+
+      it "registers method with correct visibility" do
+        expect_receiver_responds("singleton(A)", :public, "default_public_method")
       end
     end
   end

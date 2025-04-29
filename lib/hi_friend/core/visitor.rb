@@ -29,6 +29,7 @@ module HiFriend::Core
       @current_method_obj = nil
       @current_method_visibility_stack = [:private] # main start with private
       @current_if_cond_tv = nil
+      @module_function_flag = false
       @last_evaluated_tv_stack = []
     end
 
@@ -46,7 +47,9 @@ module HiFriend::Core
       )
 
       in_scope(const_names) do
+        prev_module_function_flag = @module_function_flag
         super
+        @module_function_flag = prev_module_function_flag
       end
     end
 
@@ -101,17 +104,30 @@ module HiFriend::Core
       singleton = node.receiver.is_a?(Prism::SelfNode) || @current_in_singleton
 
       receiver = Receiver.find_by_fqname(@db, current_self_type_name_with_singleton)
-      if receiver
+      if receiver.nil?
+        raise "Unreachable: #{receiver.fqname} on #{@source.path} at line #{node.location.start_line}"
+      end
+
+      MethodModel.insert(
+        db: @db,
+        receiver_id: receiver.id,
+        visibility: current_method_visibility,
+        name: node.name,
+        file_path: @source.path,
+        line: node.location.start_line,
+      )
+
+      if @module_function_flag && !receiver.is_singleton
+        module_receiver = Receiver.find_by_fqname(@db, receiver.singleton_fqname)
+
         MethodModel.insert(
           db: @db,
-          receiver_id: receiver.id,
-          visibility: current_method_visibility,
+          receiver_id: module_receiver.id,
+          visibility: :public,
           name: node.name,
           file_path: @source.path,
           line: node.location.start_line,
         )
-      else
-        raise "Unreachable: #{receiver.fqname} on #{@source.path} at line #{node.location.start_line}"
       end
 
       method_obj = @method_registry.create(
@@ -565,6 +581,11 @@ module HiFriend::Core
 
     def change_current_method_visibility(visibility)
       @current_method_visibility_stack[-1] = visibility
+    end
+
+    def mark_as_module_function
+      @module_function_flag = true
+      change_current_method_visibility(:private)
     end
 
     def last_evaluated_tv(tv)
