@@ -28,8 +28,9 @@ when "--test"
   core = HiFriend::Core::Service.new
   core.update_rb_file(path, nil, update_inference: true)
 when "--test-all"
+  path = ARGV[1] || "."
   core = HiFriend::Core::Service.new
-  core.add_workspace(".")
+  core.add_workspace(path)
 else
   p ARGV
 end
