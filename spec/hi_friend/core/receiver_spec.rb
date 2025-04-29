@@ -6,7 +6,7 @@ module HiFriend::Core
       db.execute("SELECT kind, fqname, is_singleton, file_path, line, file_hash FROM receivers WHERE fqname = '#{fqname}'")
     end
 
-    let(:db) { Storage.new }
+    let(:db) { Storage.db }
 
     describe ".find_by_fqname" do
       context "when receiver exists" do

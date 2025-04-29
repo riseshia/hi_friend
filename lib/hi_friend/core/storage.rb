@@ -2,6 +2,10 @@ require "sqlite3"
 
 module HiFriend::Core
   class Storage
+    def self.db
+      @db ||= new
+    end
+
     def initialize
       @db = SQLite3::Database.new(":memory:")
       schema_path = File.expand_path("#{__dir__}/../../../db/schema.sql")
@@ -11,6 +15,14 @@ module HiFriend::Core
 
     def execute(query)
       @db.execute(query)
+    end
+
+    def transaction(&block)
+      @db.transaction(&block)
+    end
+
+    def rollback
+      @db.rollback
     end
   end
 end

@@ -4,7 +4,7 @@ require "spec_helper"
 
 module HiFriend::Core
   RSpec.describe MethodModel do
-    let(:db) { Storage.new }
+    let(:db) { Storage.db }
 
     describe ".where" do
       before do

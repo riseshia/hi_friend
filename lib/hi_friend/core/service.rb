@@ -3,7 +3,7 @@ module HiFriend::Core
     def initialize
       @code_ast_per_file = {}
       @global_env = GlobalEnv.load!
-      @db = Storage.new
+      @db = Storage.db
     end
 
     def add_workspace(rb_folder)

@@ -2,7 +2,7 @@
 
 module HiFriend::Core
   describe Visitor do
-    let(:db) { Storage.new }
+    let(:db) { Storage.db }
     let(:const_registry) { HiFriend::Core.const_registry }
     let(:method_registry) { HiFriend::Core.method_registry }
     let(:type_vertex_registry) { HiFriend::Core.type_vertex_registry }

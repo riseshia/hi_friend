@@ -40,7 +40,7 @@ module HiFriend::Core
   module_function
 
   def db
-    @db ||= Storage.new
+    @db ||= Storage.db
   end
 
   def const_registry
