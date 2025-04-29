@@ -103,7 +103,7 @@ module HiFriend::Core
     def visit_def_node(node)
       singleton = node.receiver.is_a?(Prism::SelfNode) || @current_in_singleton
 
-      receiver = Receiver.find_by_fqname(@db, current_self_type_name_with_singleton)
+      receiver = Receiver.find_by_fqname(@db, current_self_type_name_with_singleton(singleton))
       if receiver.nil?
         raise "Unreachable: #{receiver.fqname} on #{@source.path} at line #{node.location.start_line}"
       end
@@ -541,12 +541,14 @@ module HiFriend::Core
       end
     end
 
-    def current_self_type_name_with_singleton
+    def current_self_type_name_with_singleton(singleton_override = nil)
       return @current_scope[0] if @current_scope.size == 1
 
       type_name = @current_scope[1..].map(&:to_s).join("::")
 
-      if @current_in_singleton
+      is_singleton = singleton_override ? singleton_override : @current_in_singleton
+
+      if is_singleton
         "singleton(#{type_name})"
       else
         type_name
