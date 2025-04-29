@@ -37,7 +37,7 @@ module HiFriend::Core
       qualified_const_name = build_qualified_const_name(const_names)
       @const_registry.create(qualified_const_name, node, @source.path, kind: :module)
 
-      receiver = Receiver.insert_module(
+      Receiver.insert_module(
         db: @db,
         fqname: qualified_const_name,
         file_path: @source.path,
@@ -99,6 +99,20 @@ module HiFriend::Core
 
     def visit_def_node(node)
       singleton = node.receiver.is_a?(Prism::SelfNode) || @current_in_singleton
+
+      receiver = Receiver.find_by_fqname(@db, current_self_type_name_with_singleton)
+      if receiver
+        MethodModel.insert(
+          db: @db,
+          receiver_id: receiver.id,
+          visibility: current_method_visibility,
+          name: node.name,
+          file_path: @source.path,
+          line: node.location.start_line,
+        )
+      else
+        raise "Unreachable: #{receiver.fqname} on #{@source.path} at line #{node.location.start_line}"
+      end
 
       method_obj = @method_registry.create(
         receiver_name: current_self_type_name,
@@ -511,6 +525,18 @@ module HiFriend::Core
       end
     end
 
+    def current_self_type_name_with_singleton
+      return @current_scope[0] if @current_scope.size == 1
+
+      type_name = @current_scope[1..].map(&:to_s).join("::")
+
+      if @current_in_singleton
+        "singleton(#{type_name})"
+      else
+        type_name
+      end
+    end
+
     def in_singleton
       prev_in_singleton = @current_in_singleton
       @current_in_singleton = true
@@ -523,8 +549,14 @@ module HiFriend::Core
     end
 
     # start module / class scope visibility with public
-    def add_new_method_visibility
-      @current_method_visibility_stack << :public
+    def add_new_method_visibility(new_visibility = :public)
+      @current_method_visibility_stack << new_visibility
+    end
+
+    def in_method_visibility(visibility)
+      add_new_method_visibility(visibility)
+      yield
+      remove_current_method_visibility
     end
 
     def remove_current_method_visibility

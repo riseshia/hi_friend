@@ -18,11 +18,15 @@ module HiFriend::Core
         target_visibility = node.name
 
         if node.arguments.nil?
+          # change default
           visitor.change_current_method_visibility(target_visibility)
         elsif node.arguments.arguments.first.is_a?(Prism::DefNode)
+          # inline change
           def_node = node.arguments.arguments.first
 
-          block.call
+          visitor.in_method_visibility(target_visibility) do
+            block.call
+          end
 
           method_obj = visitor.method_registry.find(
             current_const_name,
@@ -31,8 +35,22 @@ module HiFriend::Core
           )
           method_obj.visibility = target_visibility
         else
+          # change after def
           node.arguments.arguments.each do |arg_node|
             # Handle string or symbol only.
+            receiver = Receiver.find_by_fqname(visitor.db, visitor.current_self_type_name_with_singleton)
+
+            if receiver
+              MethodModel.change_visibility(
+                db: visitor.db,
+                receiver_id: receiver.id,
+                name: arg_node.unescaped,
+                visibility: target_visibility
+              )
+            else
+              # XXX: maybe add diaginostic?
+            end
+
             if arg_node.respond_to?(:unescaped)
               method_obj = visitor.method_registry.find(
                 current_const_name,

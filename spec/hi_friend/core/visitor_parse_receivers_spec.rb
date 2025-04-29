@@ -82,6 +82,14 @@ module HiFriend::Core
       expect(singleton_receiver.kind).to eq("Class")
     end
 
+    def expect_receiver_responds(fqname, visibility, method_name)
+      receiver = Receiver.find_by_fqname(db, fqname)
+      expect(receiver).not_to be_nil
+
+      methods = MethodModel.where(db, receiver_id: receiver.id, visibility: visibility, name: method_name)
+      expect(methods.size).to eq(1)
+    end
+
     describe "Parse class def" do
       context "when simple class" do
         let(:code) do
@@ -349,22 +357,40 @@ module HiFriend::Core
     describe "Parse method def in class" do
       let(:code) do
         <<~CODE
-        class A
-          def default_public_method = 1
-          private
-          public def explicit_public_method = 1
-          def defered_public_method = 1
-          public :defered_public_method
-        end
+          class A
+            def default_public_method = 1
+            private
+            public def explicit_public_method = 1
+            def defered_public_method = 1
+            public :defered_public_method
+          end
         CODE
       end
 
-      context "when default pubilc" do
-        it "registers method" do
-          expect_receiver_responds("A", :public, "default_public_method")
-          expect_receiver_responds("A", :public, "explicit_public_method")
-          expect_receiver_responds("A", :public, "defered_public_method")
-        end
+      it "registers method with correct visibility" do
+        expect_receiver_responds("A", :public, "default_public_method")
+        expect_receiver_responds("A", :public, "explicit_public_method")
+        expect_receiver_responds("A", :public, "defered_public_method")
+      end
+    end
+
+    describe "Parse method def in module" do
+      let(:code) do
+        <<~CODE
+          module A
+            def default_public_method = 1
+            private
+            public def explicit_public_method = 1
+            def defered_public_method = 1
+            public :defered_public_method
+          end
+        CODE
+      end
+
+      it "registers method with correct visibility" do
+        expect_receiver_responds("A", :public, "default_public_method")
+        expect_receiver_responds("A", :public, "explicit_public_method")
+        expect_receiver_responds("A", :public, "defered_public_method")
       end
     end
   end

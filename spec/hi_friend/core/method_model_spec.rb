@@ -58,5 +58,34 @@ module HiFriend::Core
         expect(row[4]).to eq(10)
       end
     end
+
+    describe ".change_visibility" do
+      before do
+        db.execute(<<~SQL)
+          INSERT INTO methods (
+            receiver_id, visibility, name,
+            file_path, line
+          ) VALUES (
+            '1', 'public', 'hoge',
+            '/path/to/file.rb', 10
+          )
+        SQL
+      end
+
+      it "changes target method visibility" do
+        MethodModel.change_visibility(
+          db: db,
+          receiver_id: "1",
+          name: "hoge",
+          visibility: :private
+        )
+
+        rows = db.execute("SELECT receiver_id, visibility, name, file_path, line FROM methods WHERE receiver_id = '1'")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row[1]).to eq("private")
+      end
+    end
   end
 end

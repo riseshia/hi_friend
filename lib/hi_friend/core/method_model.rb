@@ -28,9 +28,16 @@ module HiFriend::Core
             receiver_id, visibility, name,
             file_path, line
           ) VALUES (
-            '#{receiver_id}', '#{visibility}', '#{name}',
+            #{receiver_id}, '#{visibility}', '#{name}',
             '#{file_path}', '#{line}'
           )
+        SQL
+      end
+
+      def change_visibility(db:, receiver_id:, name:, visibility:)
+        db.execute(<<~SQL)
+          UPDATE methods SET visibility = '#{visibility}'
+          WHERE receiver_id = #{receiver_id} AND name = '#{name}'
         SQL
       end
 
