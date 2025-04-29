@@ -8,6 +8,85 @@ module HiFriend::Core
       def load!
         new.tap(&:load!)
       end
+
+      def load_to_db(db)
+        return if db.global_env_loaded?
+
+        loader = RBS::EnvironmentLoader.new
+        environment = RBS::Environment.from_loader(loader).resolve_type_names
+        @builder = RBS::DefinitionBuilder.new(env: environment)
+
+        receiver_rows = []
+        method_rows = []
+        environment.class_decls.each do |type_name, class_decl|
+          kind = environment.class_decl?(type_name) ? :Class : :Module
+          fqname = type_name.to_s.sub(/^::/, "")
+          locations = class_decl.decls.map { |d| d.decl.location }
+
+          locations.each do |location|
+            receiver_rows.push(
+              [kind, fqname, false, location.name, location.start_line, "dummy_hash"],
+              [kind, "singleton(#{fqname})", true, location.name, location.start_line, "dummy_hash"],
+            )
+          end
+
+
+          singleton_def = @builder.build_singleton(type_name)
+          singleton_def.methods.each do |method_name, rbs_method_def|
+            accessibility = rbs_method_def.accessibility
+
+            rbs_method_def.defs.each do |definition|
+              defined_in_fqname = definition.defined_in.name.to_s
+
+              # skip included / inherited methods
+              next if fqname != defined_in_fqname
+
+              location = definition.type.location
+              method_rows.push(
+                ["singleton(#{fqname})", accessibility, method_name, location.name, location.start_line]
+              )
+
+              # XXX: Do not care overloaded / overrided at this point.
+              break
+            end
+          end
+
+          instance_def = @builder.build_instance(type_name)
+          instance_def.methods.each do |method_name, rbs_method_def|
+            accessibility = rbs_method_def.accessibility
+
+            rbs_method_def.defs.each do |definition|
+              defined_in_fqname = definition.defined_in.name.to_s
+
+              # skip included / inherited methods
+              next if fqname != defined_in_fqname
+
+              location = definition.type.location
+              method_rows.push(
+                [fqname, accessibility, method_name, location.name, location.start_line]
+              )
+
+              # XXX: Do not care overloaded / overrided at this point.
+              break
+            end
+          end
+        end
+
+        Receiver.insert_bulk(db: db, rows: receiver_rows)
+
+        method_rows.each do |row|
+          receiver_id = Receiver.find_id_by(db, fqname: row[0], file_path: row[3])
+          if receiver_id.nil?
+            receiver_id = Receiver.find_id_by(db, fqname: row[0])
+          end
+
+          row[0] = receiver_id
+        end
+
+        MethodModel.insert_bulk(db: db, rows: method_rows)
+
+        db.global_env_loaded!
+      end
     end
 
     attr_reader :consts, :methods, :interfaces

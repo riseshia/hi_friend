@@ -46,6 +46,10 @@ RSpec.configure do |config|
   # triggering implicit auto-inclusion in groups with matching metadata.
   config.shared_context_metadata_behavior = :apply_to_host_groups
 
+  config.before(:suite) do
+    db = HiFriend::Core::Storage.db
+    HiFriend::Core::GlobalEnv.load_to_db(db)
+  end
   config.around(:each) do |example|
     db = HiFriend::Core::Storage.db
     db.transaction

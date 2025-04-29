@@ -2,6 +2,8 @@ module HiFriend::Core
   class Receiver
     class << self
       def find_by_fqname(db, fqname)
+        where_clauses = []
+
         rows = db.execute(<<~SQL)
           SELECT id, kind, fqname, is_singleton, file_path, line, file_hash
           FROM receivers
@@ -12,6 +14,22 @@ module HiFriend::Core
         return nil if rows.empty?
 
         from_row(rows.first)
+      end
+
+      def find_id_by(db, fqname:, file_path: nil)
+        where_clauses = []
+        where_clauses << "fqname = '#{fqname}'"
+        where_clauses << "file_path = '#{file_path}'" if file_path
+        where_clause = where_clauses.join(" AND ")
+
+        rows = db.execute(<<~SQL)
+          SELECT id
+          FROM receivers
+          WHERE #{where_clause}
+          LIMIT 1
+        SQL
+
+        rows&.first&.first
       end
 
       def insert_class(
@@ -32,6 +50,23 @@ module HiFriend::Core
           db: db, kind: :Module, fqname: fqname,
           file_path: file_path, line: line, file_hash: file_hash
         )
+      end
+
+      def insert_bulk(db:, rows:)
+        values = rows.map do |row|
+          kind, fqname, is_singleton, file_path, line, file_hash = row
+          <<~SQL
+           ('#{kind}', '#{fqname}', #{is_singleton}, '#{file_path}', '#{line}', '#{file_hash}')
+          SQL
+        end
+
+        db.execute(<<~SQL)
+          INSERT INTO receivers (
+            kind, fqname,
+            is_singleton, file_path, line, file_hash
+          ) VALUES
+          #{values.join(",\n")}
+        SQL
       end
 
       def insert(

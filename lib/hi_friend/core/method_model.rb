@@ -19,6 +19,23 @@ module HiFriend::Core
         rows.map { |row| from_row(row) }
       end
 
+      def insert_bulk(db:, rows:)
+        values = rows.map do |row|
+          receiver_id, visibility, name, file_path, line = row
+          <<~SQL
+           (#{receiver_id}, '#{visibility}', '#{name}', '#{file_path}', '#{line}')
+          SQL
+        end
+
+        db.execute(<<~SQL)
+          INSERT INTO methods (
+            receiver_id, visibility, name,
+            file_path, line
+          ) VALUES
+          #{values.join(",\n")}
+        SQL
+      end
+
       def insert(
         db:, receiver_id:, visibility:, name:,
         file_path:, line:
