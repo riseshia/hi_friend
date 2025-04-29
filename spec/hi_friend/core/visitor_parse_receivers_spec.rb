@@ -337,5 +337,27 @@ module HiFriend::Core
         end
       end
     end
+
+    describe "Parse method def in class" do
+      let(:code) do
+        <<~CODE
+        class A
+          def default_public_method = 1
+          private
+          public def explicit_public_method = 1
+          def defered_public_method = 1
+          public :defered_public_method
+        end
+        CODE
+      end
+
+      context "when default pubilc" do
+        it "registers method" do
+          expect_receiver_responds("A", :public, "default_public_method")
+          expect_receiver_responds("A", :public, "explicit_public_method")
+          expect_receiver_responds("A", :public, "defered_public_method")
+        end
+      end
+    end
   end
 end

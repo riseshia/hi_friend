@@ -2,8 +2,9 @@ module HiFriend::Core
   # XXX: Rename to Method
   class MethodModel
     class << self
-      def where(db, visibility: nil, name: nil)
+      def where(db, receiver_id: nil, visibility: nil, name: nil)
         where_clauses = []
+        where_clauses << "receiver_id = #{receiver_id}" if receiver_id
         where_clauses << "visibility = '#{visibility}'" if visibility
         where_clauses << "name = '#{name}'" if name
         where_clause = where_clauses.empty? ? "" : "WHERE #{where_clauses.join(' AND ')}"

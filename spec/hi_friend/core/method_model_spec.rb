@@ -21,7 +21,7 @@ module HiFriend::Core
 
       context "when target exists" do
         it "returns target info" do
-          method = described_class.where(db, visibility: :public, name: "hoge").first
+          method = described_class.where(db, receiver_id: 1, visibility: :public, name: "hoge").first
           expect(method.name).to eq("hoge")
           expect(method.file_path).to eq("/path/to/file.rb")
           expect(method.line).to eq(10)
@@ -30,7 +30,7 @@ module HiFriend::Core
 
       context "when parent does not exist" do
         it "returns nil" do
-          method = described_class.where(db, visibility: :public, name: "hige").first
+          method = described_class.where(db, receiver_id: 1, visibility: :public, name: "hige").first
           expect(method).to be_nil
         end
       end
