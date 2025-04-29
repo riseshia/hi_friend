@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS receivers (
   id INTEGER PRIMARY KEY,
   fqname TEXT NOT NULL,
   is_singleton BOOLEAN NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('Class', 'Module')),
   file_path TEXT NOT NULL,
   line INTEGER,
   file_hash TEXT,

@@ -34,10 +34,12 @@ module HiFriend::Core
       receiver = Receiver.find_by_fqname(db, fqname)
       expect(receiver).not_to be_nil
       expect(receiver.is_singleton).to eq(false)
+      expect(receiver.kind).to eq("Class")
 
       singleton_receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
       expect(singleton_receiver).not_to be_nil
       expect(singleton_receiver.is_singleton).to eq(true)
+      expect(singleton_receiver.kind).to eq("Class")
     end
 
     def expect_class_inherits(child_fqname, parent_fqname)
@@ -69,9 +71,15 @@ module HiFriend::Core
     end
 
     def expect_module_exists(fqname)
-      receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
+      receiver = Receiver.find_by_fqname(db, fqname)
       expect(receiver).not_to be_nil
-      expect(receiver.is_singleton).to eq(true)
+      expect(receiver.is_singleton).to eq(false)
+      expect(receiver.kind).to eq("Module")
+
+      singleton_receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
+      expect(singleton_receiver).not_to be_nil
+      expect(singleton_receiver.is_singleton).to eq(true)
+      expect(singleton_receiver.kind).to eq("Class")
     end
 
     describe "Parse class def" do
@@ -221,7 +229,7 @@ module HiFriend::Core
         end
 
         it "registers all classes" do
-          expect_module_exists("A::B")
+          expect_module_exists("A")
           expect_class_exists("A::B")
           expect_class_includes("C", "A::B")
         end
@@ -261,7 +269,7 @@ module HiFriend::Core
         end
 
         it "registers all classes" do
-          expect_module_exists("A::B")
+          expect_module_exists("A")
           expect_class_exists("A::B")
           expect_class_extends("C", "A::B")
         end

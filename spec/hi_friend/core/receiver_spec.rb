@@ -3,7 +3,7 @@
 module HiFriend::Core
   RSpec.describe Receiver do
     def fetch_rows_by_fqname(fqname)
-      db.execute("SELECT fqname, is_singleton, file_path, line, file_hash FROM receivers WHERE fqname = '#{fqname}'")
+      db.execute("SELECT kind, fqname, is_singleton, file_path, line, file_hash FROM receivers WHERE fqname = '#{fqname}'")
     end
 
     let(:db) { Storage.new }
@@ -13,10 +13,10 @@ module HiFriend::Core
         before do
           db.execute(<<~SQL)
             INSERT INTO receivers (
-              fqname,
+              kind, fqname,
               is_singleton, file_path, line, file_hash
             ) VALUES (
-              'Test::Class',
+              'Class', 'Test::Class',
               'false', '/path/to/file.rb', 10, 'hash123'
             )
           SQL
@@ -25,6 +25,7 @@ module HiFriend::Core
         it "returns a receiver instance" do
           receiver = described_class.find_by_fqname(db, "Test::Class")
           expect(receiver).to be_a(Receiver)
+          expect(receiver.kind).to eq("Class")
           expect(receiver.fqname).to eq("Test::Class")
           expect(receiver.is_singleton).to eq(false)
           expect(receiver.file_path).to eq("/path/to/file.rb")
@@ -42,7 +43,7 @@ module HiFriend::Core
     end
 
     describe ".insert_class" do
-      it "inserts a new receiver record" do
+      it "inserts new record for class" do
         described_class.insert_class(
           db: db,
           fqname: "A::B",
@@ -55,27 +56,29 @@ module HiFriend::Core
         expect(rows.size).to eq(1)
 
         row = rows.first
-        expect(row[0]).to eq("A::B")
-        expect(row[1]).to eq(0)
-        expect(row[2]).to eq("/path/to/module.rb")
-        expect(row[3]).to eq(20)
-        expect(row[4]).to eq("hash456")
+        expect(row[0]).to eq("Class")
+        expect(row[1]).to eq("A::B")
+        expect(row[2]).to eq(0)
+        expect(row[3]).to eq("/path/to/module.rb")
+        expect(row[4]).to eq(20)
+        expect(row[5]).to eq("hash456")
 
         rows = fetch_rows_by_fqname("singleton(A::B)")
         expect(rows.size).to eq(1)
 
         row = rows.first
-        expect(row[0]).to eq("singleton(A::B)")
-        expect(row[1]).to eq(1)
-        expect(row[2]).to eq("/path/to/module.rb")
-        expect(row[3]).to eq(20)
-        expect(row[4]).to eq("hash456")
+        expect(row[0]).to eq("Class")
+        expect(row[1]).to eq("singleton(A::B)")
+        expect(row[2]).to eq(1)
+        expect(row[3]).to eq("/path/to/module.rb")
+        expect(row[4]).to eq(20)
+        expect(row[5]).to eq("hash456")
       end
     end
 
     describe ".insert_module" do
-      it "inserts a new receiver record" do
-        described_class.insert_class(
+      it "inserts new record for module" do
+        described_class.insert_module(
           db: db,
           fqname: "A::B",
           file_path: "/path/to/module.rb",
@@ -87,11 +90,23 @@ module HiFriend::Core
         expect(rows.size).to eq(1)
 
         row = rows.first
-        expect(row[0]).to eq("A::B")
-        expect(row[1]).to eq(0)
-        expect(row[2]).to eq("/path/to/module.rb")
-        expect(row[3]).to eq(20)
-        expect(row[4]).to eq("hash456")
+        expect(row[0]).to eq("Module")
+        expect(row[1]).to eq("A::B")
+        expect(row[2]).to eq(0)
+        expect(row[3]).to eq("/path/to/module.rb")
+        expect(row[4]).to eq(20)
+        expect(row[5]).to eq("hash456")
+
+        rows = fetch_rows_by_fqname("singleton(A::B)")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row[0]).to eq("Class")
+        expect(row[1]).to eq("singleton(A::B)")
+        expect(row[2]).to eq(1)
+        expect(row[3]).to eq("/path/to/module.rb")
+        expect(row[4]).to eq(20)
+        expect(row[5]).to eq("hash456")
       end
     end
   end

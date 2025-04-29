@@ -3,7 +3,7 @@ module HiFriend::Core
     class << self
       def find_by_fqname(db, fqname)
         rows = db.execute(<<~SQL)
-          SELECT id, fqname, is_singleton, file_path, line, file_hash
+          SELECT id, kind, fqname, is_singleton, file_path, line, file_hash
           FROM receivers
           WHERE fqname = '#{fqname}'
           LIMIT 1
@@ -18,30 +18,35 @@ module HiFriend::Core
         db:, fqname:,
         file_path:, line:, file_hash:
       )
-        db.execute(<<~SQL)
-          INSERT INTO receivers (
-            fqname,
-            is_singleton, file_path, line, file_hash
-          ) VALUES (
-            '#{fqname}',
-            false, '#{file_path}', '#{line}', '#{file_hash}'
-          ), (
-            'singleton(#{fqname})',
-            true, '#{file_path}', '#{line}', '#{file_hash}'
-          )
-        SQL
+        insert(
+          db: db, kind: :Class, fqname: fqname,
+          file_path: file_path, line: line, file_hash: file_hash
+        )
       end
 
       def insert_module(
         db:, fqname:,
         file_path:, line:, file_hash:
       )
+        insert(
+          db: db, kind: :Module, fqname: fqname,
+          file_path: file_path, line: line, file_hash: file_hash
+        )
+      end
+
+      def insert(
+        db:, kind:, fqname:,
+        file_path:, line:, file_hash:
+      )
         db.execute(<<~SQL)
           INSERT INTO receivers (
-            fqname,
+            kind, fqname,
             is_singleton, file_path, line, file_hash
           ) VALUES (
-            'singleton(#{fqname})',
+            '#{kind}', '#{fqname}',
+            false, '#{file_path}', '#{line}', '#{file_hash}'
+          ), (
+            'Class', 'singleton(#{fqname})',
             true, '#{file_path}', '#{line}', '#{file_hash}'
           )
         SQL
@@ -52,11 +57,12 @@ module HiFriend::Core
       end
     end
 
-    attr_reader :id, :fqname,
+    attr_reader :id, :kind, :fqname,
                 :is_singleton, :file_path, :line, :file_hash
 
     def initialize(
       id,
+      kind,
       fqname,
       is_singleton,
       file_path,
@@ -64,6 +70,7 @@ module HiFriend::Core
       file_hash
     )
       @id = id
+      @kind = kind
       @fqname = fqname
       @is_singleton = is_singleton == 1
       @file_path = file_path
