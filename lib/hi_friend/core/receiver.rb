@@ -99,6 +99,8 @@ module HiFriend::Core
       end
 
       def insert_bulk(db:, rows:)
+        return if rows.empty?
+
         values = rows.map do |row|
           kind, fqname, is_singleton, file_path, line, file_hash = row
           <<~SQL

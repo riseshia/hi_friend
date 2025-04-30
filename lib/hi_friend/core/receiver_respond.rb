@@ -36,6 +36,8 @@ module HiFriend::Core
       end
 
       def insert_bulk(db:, rows:)
+        return if rows.empty?
+
         values = rows.map do |row|
           receiver_fqname, method_name, source = row
           <<~SQL
