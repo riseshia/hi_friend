@@ -19,6 +19,7 @@ module HiFriend::Core
             db: visitor.db,
             kind: :mixin,
             target_fqname: current_const_name,
+            eval_scope: current_const_name,
             passed_name: included_module_name,
             file_path: visitor.source.path,
             line: node.location.start_line,

@@ -80,9 +80,11 @@ module HiFriend::Core
           @source.path,
         )
 
+        scope_name = build_qualified_const_name([])
         IncludedModule.insert_inherit(
           db: @db,
           target_fqname: qualified_const_name,
+          eval_scope: scope_name,
           passed_name: superclass_name,
           file_path: @source.path,
           line: node.location.start_line,

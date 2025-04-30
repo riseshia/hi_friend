@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS included_modules (
   id INTEGER PRIMARY KEY,
   kind TEXT NOT NULL CHECK (kind IN ('mixin', 'inherit')),
   target_fqname TEXT NOT NULL,
+  eval_scope TEXT NOT NULL,
   passed_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
   line INTEGER

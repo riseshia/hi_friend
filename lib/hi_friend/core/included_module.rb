@@ -8,7 +8,7 @@ module HiFriend::Core
         where_clause = where_clauses.empty? ? "" : "WHERE #{where_clauses.join(' AND ')}"
 
         rows = db.execute(<<~SQL)
-          SELECT kind, target_fqname, passed_name,
+          SELECT kind, target_fqname, eval_scope, passed_name,
                  file_path, line
           FROM included_modules
           #{where_clause}
@@ -22,34 +22,34 @@ module HiFriend::Core
       end
 
       def insert_inherit(
-        db:, target_fqname:, passed_name:,
+        db:, target_fqname:, eval_scope:, passed_name:,
         file_path:, line:
       )
         kind = :inherit
         db.execute(<<~SQL)
           INSERT INTO included_modules (
-            kind, target_fqname, passed_name,
+            kind, target_fqname, eval_scope, passed_name,
             file_path, line
           ) VALUES (
-            '#{kind}', '#{target_fqname}', '#{passed_name}',
+            '#{kind}', '#{target_fqname}', '#{eval_scope}', '#{passed_name}',
             '#{file_path}', '#{line}'
           ), (
-            '#{kind}', 'singleton(#{target_fqname})', '#{passed_name}',
+            '#{kind}', 'singleton(#{target_fqname})', '#{eval_scope}', '#{passed_name}',
             '#{file_path}', '#{line}'
           )
         SQL
       end
 
       def insert(
-        db:, kind:, target_fqname:, passed_name:,
+        db:, kind:, target_fqname:, eval_scope:, passed_name:,
         file_path:, line:
       )
         db.execute(<<~SQL)
           INSERT INTO included_modules (
-            kind, target_fqname, passed_name,
+            kind, target_fqname, eval_scope, passed_name,
             file_path, line
           ) VALUES (
-            '#{kind}', '#{target_fqname}', '#{passed_name}',
+            '#{kind}', '#{target_fqname}', '#{eval_scope}', '#{passed_name}',
             '#{file_path}', '#{line}'
           )
         SQL
@@ -59,33 +59,35 @@ module HiFriend::Core
         return if rows.empty?
 
         values = rows.map do |row|
-          kind, target_fqname, passed_name, file_path, line = row
+          kind, target_fqname, eval_scope, passed_name, file_path, line = row
           <<~SQL
-           ('#{kind}', '#{target_fqname}', '#{passed_name}', '#{file_path}', '#{line}')
+           ('#{kind}', '#{target_fqname}', '#{eval_scope}', '#{passed_name}', '#{file_path}', '#{line}')
           SQL
         end
 
         db.execute(<<~SQL)
           INSERT INTO included_modules (
-            kind, target_fqname, passed_name, file_path, line
+            kind, target_fqname, eval_scope, passed_name, file_path, line
           ) VALUES
           #{values.join(",\n")}
         SQL
       end
     end
 
-    attr_reader :kind, :target_fqname, :passed_name,
+    attr_reader :kind, :target_fqname, :eval_scope, :passed_name,
                 :file_path, :line
 
     def initialize(
       kind,
       target_fqname,
+      eval_scope,
       passed_name,
       file_path,
       line
     )
       @kind = kind
       @target_fqname = target_fqname
+      @eval_scope = eval_scope
       @passed_name = passed_name
       @file_path = file_path
       @line = line

@@ -46,7 +46,7 @@ module HiFriend::Core
       receiver = Receiver.find_by_fqname(db, child_fqname)
       expect(receiver).not_to be_nil
 
-      inheritance = IncludedModule.where(db, kind: :inherit, child_fqname: child_fqname).first
+      inheritance = IncludedModule.where(db: db, kind: :inherit, target_fqname: child_fqname).first
       expect(inheritance).not_to be_nil
       expect(inheritance.passed_name).to eq(parent_fqname)
     end
@@ -55,7 +55,7 @@ module HiFriend::Core
       receiver = Receiver.find_by_fqname(db, child_fqname)
       expect(receiver).not_to be_nil
 
-      inheritance = IncludedModule.where(db, kind: :mixin, child_fqname: child_fqname).first
+      inheritance = IncludedModule.where(db: db, kind: :mixin, target_fqname: child_fqname).first
       expect(inheritance).not_to be_nil
       expect(inheritance.passed_name).to eq(passed_name)
     end
@@ -65,7 +65,7 @@ module HiFriend::Core
       receiver = Receiver.find_by_fqname(db, singleton_of_child_fqname)
       expect(receiver).not_to be_nil
 
-      inheritance = IncludedModule.where(db, kind: :mixin, child_fqname: singleton_of_child_fqname).first
+      inheritance = IncludedModule.where(db: db, kind: :mixin, target_fqname: singleton_of_child_fqname).first
       expect(inheritance).not_to be_nil
       expect(inheritance.passed_name).to eq(passed_name)
     end
