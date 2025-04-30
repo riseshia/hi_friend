@@ -1,10 +1,10 @@
 module HiFriend::Core
   class IncludedModule
     class << self
-      def where(db, kind: nil, child_fqname: nil)
+      def where(db:, kind: nil, target_fqname: nil)
         where_clauses = []
         where_clauses << "kind = '#{kind}'" if kind
-        where_clauses << "target_fqname = '#{child_fqname}'" if child_fqname
+        where_clauses << "target_fqname = '#{target_fqname}'" if target_fqname
         where_clause = where_clauses.empty? ? "" : "WHERE #{where_clauses.join(' AND ')}"
 
         rows = db.execute(<<~SQL)
@@ -52,6 +52,24 @@ module HiFriend::Core
             '#{kind}', '#{target_fqname}', '#{passed_name}',
             '#{file_path}', '#{line}'
           )
+        SQL
+      end
+
+      def insert_bulk(db:, rows:)
+        return if rows.empty?
+
+        values = rows.map do |row|
+          kind, target_fqname, passed_name, file_path, line = row
+          <<~SQL
+           ('#{kind}', '#{target_fqname}', '#{passed_name}', '#{file_path}', '#{line}')
+          SQL
+        end
+
+        db.execute(<<~SQL)
+          INSERT INTO included_modules (
+            kind, target_fqname, passed_name, file_path, line
+          ) VALUES
+          #{values.join(",\n")}
         SQL
       end
     end

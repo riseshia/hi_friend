@@ -20,7 +20,7 @@ module HiFriend::Core
 
       context "when parent exists" do
         it "returns parent name" do
-          included_module = described_class.where(db, kind: :inherit, child_fqname: "B").first
+          included_module = described_class.where(db: db, kind: :inherit, target_fqname: "B").first
           expect(included_module.passed_name).to eq("A")
           expect(included_module.file_path).to eq("/path/to/file.rb")
           expect(included_module.line).to eq(10)
@@ -29,7 +29,7 @@ module HiFriend::Core
 
       context "when parent does not exist" do
         it "returns nil" do
-          included_module = described_class.where(db, kind: :inherit, child_fqname: "C").first
+          included_module = described_class.where(db: db, kind: :inherit, target_fqname: "C").first
           expect(included_module).to be_nil
         end
       end
