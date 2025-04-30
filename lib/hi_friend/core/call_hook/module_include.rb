@@ -17,7 +17,7 @@ module HiFriend::Core
 
           IncludedModule.insert(
             db: visitor.db,
-            kind: :include,
+            kind: :mixin,
             target_fqname: current_const_name,
             passed_name: included_module_name,
             file_path: visitor.source.path,

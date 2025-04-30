@@ -33,7 +33,7 @@ CREATE INDEX idx_methods_name ON methods(name);
 
 CREATE TABLE IF NOT EXISTS included_modules (
   id INTEGER PRIMARY KEY,
-  kind TEXT NOT NULL CHECK (kind IN ('include', 'inherit')),
+  kind TEXT NOT NULL CHECK (kind IN ('mixin', 'inherit')),
   target_fqname TEXT NOT NULL,
   passed_name TEXT NOT NULL,
   file_path TEXT NOT NULL,
