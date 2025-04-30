@@ -43,11 +43,11 @@ CREATE TABLE IF NOT EXISTS included_modules (
 CREATE INDEX idx_included_modules_parent ON included_modules(passed_name);
 CREATE INDEX idx_included_modules_target_fqname ON included_modules(target_fqname);
 
-CREATE TABLE IF NOT EXISTS method_responses (
-  receiver_full_path TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS receiver_responds (
+  receiver_fqname TEXT NOT NULL,
   method_name TEXT NOT NULL,
   source TEXT NOT NULL CHECK (source IN ('self', 'mixin', 'inherit')),
-  PRIMARY KEY (receiver_full_path, method_name)
+  PRIMARY KEY (receiver_fqname, method_name)
 );
 
-CREATE INDEX idx_method_responses_method ON method_responses(method_name);
+CREATE INDEX idx_method_responses_method ON receiver_responds(method_name);
