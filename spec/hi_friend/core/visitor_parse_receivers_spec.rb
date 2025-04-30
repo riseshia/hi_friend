@@ -86,7 +86,7 @@ module HiFriend::Core
       receiver = Receiver.find_by_fqname(db, fqname)
       expect(receiver).not_to be_nil
 
-      methods = MethodModel.where(db, receiver_id: receiver.id, visibility: visibility, name: method_name)
+      methods = MethodModel.where(db: db, receiver_id: receiver.id, visibility: visibility, name: method_name)
       expect(methods.size).to eq(1)
     end
 

@@ -22,7 +22,7 @@ module HiFriend::Core
             next if receiver.nil?
 
             singleton_of_receiver = Receiver.find_by_fqname(visitor.db, "singleton(#{scope_name})")
-            methods = MethodModel.where(visitor.db, receiver_id: receiver.id, name: arg_node.unescaped)
+            methods = MethodModel.where(db: visitor.db, receiver_id: receiver.id, name: arg_node.unescaped)
 
             methods.each do |method|
               MethodModel.change_visibility(
