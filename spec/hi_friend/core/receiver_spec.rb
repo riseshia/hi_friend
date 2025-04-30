@@ -137,5 +137,32 @@ module HiFriend::Core
         expect(row[5]).to eq("hash456")
       end
     end
+
+    describe ".insert_bulk" do
+      it "inserts new records" do
+        rows = [
+          ["Class", "A", false, "/path/to/file1.rb", 10, "hash123"],
+          ["Class", "singleton(A)", true, "/path/to/file1.rb", 10, "hash123"],
+        ]
+
+        described_class.insert_bulk(db: db, rows: rows)
+
+        rows = fetch_rows_by_fqname("A")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row).to contain_exactly(
+          "Class", "A", 0, "/path/to/file1.rb", 10, "hash123"
+        )
+
+        rows = fetch_rows_by_fqname("singleton(A)")
+        expect(rows.size).to eq(1)
+
+        row = rows.first
+        expect(row).to contain_exactly(
+          "Class", "singleton(A)", 1, "/path/to/file1.rb", 10, "hash123"
+        )
+      end
+    end
   end
 end

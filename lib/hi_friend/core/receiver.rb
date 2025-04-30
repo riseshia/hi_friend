@@ -98,6 +98,23 @@ module HiFriend::Core
         SQL
       end
 
+      def insert_bulk(db:, rows:)
+        values = rows.map do |row|
+          kind, fqname, is_singleton, file_path, line, file_hash = row
+          <<~SQL
+            ('#{kind}', '#{fqname}', #{is_singleton}, '#{file_path}', #{line}, '#{file_hash}')
+          SQL
+        end
+
+        db.execute(<<~SQL)
+          INSERT INTO receivers (
+            kind, fqname,
+            is_singleton, file_path, line, file_hash
+          ) VALUES
+          #{values.join(",\n")}
+        SQL
+      end
+
       def from_row(row)
         new(*row)
       end
