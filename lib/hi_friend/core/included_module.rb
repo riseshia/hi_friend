@@ -4,7 +4,14 @@ module HiFriend::Core
       def where(db:, kind: nil, target_fqname: nil)
         where_clauses = []
         where_clauses << "kind = '#{kind}'" if kind
-        where_clauses << "target_fqname = '#{target_fqname}'" if target_fqname
+        if target_fqname
+          if target_fqname.is_a?(Array) && target_fqname.size > 0
+            target_fqname = target_fqname.map { |n| "'#{n}'" }.join(", ")
+            where_clauses << "target_fqname IN (#{target_fqname})"
+          else
+            where_clauses << "target_fqname = '#{target_fqname}'"
+          end
+        end
         where_clause = where_clauses.empty? ? "" : "WHERE #{where_clauses.join(' AND ')}"
 
         rows = db.execute(<<~SQL)
@@ -61,7 +68,7 @@ module HiFriend::Core
         values = rows.map do |row|
           kind, target_fqname, eval_scope, passed_name, file_path, line = row
           <<~SQL
-           ('#{kind}', '#{target_fqname}', '#{eval_scope}', '#{passed_name}', '#{file_path}', '#{line}')
+           ('#{kind}', '#{target_fqname}', '#{eval_scope}', '#{passed_name}', '#{file_path}', #{line})
           SQL
         end
 

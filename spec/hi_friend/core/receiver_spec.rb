@@ -45,17 +45,17 @@ module HiFriend::Core
     describe ".receiver_names_by_paths" do
       before do
         db.execute(<<~SQL)
-        INSERT INTO receivers (
-          kind, fqname, is_singleton, file_path, line, file_hash
-        ) VALUES (
-          'Class', 'A', 'false', '/path/to/file1.rb', 10, 'hash123'
-        ), (
-          'Class', 'B', 'false', '/path/to/file1.rb', 10, 'hash123'
-        ), (
-          'Class', 'B', 'false', '/path/to/file2.rb', 10, 'hash123'
-        ), (
-          'Class', 'C', 'false', '/path/to/file3.rb', 10, 'hash123'
-        )
+          INSERT INTO receivers (
+            kind, fqname, is_singleton, file_path, line, file_hash
+          ) VALUES (
+            'Class', 'A', 'false', '/path/to/file1.rb', 10, 'hash123'
+          ), (
+            'Class', 'B', 'false', '/path/to/file1.rb', 10, 'hash123'
+          ), (
+            'Class', 'B', 'false', '/path/to/file2.rb', 10, 'hash123'
+          ), (
+            'Class', 'C', 'false', '/path/to/file3.rb', 10, 'hash123'
+          )
         SQL
       end
 
@@ -162,6 +162,51 @@ module HiFriend::Core
         expect(row).to contain_exactly(
           "Class", "singleton(A)", 1, "/path/to/file1.rb", 10, "hash123"
         )
+      end
+    end
+
+    describe ".resolve_name" do
+      before do
+        rows = [
+          ["Module", "A", false, "/path/to/a.rb", 10, "hash123"],
+          ["Module", "A::B", false, "/path/to/a/b.rb", 10, "hash123"],
+          ["Class", "A::B::C", false, "/path/to/a/b/c.rb", 10, "hash123"],
+          ["Class", "A::C", false, "/path/to/a/c.rb", 10, "hash123"],
+          ["Class", "B::C", false, "/path/to/b/c.rb", 10, "hash123"],
+          ["Class", "C", false, "/path/to/c.rb", 10, "hash123"],
+          ["Class", "D", false, "/path/to/d.rb", 10, "hash123"],
+        ]
+
+        described_class.insert_bulk(db: db, rows: rows)
+      end
+
+      it "return nil" do
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "Object", name: "NotFound")
+        expect(resolved_name).to be_nil
+
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "A::B::C", name: "NotFound")
+        expect(resolved_name).to be_nil
+      end
+
+      it "return name in root" do
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "Object", name: "C")
+        expect(resolved_name).to eq("C")
+
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "A::B", name: "D")
+        expect(resolved_name).to eq("D")
+      end
+
+      it "return name in parent module" do
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "A", name: "B::C")
+        expect(resolved_name).to eq("A::B::C")
+      end
+
+      it "return name in same module" do
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "A::B", name: "C")
+        expect(resolved_name).to eq("A::B::C")
+
+        resolved_name = described_class.resolve_name(db: db, eval_scope: "A", name: "C")
+        expect(resolved_name).to eq("A::C")
       end
     end
   end

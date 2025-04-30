@@ -1,9 +1,7 @@
 module HiFriend::Core
   class Receiver
     class << self
-      def find_by_fqname(db, fqname)
-        where_clauses = []
-
+      def find_by_fqname(db:, fqname:)
         rows = db.execute(<<~SQL)
           SELECT id, kind, fqname, is_singleton, file_path, line, file_hash
           FROM receivers
@@ -14,17 +12,6 @@ module HiFriend::Core
         return nil if rows.empty?
 
         from_row(rows.first)
-      end
-
-      def receiver_names_by_paths(db:, paths:)
-        paths_in = paths.map { |path| "'#{path}'" }.join(", ")
-        rows = db.execute(<<~SQL)
-          SELECT distinct fqname
-          FROM receivers
-          WHERE file_path IN (#{paths_in})
-        SQL
-
-        rows.map { |r| r.first }
       end
 
       def find_id_by(db, fqname:, file_path: nil)
@@ -40,7 +27,60 @@ module HiFriend::Core
           LIMIT 1
         SQL
 
-        rows&.first&.first
+        rows.first&.first
+      end
+
+      def receivers_by_fqnames(db:, fqnames:)
+        fqnames_in = fqnames.map { |fqname| "'#{fqname}'" }.join(", ")
+        rows = db.execute(<<~SQL)
+          SELECT id, kind, fqname, is_singleton, file_path, line, file_hash
+          FROM receivers
+          WHERE fqname IN (#{fqnames_in})
+        SQL
+        rows.map { |r| from_row(r) }
+      end
+
+      # XXX: Do not search in included/extended module at this point,
+      #      which is too complicatded & rare cases.
+      #      which search only scope tree, too.
+      def resolve_name_to_receiver(db:, eval_scope:, is_singleton:, name:)
+        candidates = generate_resolve_name_candidates(eval_scope, name)
+
+        receivers = receivers_by_fqnames(db: db, fqnames: candidates)
+        receivers_by_fqname = receivers.each_with_object({}) { |r, h| h[r.fqname] = r }
+        resolved_fqname = candidates.find { |c| receivers_by_fqname[c] }
+
+        if is_singleton
+          singleton_fqname = "singleton(#{resolved_fqname})"
+          find_by_fqname(db: db, fqname: singleton_fqname)
+        else
+          receivers_by_fqname[resolved_fqname]
+        end
+      end
+
+      # Generate name candidates order by priority.
+      private def generate_resolve_name_candidates(eval_scope, name)
+        if eval_scope == "Object"
+          [name]
+        else
+          tokens = eval_scope.split("::")
+          tokens << name
+          start = tokens.size - 1
+          start.downto(0).map do |i|
+            (tokens[0...i] + [name]).join("::")
+          end
+        end
+      end
+
+      def receiver_names_by_paths(db:, paths:)
+        paths_in = paths.map { |path| "'#{path}'" }.join(", ")
+        rows = db.execute(<<~SQL)
+          SELECT distinct fqname
+          FROM receivers
+          WHERE file_path IN (#{paths_in})
+        SQL
+
+        rows.map { |r| r.first }
       end
 
       def insert_class(

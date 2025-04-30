@@ -4,9 +4,23 @@ module HiFriend::Core
     class << self
       def where(db:, receiver_id: nil, visibility: nil, name: nil)
         where_clauses = []
-        where_clauses << "receiver_id = #{receiver_id}" if receiver_id
+        if receiver_id
+          if receiver_id.is_a?(Array) && receiver_id.size > 0
+            receiver_id = receiver_id.map { |n| "#{n}" }.join(", ")
+            where_clauses << "receiver_id IN (#{receiver_id})"
+          else
+            where_clauses << "receiver_id = #{receiver_id}"
+          end
+        end
         where_clauses << "visibility = '#{visibility}'" if visibility
-        where_clauses << "name = '#{name}'" if name
+        if name
+          if name.is_a?(Array) && name.size > 0
+            name = name.map { |n| "'#{n}'" }.join(", ")
+            where_clauses << "name IN (#{name})"
+          else
+            where_clauses << "name = '#{name}'"
+          end
+        end
         where_clause = where_clauses.empty? ? "" : "WHERE #{where_clauses.join(' AND ')}"
 
         rows = db.execute(<<~SQL)

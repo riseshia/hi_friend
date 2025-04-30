@@ -12,12 +12,6 @@ CREATE TABLE IF NOT EXISTS receivers (
 CREATE INDEX idx_receivers_fqname ON receivers(fqname);
 CREATE INDEX idx_receivers_file_path ON receivers(file_path);
 
-DROP VIEW IF EXISTS view_receivers;
-CREATE VIEW view_receivers AS
-SELECT
-  distinct fqname
-FROM receivers;
-
 CREATE TABLE IF NOT EXISTS methods (
   id INTEGER PRIMARY KEY,
   receiver_id INTEGER NOT NULL,
