@@ -16,6 +16,17 @@ module HiFriend::Core
         from_row(rows.first)
       end
 
+      def receiver_names_by_paths(db:, paths:)
+        paths_in = paths.map { |path| "'#{path}'" }.join(", ")
+        rows = db.execute(<<~SQL)
+          SELECT distinct fqname
+          FROM receivers
+          WHERE file_path IN (#{paths_in})
+        SQL
+
+        rows.map { |r| r.first }
+      end
+
       def find_id_by(db, fqname:, file_path: nil)
         where_clauses = []
         where_clauses << "fqname = '#{fqname}'"

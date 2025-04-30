@@ -42,6 +42,34 @@ module HiFriend::Core
       end
     end
 
+    describe ".receiver_names_by_paths" do
+      before do
+        db.execute(<<~SQL)
+        INSERT INTO receivers (
+          kind, fqname, is_singleton, file_path, line, file_hash
+        ) VALUES (
+          'Class', 'A', 'false', '/path/to/file1.rb', 10, 'hash123'
+        ), (
+          'Class', 'B', 'false', '/path/to/file1.rb', 10, 'hash123'
+        ), (
+          'Class', 'B', 'false', '/path/to/file2.rb', 10, 'hash123'
+        ), (
+          'Class', 'C', 'false', '/path/to/file3.rb', 10, 'hash123'
+        )
+        SQL
+      end
+
+      it "returns a receiver instance" do
+        paths = [
+          "/path/to/file1.rb",
+          "/path/to/file2.rb",
+        ]
+
+        receiver_names = described_class.receiver_names_by_paths(db: db, paths: paths)
+        expect(receiver_names).to match_array(["A", "B"])
+      end
+    end
+
     describe ".insert_class" do
       it "inserts new record for class" do
         described_class.insert_class(
