@@ -181,32 +181,32 @@ module HiFriend::Core
       end
 
       it "return nil" do
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "Object", name: "NotFound")
-        expect(resolved_name).to be_nil
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "Object", name: "NotFound")
+        expect(actual_receiver).to be_nil
 
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B::C", name: "NotFound")
-        expect(resolved_name).to be_nil
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B::C", name: "NotFound")
+        expect(actual_receiver).to be_nil
       end
 
       it "return name in root" do
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "Object", name: "C")
-        expect(resolved_name).to eq("C")
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "Object", name: "C")
+        expect(actual_receiver.fqname).to eq("C")
 
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B", name: "D")
-        expect(resolved_name).to eq("D")
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B", name: "D")
+        expect(actual_receiver.fqname).to eq("D")
       end
 
       it "return name in parent module" do
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A", name: "B::C")
-        expect(resolved_name).to eq("A::B::C")
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "A", name: "B::C")
+        expect(actual_receiver.fqname).to eq("A::B::C")
       end
 
       it "return name in same module" do
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B", name: "C")
-        expect(resolved_name).to eq("A::B::C")
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B", name: "C")
+        expect(actual_receiver.fqname).to eq("A::B::C")
 
-        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A", name: "C")
-        expect(resolved_name).to eq("A::C")
+        actual_receiver = described_class.resolve_name_to_receiver(db: db, eval_scope: "A", name: "C")
+        expect(actual_receiver.fqname).to eq("A::C")
       end
     end
   end

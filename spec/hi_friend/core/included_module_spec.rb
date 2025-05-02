@@ -59,38 +59,5 @@ module HiFriend::Core
         expect(row[4]).to eq(10)
       end
     end
-
-    describe ".insert_inherit" do
-      it "executes the correct SQL query" do
-        IncludedModule.insert_inherit(
-          db: db,
-          target_fqname: "B",
-          eval_scope: "Object",
-          passed_name: "A",
-          file_path: "path/to/file.rb",
-          line: 10
-        )
-
-        rows = db.execute("SELECT target_fqname, eval_scope, passed_name, file_path, line FROM included_modules WHERE target_fqname = 'B'")
-        expect(rows.size).to eq(1)
-
-        row = rows.first
-        expect(row[0]).to eq("B")
-        expect(row[1]).to eq("Object")
-        expect(row[2]).to eq("A")
-        expect(row[3]).to eq("path/to/file.rb")
-        expect(row[4]).to eq(10)
-
-        rows = db.execute("SELECT target_fqname, eval_scope, passed_name, file_path, line FROM included_modules WHERE target_fqname = 'singleton(B)'")
-        expect(rows.size).to eq(1)
-
-        row = rows.first
-        expect(row[0]).to eq("singleton(B)")
-        expect(row[1]).to eq("Object")
-        expect(row[2]).to eq("A")
-        expect(row[3]).to eq("path/to/file.rb")
-        expect(row[4]).to eq(10)
-      end
-    end
   end
 end

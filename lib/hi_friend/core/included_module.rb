@@ -28,25 +28,6 @@ module HiFriend::Core
         new(*row)
       end
 
-      def insert_inherit(
-        db:, target_fqname:, eval_scope:, passed_name:,
-        file_path:, line:
-      )
-        kind = :inherit
-        db.execute(<<~SQL)
-          INSERT INTO included_modules (
-            kind, target_fqname, eval_scope, passed_name,
-            file_path, line
-          ) VALUES (
-            '#{kind}', '#{target_fqname}', '#{eval_scope}', '#{passed_name}',
-            '#{file_path}', '#{line}'
-          ), (
-            '#{kind}', 'singleton(#{target_fqname})', '#{eval_scope}', '#{passed_name}',
-            '#{file_path}', '#{line}'
-          )
-        SQL
-      end
-
       def insert(
         db:, kind:, target_fqname:, eval_scope:, passed_name:,
         file_path:, line:

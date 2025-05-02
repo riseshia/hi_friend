@@ -34,9 +34,9 @@ module HiFriend::Core
         let(:receiver_rows) do
           [
             ["Class", "A", false, "/path/to/a.rb", 10, "hash123"],
-            ["Class", "singleton(A)", false, "/path/to/a.rb", 10, "hash123"],
+            ["Class", "singleton(A)", true, "/path/to/a.rb", 10, "hash123"],
             ["Class", "B", false, "/path/to/b.rb", 10, "hash123"],
-            ["Class", "singleton(B)", false, "/path/to/b.rb", 10, "hash123"],
+            ["Class", "singleton(B)", true, "/path/to/b.rb", 10, "hash123"],
             ["Module", "FeatureA", false, "/path/to/feature_a.rb", 10, "hash123"],
             ["Module", "FeatureB", false, "/path/to/feature_b.rb", 10, "hash123"],
             ["Module", "FeatureC", false, "/path/to/feature_c.rb", 10, "hash123"],
@@ -83,10 +83,10 @@ module HiFriend::Core
             "method_from_a", "method_from_feature_a",
             "method_from_b", "method_from_feature_c"
           )
-          # expect(method_names_of("singleton(B)")).to contain_exactly(
-          #   "method_from_singleton_a", "method_from_feature_b",
-          #   "method_from_singleton_b", "method_from_feature_d"
-          # )
+          expect(method_names_of("singleton(B)")).to contain_exactly(
+            "method_from_singleton_a", "method_from_feature_b",
+            "method_from_singleton_b", "method_from_feature_d"
+          )
         end
       end
     end

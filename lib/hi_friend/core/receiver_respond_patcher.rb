@@ -28,7 +28,6 @@ module HiFriend::Core
           module_receiver = Receiver.resolve_name_to_receiver(
             db: db,
             eval_scope: included_module.eval_scope,
-            is_singleton: receiver.is_singleton,
             name: included_module.passed_name,
           )
           source_by_fqname[module_receiver.fqname] = {
@@ -55,7 +54,8 @@ module HiFriend::Core
 
       def retrieve_ancesters(db:, receiver:)
         ancestors = []
-        target_fqname = receiver.fqname
+        target_fqname = receiver.unwrap_fqname_if_singleton
+        is_singleton = receiver.is_singleton
 
         loop do
           included_module = IncludedModule.where(db: db, kind: :inherit, target_fqname: target_fqname).first
@@ -64,11 +64,14 @@ module HiFriend::Core
           parent_receiver = Receiver.resolve_name_to_receiver(
             db: db,
             eval_scope: included_module.eval_scope,
-            is_singleton: receiver.is_singleton,
             name: included_module.passed_name,
           )
+          if is_singleton
+            parent_receiver = Receiver.find_by_fqname(db: db, fqname: parent_receiver.singleton_fqname)
+          end
+
           ancestors << parent_receiver
-          target_fqname = parent_receiver.fqname
+          target_fqname = parent_receiver.unwrap_fqname_if_singleton
         end
 
         ancestors

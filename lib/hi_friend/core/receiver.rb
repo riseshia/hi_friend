@@ -43,19 +43,14 @@ module HiFriend::Core
       # XXX: Do not search in included/extended module at this point,
       #      which is too complicatded & rare cases.
       #      which search only scope tree, too.
-      def resolve_name_to_receiver(db:, eval_scope:, is_singleton:, name:)
+      def resolve_name_to_receiver(db:, eval_scope:, name:)
         candidates = generate_resolve_name_candidates(eval_scope, name)
 
         receivers = receivers_by_fqnames(db: db, fqnames: candidates)
         receivers_by_fqname = receivers.each_with_object({}) { |r, h| h[r.fqname] = r }
         resolved_fqname = candidates.find { |c| receivers_by_fqname[c] }
 
-        if is_singleton
-          singleton_fqname = "singleton(#{resolved_fqname})"
-          find_by_fqname(db: db, fqname: singleton_fqname)
-        else
-          receivers_by_fqname[resolved_fqname]
-        end
+        receivers_by_fqname[resolved_fqname]
       end
 
       # Generate name candidates order by priority.
@@ -185,6 +180,17 @@ module HiFriend::Core
 
     def singleton_fqname
       "singleton(#{fqname})"
+    end
+
+    def unwrap_fqname_if_singleton
+      if is_singleton
+        # singleton(A) => A
+        # singleton(A::B) => A::B
+        # singleton(A::B::C) => A::B::C
+        fqname[10..-2]
+      else
+        fqname
+      end
     end
   end
 end

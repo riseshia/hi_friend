@@ -81,8 +81,9 @@ module HiFriend::Core
         )
 
         scope_name = build_qualified_const_name([])
-        IncludedModule.insert_inherit(
+        IncludedModule.insert(
           db: @db,
+          kind: :inherit,
           target_fqname: qualified_const_name,
           eval_scope: scope_name,
           passed_name: superclass_name,
