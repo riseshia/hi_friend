@@ -214,6 +214,16 @@ module HiFriend::Core
       end
     end
 
+    class ClassReceiver < Base
+      def initialize(fqname)
+        super()
+        @fqname = fqname
+      end
+
+      def name = @fqname
+      def to_ts = @fqname
+    end
+
     module_function
 
     def void = (@void ||= Void.new)
@@ -229,7 +239,10 @@ module HiFriend::Core
     def string(literal = nil) = String.new(literal)
     def duck(name) = Duck.new(name)
     def interface(name) = Interface.new(name)
+    # @deprecated
     def const(name, singleton:) = Const.new(name, singleton: singleton)
+
+    def class_receiver(name) = ClassReceiver.new(name)
     def symbol(name) = Symbol.new(name)
     def array(el_type) = Array.new(el_type)
     def hash(kvs) = Hash.new(kvs)

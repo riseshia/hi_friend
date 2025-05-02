@@ -7,6 +7,7 @@ require_relative "core/included_module"
 require_relative "core/method_model"
 require_relative "core/receiver_respond"
 require_relative "core/receiver_respond_patcher"
+require_relative "core/receiver_guesser"
 
 require_relative "core/constant"
 require_relative "core/interface"

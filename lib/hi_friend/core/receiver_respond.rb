@@ -20,14 +20,18 @@ module HiFriend::Core
         from_row(rows.first)
       end
 
-      def receivers_respond_to(db:, method_names:)
+      def receivers_respond_to(db:, method_names:, self_only: false)
         method_num = method_names.size
         method_names_in = method_names.map { |name| "'#{name}'" }.join(", ")
+
+        where_clauses = ["method_name IN (#{method_names_in})"]
+        where_clauses << "source = 'self'" if self_only
+        where_clause = where_clauses.join(" AND ")
 
         rows = db.execute(<<~SQL)
           SELECT receiver_fqname, count(*) as c
           FROM receiver_responds
-          WHERE method_name IN (#{method_names_in})
+          WHERE #{where_clause}
           GROUP BY receiver_fqname
           HAVING c = #{method_num}
         SQL
