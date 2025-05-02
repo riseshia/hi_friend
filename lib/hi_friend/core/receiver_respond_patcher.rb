@@ -9,6 +9,10 @@ module HiFriend::Core
         end
       end
 
+      # Generate methods to be responded with passed receiver.
+      # As limitation of current implementation, this method will:
+      # - check all ancestors of receiver
+      # - check all *direct* included modules of receiver
       def with_per_receiver_name(db:, receiver_fqname:)
         receiver = Receiver.find_by_fqname(db: db, fqname: receiver_fqname)
 
