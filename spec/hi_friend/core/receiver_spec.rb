@@ -23,7 +23,7 @@ module HiFriend::Core
         end
 
         it "returns a receiver instance" do
-          receiver = described_class.find_by_fqname(db, "Test::Class")
+          receiver = described_class.find_by_fqname(db: db, fqname: "Test::Class")
           expect(receiver).to be_a(Receiver)
           expect(receiver.kind).to eq("Class")
           expect(receiver.fqname).to eq("Test::Class")
@@ -36,7 +36,7 @@ module HiFriend::Core
 
       context "when receiver does not exist" do
         it "returns nil" do
-          receiver = described_class.find_by_fqname(db, "NonExistent")
+          receiver = described_class.find_by_fqname(db: db, fqname: "NonExistent")
           expect(receiver).to be_nil
         end
       end
@@ -165,7 +165,7 @@ module HiFriend::Core
       end
     end
 
-    describe ".resolve_name" do
+    describe ".resolver_name_to_receiver" do
       before do
         rows = [
           ["Module", "A", false, "/path/to/a.rb", 10, "hash123"],
@@ -181,31 +181,31 @@ module HiFriend::Core
       end
 
       it "return nil" do
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "Object", name: "NotFound")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "Object", name: "NotFound")
         expect(resolved_name).to be_nil
 
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "A::B::C", name: "NotFound")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B::C", name: "NotFound")
         expect(resolved_name).to be_nil
       end
 
       it "return name in root" do
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "Object", name: "C")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "Object", name: "C")
         expect(resolved_name).to eq("C")
 
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "A::B", name: "D")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B", name: "D")
         expect(resolved_name).to eq("D")
       end
 
       it "return name in parent module" do
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "A", name: "B::C")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A", name: "B::C")
         expect(resolved_name).to eq("A::B::C")
       end
 
       it "return name in same module" do
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "A::B", name: "C")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A::B", name: "C")
         expect(resolved_name).to eq("A::B::C")
 
-        resolved_name = described_class.resolve_name(db: db, eval_scope: "A", name: "C")
+        resolved_name = described_class.resolve_name_to_receiver(db: db, eval_scope: "A", name: "C")
         expect(resolved_name).to eq("A::C")
       end
     end

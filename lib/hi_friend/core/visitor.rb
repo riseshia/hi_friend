@@ -105,7 +105,7 @@ module HiFriend::Core
     def visit_def_node(node)
       singleton = node.receiver.is_a?(Prism::SelfNode) || @current_in_singleton
 
-      receiver = Receiver.find_by_fqname(@db, current_self_type_name_with_singleton(singleton))
+      receiver = Receiver.find_by_fqname(db: @db, fqname: current_self_type_name_with_singleton(singleton))
       if receiver.nil?
         raise "Unreachable: #{receiver.fqname} on #{@source.path} at line #{node.location.start_line}"
       end
@@ -120,7 +120,7 @@ module HiFriend::Core
       )
 
       if @module_function_flag && !receiver.is_singleton
-        module_receiver = Receiver.find_by_fqname(@db, receiver.singleton_fqname)
+        module_receiver = Receiver.find_by_fqname(db: @db, fqname: receiver.singleton_fqname)
 
         MethodModel.insert(
           db: @db,

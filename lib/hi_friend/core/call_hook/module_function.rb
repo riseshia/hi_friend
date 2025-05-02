@@ -18,10 +18,10 @@ module HiFriend::Core
             next if !arg_node.respond_to?(:unescaped)
 
             scope_name = visitor.current_self_type_name_with_singleton
-            receiver = Receiver.find_by_fqname(visitor.db, scope_name)
+            receiver = Receiver.find_by_fqname(db: visitor.db, fqname: scope_name)
             next if receiver.nil?
 
-            singleton_of_receiver = Receiver.find_by_fqname(visitor.db, "singleton(#{scope_name})")
+            singleton_of_receiver = Receiver.find_by_fqname(db: visitor.db, fqname: "singleton(#{scope_name})")
             methods = MethodModel.where(db: visitor.db, receiver_id: receiver.id, name: arg_node.unescaped)
 
             methods.each do |method|

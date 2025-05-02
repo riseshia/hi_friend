@@ -38,7 +38,7 @@ module HiFriend::Core
           # change after def
           node.arguments.arguments.each do |arg_node|
             # Handle string or symbol only.
-            receiver = Receiver.find_by_fqname(visitor.db, visitor.current_self_type_name_with_singleton)
+            receiver = Receiver.find_by_fqname(db: visitor.db, fqname: visitor.current_self_type_name_with_singleton)
 
             if receiver
               MethodModel.change_visibility(

@@ -31,19 +31,19 @@ module HiFriend::Core
     end
 
     def expect_class_exists(fqname)
-      receiver = Receiver.find_by_fqname(db, fqname)
+      receiver = Receiver.find_by_fqname(db: db, fqname: fqname)
       expect(receiver).not_to be_nil
       expect(receiver.is_singleton).to eq(false)
       expect(receiver.kind).to eq("Class")
 
-      singleton_receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
+      singleton_receiver = Receiver.find_by_fqname(db: db, fqname: "singleton(#{fqname})")
       expect(singleton_receiver).not_to be_nil
       expect(singleton_receiver.is_singleton).to eq(true)
       expect(singleton_receiver.kind).to eq("Class")
     end
 
     def expect_class_inherits(child_fqname, parent_fqname)
-      receiver = Receiver.find_by_fqname(db, child_fqname)
+      receiver = Receiver.find_by_fqname(db: db, fqname: child_fqname)
       expect(receiver).not_to be_nil
 
       inheritance = IncludedModule.where(db: db, kind: :inherit, target_fqname: child_fqname).first
@@ -52,7 +52,7 @@ module HiFriend::Core
     end
 
     def expect_class_includes(child_fqname, passed_name)
-      receiver = Receiver.find_by_fqname(db, child_fqname)
+      receiver = Receiver.find_by_fqname(db: db, fqname: child_fqname)
       expect(receiver).not_to be_nil
 
       inheritance = IncludedModule.where(db: db, kind: :mixin, target_fqname: child_fqname).first
@@ -62,7 +62,7 @@ module HiFriend::Core
 
     def expect_class_extends(child_fqname, passed_name)
       singleton_of_child_fqname = "singleton(#{child_fqname})"
-      receiver = Receiver.find_by_fqname(db, singleton_of_child_fqname)
+      receiver = Receiver.find_by_fqname(db: db, fqname: singleton_of_child_fqname)
       expect(receiver).not_to be_nil
 
       inheritance = IncludedModule.where(db: db, kind: :mixin, target_fqname: singleton_of_child_fqname).first
@@ -71,19 +71,19 @@ module HiFriend::Core
     end
 
     def expect_module_exists(fqname)
-      receiver = Receiver.find_by_fqname(db, fqname)
+      receiver = Receiver.find_by_fqname(db: db, fqname: fqname)
       expect(receiver).not_to be_nil
       expect(receiver.is_singleton).to eq(false)
       expect(receiver.kind).to eq("Module")
 
-      singleton_receiver = Receiver.find_by_fqname(db, "singleton(#{fqname})")
+      singleton_receiver = Receiver.find_by_fqname(db: db, fqname: "singleton(#{fqname})")
       expect(singleton_receiver).not_to be_nil
       expect(singleton_receiver.is_singleton).to eq(true)
       expect(singleton_receiver.kind).to eq("Class")
     end
 
     def expect_receiver_responds(fqname, visibility, method_name)
-      receiver = Receiver.find_by_fqname(db, fqname)
+      receiver = Receiver.find_by_fqname(db: db, fqname: fqname)
       expect(receiver).not_to be_nil
 
       methods = MethodModel.where(db: db, receiver_id: receiver.id, visibility: visibility, name: method_name)
