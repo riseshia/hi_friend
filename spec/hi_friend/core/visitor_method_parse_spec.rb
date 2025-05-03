@@ -31,9 +31,9 @@ module HiFriend::Core
         CODE
       end
 
-      it "registers method" do
-        expect(method_registry.find("Object", "hello", visibility: :private, singleton: false)).not_to be_nil
-      end
+      # it "registers method" do
+      #   expect(method_registry.find("Object", "hello", visibility: :private, singleton: false)).not_to be_nil
+      # end
     end
 
     context "when class with public instance method" do
@@ -45,9 +45,9 @@ module HiFriend::Core
         CODE
       end
 
-      it "registers all" do
-        expect(method_registry.find("Post", "hello", visibility: :public, singleton: false)).not_to be_nil
-      end
+      # it "registers all" do
+      #   expect(method_registry.find("Post", "hello", visibility: :public, singleton: false)).not_to be_nil
+      # end
     end
 
     context "when class with private instance method" do
@@ -95,9 +95,9 @@ module HiFriend::Core
           CODE
         end
 
-        it "registers all" do
-          expect(method_registry.find("Post", "hello", visibility: :public, singleton: true)).not_to be_nil
-        end
+        # it "registers all" do
+        #   expect(method_registry.find("Post", "hello", visibility: :public, singleton: true)).not_to be_nil
+        # end
       end
 
       context "with open self" do
@@ -111,9 +111,9 @@ module HiFriend::Core
           CODE
         end
 
-        it "registers all" do
-          expect(method_registry.find("Post", "hello", visibility: :public, singleton: true)).not_to be_nil
-        end
+        # it "registers all" do
+        #   expect(method_registry.find("Post", "hello", visibility: :public, singleton: true)).not_to be_nil
+        # end
       end
 
       context "with self. in open self" do

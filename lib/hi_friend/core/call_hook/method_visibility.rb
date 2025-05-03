@@ -28,12 +28,12 @@ module HiFriend::Core
             block.call
           end
 
-          method_obj = visitor.method_registry.find(
-            current_const_name,
-            def_node.name.to_s,
-            singleton: visitor.current_in_singleton,
-          )
-          method_obj.visibility = target_visibility
+          # method_obj = visitor.method_registry.find(
+          #   current_const_name,
+          #   def_node.name.to_s,
+          #   singleton: visitor.current_in_singleton,
+          # )
+          # method_obj.visibility = target_visibility
         else
           # change after def
           node.arguments.arguments.each do |arg_node|
@@ -52,12 +52,12 @@ module HiFriend::Core
             end
 
             if arg_node.respond_to?(:unescaped)
-              method_obj = visitor.method_registry.find(
-                current_const_name,
-                arg_node.unescaped,
-                singleton: visitor.current_in_singleton,
-              )
-              method_obj.visibility = target_visibility
+              # method_obj = visitor.method_registry.find(
+              #   current_const_name,
+              #   arg_node.unescaped,
+              #   singleton: visitor.current_in_singleton,
+              # )
+              # method_obj.visibility = target_visibility
             else
               # Do nothing with arg node, such lvar.
             end

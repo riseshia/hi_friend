@@ -36,7 +36,7 @@ module HiFriend::Core
     def visit_module_node(node)
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
-      @const_registry.create(qualified_const_name, node, @source.path, kind: :module)
+      # @const_registry.create(qualified_const_name, node, @source.path, kind: :module)
 
       Receiver.insert_module(
         db: @db,
@@ -57,12 +57,12 @@ module HiFriend::Core
       const_names = extract_const_names(node.constant_path)
       qualified_const_name = build_qualified_const_name(const_names)
 
-      klass = @const_registry.create(
-        qualified_const_name,
-        node,
-        @source.path,
-        kind: :class,
-      )
+      # klass = @const_registry.create(
+      #   qualified_const_name,
+      #   node,
+      #   @source.path,
+      #   kind: :class,
+      # )
 
       receiver = Receiver.insert_class(
         db: @db,
@@ -74,11 +74,11 @@ module HiFriend::Core
 
       if node.superclass
         superclass_name = extract_const_names(node.superclass).join("::")
-        klass.add_superclass(
-          self.current_self_type_name,
-          superclass_name,
-          @source.path,
-        )
+        # klass.add_superclass(
+        #   self.current_self_type_name,
+        #   superclass_name,
+        #   @source.path,
+        # )
 
         scope_name = build_qualified_const_name([])
         IncludedModule.insert(
@@ -133,15 +133,16 @@ module HiFriend::Core
         )
       end
 
-      method_obj = @method_registry.create(
-        receiver_name: current_self_type_name,
-        name: node.name,
-        node: node,
-        path: @source.path,
-        singleton: singleton,
-        visibility: current_method_visibility,
-      )
-      @node_registry.add(@source.path, method_obj)
+      # method_obj = @method_registry.create(
+      #   receiver_name: current_self_type_name,
+      #   name: node.name,
+      #   node: node,
+      #   path: @source.path,
+      #   singleton: singleton,
+      #   visibility: current_method_visibility,
+      # )
+      # @node_registry.add(@source.path, method_obj)
+      method_obj = nil
 
       in_method(node.name, method_obj) do
         super
@@ -212,174 +213,174 @@ module HiFriend::Core
 
     def visit_constant_write_node(node)
       # we need this some day
-      qualified_const_name = build_qualified_const_name([node.name])
-      @const_registry.create(qualified_const_name, node, @source.path, kind: :var)
+      # qualified_const_name = build_qualified_const_name([node.name])
+      # @const_registry.create(qualified_const_name, node, @source.path, kind: :var)
 
       super
     end
 
     def visit_constant_read_node(node)
       scope_name = build_qualified_const_name([])
-      const = @const_registry.lookup(scope_name, node.name.to_s)
-
-      if const.nil?
-        # XXX: Someday this case make diagnostic
-        raise "undefined constant: #{node.name} on scope #{scope_name}. It should be defined somewhere before."
-      end
-
-      # create tv without class/module def
-      if const.is_a?(ConstVariable) || const.node.constant_path != node
-        const_tv = find_or_create_tv(node)
-        const_tv.set_const(const)
-      end
+      # const = @const_registry.lookup(scope_name, node.name.to_s)
+      #
+      # if const.nil?
+      #   # XXX: Someday this case make diagnostic
+      #   raise "undefined constant: #{node.name} on scope #{scope_name}. It should be defined somewhere before."
+      # end
+      #
+      # # create tv without class/module def
+      # if const.is_a?(ConstVariable) || const.node.constant_path != node
+      #   const_tv = find_or_create_tv(node)
+      #   const_tv.set_const(const)
+      # end
 
       super
 
-      @last_evaluated_tv = const_tv
+      # @last_evaluated_tv = const_tv
     end
 
     def visit_constant_path_node(node)
-      const_names = []
-      idx = node
-      loop do
-        const_names.unshift(idx.name)
-        if idx.is_a?(Prism::ConstantPathNode) && idx.parent
-          idx = idx.parent
-        else
-          break
-        end
-      end
-      absolute_path = idx.is_a?(Prism::ConstantPathNode)
+      # const_names = []
+      # idx = node
+      # loop do
+      #   const_names.unshift(idx.name)
+      #   if idx.is_a?(Prism::ConstantPathNode) && idx.parent
+      #     idx = idx.parent
+      #   else
+      #     break
+      #   end
+      # end
+      # absolute_path = idx.is_a?(Prism::ConstantPathNode)
 
-      scope_name = absolute_path ? "" : build_qualified_const_name([])
-      const_name = const_names.join("::")
-      const = @const_registry.lookup(scope_name, const_name)
-
-      if const.nil?
-        const = @const_registry.create(scope_name, node, @source.path, kind: :unknown)
-      end
-
-      if const.is_a?(ConstVariable) || const.node.constant_path != node
-        const_tv = find_or_create_tv(node)
-        const_tv.name = const.name
-        const_tv.set_const(const)
-      end
+      # scope_name = absolute_path ? "" : build_qualified_const_name([])
+      # const_name = const_names.join("::")
+      # const = @const_registry.lookup(scope_name, const_name)
+      #
+      # if const.nil?
+      #   const = @const_registry.create(scope_name, node, @source.path, kind: :unknown)
+      # end
+      #
+      # if const.is_a?(ConstVariable) || const.node.constant_path != node
+      #   const_tv = find_or_create_tv(node)
+      #   const_tv.name = const.name
+      #   const_tv.set_const(const)
+      # end
 
       # Skip visit children to ignore it's sub constant read node
 
-      @last_evaluated_tv = const_tv
+      # @last_evaluated_tv = const_tv
     end
 
     def visit_local_variable_read_node(node)
-      lvar_node = node
-      lvar_read_tv = find_or_create_tv(lvar_node)
-
-      lvar_decl_tv = find_latest_lvar_tv(lvar_read_tv.name)
-      if lvar_decl_tv
-        lvar_read_tv.add_dependency(lvar_decl_tv)
-      else
-        raise "undefined local variable: #{lvar_node.name}. It should be defined somewhere before."
-      end
+      # lvar_node = node
+      # lvar_read_tv = find_or_create_tv(lvar_node)
+      #
+      # lvar_decl_tv = find_latest_lvar_tv(lvar_read_tv.name)
+      # if lvar_decl_tv
+      #   lvar_read_tv.add_dependency(lvar_decl_tv)
+      # else
+      #   raise "undefined local variable: #{lvar_node.name}. It should be defined somewhere before."
+      # end
 
       super
 
-      @last_evaluated_tv = lvar_read_tv
+      # @last_evaluated_tv = lvar_read_tv
     end
 
     def visit_local_variable_write_node(node)
-      lvar_node = node
-      lvar_tv = find_or_create_tv(lvar_node)
-
-      value_node = node.value
-      value_tv = find_or_create_tv(value_node)
-
-      lvar_tv.add_dependency(value_tv)
+      # lvar_node = node
+      # lvar_tv = find_or_create_tv(lvar_node)
+      #
+      # value_node = node.value
+      # value_tv = find_or_create_tv(value_node)
+      #
+      # lvar_tv.add_dependency(value_tv)
 
       super
 
-      @lvars.push(lvar_tv)
-      @last_evaluated_tv = lvar_tv
+      # @lvars.push(lvar_tv)
+      # @last_evaluated_tv = lvar_tv
     end
 
     def visit_instance_variable_read_node(node)
-      ivar_read_tv = find_or_create_tv(node)
-
-      const = @const_registry.find(current_self_type_name)
-      const.add_ivar_read_tv(ivar_read_tv)
-      ivar_read_tv.receiver(const)
+      # ivar_read_tv = find_or_create_tv(node)
+      #
+      # const = @const_registry.find(current_self_type_name)
+      # const.add_ivar_read_tv(ivar_read_tv)
+      # ivar_read_tv.receiver(const)
 
       super
 
-      @last_evaluated_tv = ivar_read_tv
+      # @last_evaluated_tv = ivar_read_tv
     end
 
     def visit_instance_variable_write_node(node)
-      ivar_write_tv = find_or_create_tv(node)
-
-      value_node = node.value
-      value_tv = find_or_create_tv(value_node)
-
-      ivar_write_tv.add_dependency(value_tv)
-
-      const = @const_registry.find(current_self_type_name)
-      const.add_ivar_write_tv(ivar_write_tv)
-      ivar_write_tv.receiver(const)
+      # ivar_write_tv = find_or_create_tv(node)
+      #
+      # value_node = node.value
+      # value_tv = find_or_create_tv(value_node)
+      #
+      # ivar_write_tv.add_dependency(value_tv)
+      #
+      # const = @const_registry.find(current_self_type_name)
+      # const.add_ivar_write_tv(ivar_write_tv)
+      # ivar_write_tv.receiver(const)
 
       super
 
-      @last_evaluated_tv = ivar_write_tv
+      # @last_evaluated_tv = ivar_write_tv
     end
 
     def visit_multi_write_node(node)
-      left_tvs = node.lefts.map do |left_node|
-        find_or_create_tv(left_node)
-      end
-
-      value_node = node.value
-      value_tv = find_or_create_tv(value_node)
-
-      if value_node.is_a?(Prism::ArrayNode)
-        element_tvs = value_node.elements.map do |element_node|
-          find_or_create_tv(element_node)
-        end
-
-        if left_tvs.size == element_tvs.size
-          left_tvs.zip(element_tvs).each do |left_tv, element_tv|
-            left_tv.add_dependency(element_tv)
-          end
-        else
-          # XXX todo
-        end
-      end
+      # left_tvs = node.lefts.map do |left_node|
+      #   find_or_create_tv(left_node)
+      # end
+      #
+      # value_node = node.value
+      # value_tv = find_or_create_tv(value_node)
+      #
+      # if value_node.is_a?(Prism::ArrayNode)
+      #   element_tvs = value_node.elements.map do |element_node|
+      #     find_or_create_tv(element_node)
+      #   end
+      #
+      #   if left_tvs.size == element_tvs.size
+      #     left_tvs.zip(element_tvs).each do |left_tv, element_tv|
+      #       left_tv.add_dependency(element_tv)
+      #     end
+      #   else
+      #     # XXX todo
+      #   end
+      # end
 
       super
 
-      left_tvs.each do |left_tv|
-        @lvars.push(left_tv)
-      end
-      @last_evaluated_tv = value_tv
+      # left_tvs.each do |left_tv|
+      #   @lvars.push(left_tv)
+      # end
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_if_node(node)
-      if_cond_tv = find_or_create_tv(node)
-      predicate_tv = find_or_create_tv(node.predicate)
-      if_cond_tv.add_predicate(predicate_tv)
+      # if_cond_tv = find_or_create_tv(node)
+      # predicate_tv = find_or_create_tv(node.predicate)
+      # if_cond_tv.add_predicate(predicate_tv)
 
       in_if_cond(if_cond_tv) do
         super
       end
-      @last_evaluated_tv = if_cond_tv
+      # @last_evaluated_tv = if_cond_tv
     end
 
     def visit_break_node(node)
-      break_tv = find_or_create_tv(node)
-
-      node.arguments&.arguments&.each do |arg_node|
-        arg_tv = find_or_create_tv(arg_node)
-        break_tv.add_dependency(arg_tv)
-      end
-
-      @last_evaluated_tv = break_tv
+      # break_tv = find_or_create_tv(node)
+      #
+      # node.arguments&.arguments&.each do |arg_node|
+      #   arg_tv = find_or_create_tv(arg_node)
+      #   break_tv.add_dependency(arg_tv)
+      # end
+      #
+      # @last_evaluated_tv = break_tv
     end
 
     def visit_statements_node(node)
@@ -388,13 +389,13 @@ module HiFriend::Core
 
       super
 
-      if in_if_cond?
-        @current_if_cond_tv.add_dependency(@last_evaluated_tv)
-      else
-        if in_method?
-          @return_tvs.push(@last_evaluated_tv)
-        end
-      end
+      # if in_if_cond?
+      #   @current_if_cond_tv.add_dependency(@last_evaluated_tv)
+      # else
+      #   if in_method?
+      #     @return_tvs.push(@last_evaluated_tv)
+      #   end
+      # end
 
       @last_evaluated_tv = @last_evaluated_tv_stack.pop
     end
@@ -410,111 +411,111 @@ module HiFriend::Core
     end
 
     def visit_array_node(node)
-      arr_tv = find_or_create_tv(node)
-
-      node.elements.each do |element_node|
-        element_tv = find_or_create_tv(element_node)
-        arr_tv.add_dependency(element_tv)
-      end
+      # arr_tv = find_or_create_tv(node)
+      #
+      # node.elements.each do |element_node|
+      #   element_tv = find_or_create_tv(element_node)
+      #   arr_tv.add_dependency(element_tv)
+      # end
 
       super
 
-      @last_evaluated_tv = arr_tv
+      # @last_evaluated_tv = arr_tv
     end
 
     def visit_hash_node(node)
-      hash_tv = find_or_create_tv(node)
-
-      node.elements.each do |assoc|
-        key_tv = find_or_create_tv(assoc.key)
-        value_tv = find_or_create_tv(assoc.value)
-
-        hash_tv.add_kv(key_tv, value_tv)
-      end
+      # hash_tv = find_or_create_tv(node)
+      #
+      # node.elements.each do |assoc|
+      #   key_tv = find_or_create_tv(assoc.key)
+      #   value_tv = find_or_create_tv(assoc.value)
+      #
+      #   hash_tv.add_kv(key_tv, value_tv)
+      # end
 
       super
 
-      @last_evaluated_tv = hash_tv
+      # @last_evaluated_tv = hash_tv
     end
 
     def visit_string_node(node)
-      value_tv = find_or_create_tv(node)
-      value_tv.correct_type(Type.string(node.unescaped))
+      # value_tv = find_or_create_tv(node)
+      # value_tv.correct_type(Type.string(node.unescaped))
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_interpoled_string_node(node)
-      value_tv = find_or_create_tv(node)
-
-      node.parts.each do |part_node|
-        part_tv = find_or_create_tv(part_node)
-        value_tv.add_dependency(part_tv)
-      end
+      # value_tv = find_or_create_tv(node)
+      #
+      # node.parts.each do |part_node|
+      #   part_tv = find_or_create_tv(part_node)
+      #   value_tv.add_dependency(part_tv)
+      # end
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_embedded_statements_node(node)
-      value_tv = find_or_create_tv(node)
-
-      node.statements.body.each do |body_node|
-        body_tv = find_or_create_tv(body_node)
-        value_tv.add_dependency(body_tv)
-      end
+      # value_tv = find_or_create_tv(node)
+      #
+      # node.statements.body.each do |body_node|
+      #   body_tv = find_or_create_tv(body_node)
+      #   value_tv.add_dependency(body_tv)
+      # end
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_integer_node(node)
-      value_tv = find_or_create_tv(node)
-      value_tv.correct_type(Type.integer)
+      # value_tv = find_or_create_tv(node)
+      # value_tv.correct_type(Type.integer)
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_symbol_node(node)
-      tv = find_or_create_tv(node)
-      tv.correct_type(Type.symbol(tv.name))
+      # tv = find_or_create_tv(node)
+      # tv.correct_type(Type.symbol(tv.name))
 
       super
 
-      @last_evaluated_tv = tv
+      # @last_evaluated_tv = tv
     end
 
     def visit_true_node(node)
-      value_tv = find_or_create_tv(node)
-      value_tv.correct_type(Type.true)
+      # value_tv = find_or_create_tv(node)
+      # value_tv.correct_type(Type.true)
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_false_node(node)
-      value_tv = find_or_create_tv(node)
-      value_tv.correct_type(Type.false)
+      # value_tv = find_or_create_tv(node)
+      # value_tv.correct_type(Type.false)
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def visit_nil_node(node)
-      value_tv = find_or_create_tv(node)
-      value_tv.correct_type(Type.nil)
+      # value_tv = find_or_create_tv(node)
+      # value_tv.correct_type(Type.nil)
 
       super
 
-      @last_evaluated_tv = value_tv
+      # @last_evaluated_tv = value_tv
     end
 
     def extract_const_names(const_read_node_or_const_path_node)
